@@ -65,6 +65,7 @@
   td { padding: 3px 4px; border-top: 1px solid var(--line); }
   td.r { text-align: right; }
   .error { margin-top: 28px; color: var(--lo); }
+  .warn { margin: 12px 0 0; padding: 10px 14px; border: 1px solid #e8c46855; border-radius: 10px; color: var(--mid); font-size: 14px; }
   footer { margin-top: 60px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
   footer b { color: var(--text); }
 </style>
@@ -161,7 +162,9 @@ function scan(token) {
       $("event").innerHTML = `<div class="event"><span class="sym">${esc(d.symbol)}</span>
         <span class="kv">Deployed <b>${d.deployment.slice(0, 16).replace("T", " ")} UTC</b></span>
         <span class="kv">Launch moment ($5k volume) <b>${d.t0.slice(0, 16).replace("T", " ")} UTC</b></span>
-        <span class="kv">Scored as of <b>launch moment</b></span></div>`;
+        <span class="kv">Scored as of <b>launch moment</b></span></div>` +
+        (d.validated_launchpad ? "" : `<div class="warn">This is not a pump.fun launch. Launch Reflex was tested on
+        pump.fun launches only, so treat these scores as unvalidated.</div>`);
     } else if (d.kind === "buyers") {
       setStage("history");
       $("headline").innerHTML = `<b>${d.buyers.length}</b> meaningful first-hour buyers`;

@@ -227,7 +227,8 @@ class Scanner:
         info = self.resolve_event(token)
         deploy, t0 = utc(info["deployment_timestamp"]), utc(info["t0_timestamp"])
         event = {"token": token, "symbol": info.get("symbol"), "deployment": deploy.isoformat(),
-                 "t0": t0.isoformat(), "first_hour_complete": now >= t0 + dt.timedelta(hours=1)}
+                 "t0": t0.isoformat(), "first_hour_complete": now >= t0 + dt.timedelta(hours=1),
+                 "validated_launchpad": token.endswith("pump")}
         self.emit("event", **event)
         buyers = self.first_hour_buyers(token, deploy, t0, now)
         self.emit("buyers", buyers=buyers)
@@ -255,6 +256,8 @@ if __name__ == "__main__":
             print(f"... {data['text']}")
         elif kind == "event":
             print(f"{data['symbol']}  deployed {data['deployment']}  T0 {data['t0']}")
+            if not data["validated_launchpad"]:
+                print("  WARNING: not a pump.fun launch. Launch Reflex is validated on pump.fun launches only.")
         elif kind == "buyers":
             print(f"{len(data['buyers'])} meaningful first-hour buyers")
         elif kind == "wallet":
