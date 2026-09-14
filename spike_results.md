@@ -518,3 +518,14 @@ underlying Reflex with square-root USD weights, a "not seen before" rule at the 
 nearest-neighbour distances, and a fully leave-one-out scale in the backtest.
 
 Corpus start balance: about 16,236 credits. Hard cap: 12,000.
+
+### Corpus collection, Stages 1–2 (2026-09-14)
+
+- **Stopped by the budget rule at 29 fingerprinted events, one below the minimum of 30.** 37 events in total;
+  8 had fewer than 3 scoreable buyers. Spend: 11,043 credits. No outcome data has been fetched.
+- The 30-event checkpoint never ran, because the budget stop came first.
+- Feature redundancy check: no pair above 0.80 (largest: actor quality vs persistence, ρ = 0.45). All four features are kept.
+- Screener quirk: on 2026-08-05, 08-08, and 08-15, the historical screener returned tokens deployed the day after
+  the sample date, so every candidate failed the deployment rule. These dates yield no events. D3 saw the same on 08-05.
+- Cost per event rose from about 100 credits (dates with D3 caches) to about 500 (new tokens and wallets).
+- Several top buyers are brand-new wallets with no trades in the prior 30 days, so they cannot be scored.
