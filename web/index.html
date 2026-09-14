@@ -66,6 +66,20 @@
   td.r { text-align: right; }
   .error { margin-top: 28px; color: var(--lo); }
   .warn { margin: 12px 0 0; padding: 10px 14px; border: 1px solid #e8c46855; border-radius: 10px; color: var(--mid); font-size: 14px; }
+  .deja { margin-top: 44px; }
+  .deja h2 { font-size: 30px; letter-spacing: -1px; margin: 0 0 4px; }
+  .deja .sub { color: var(--dim); margin: 0 0 18px; font-size: 14px; }
+  .fp { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .tile .v { font-size: 15px; font-weight: 600; margin-top: 4px; }
+  .analogue .sym { font-size: 20px; font-weight: 700; }
+  .tag { font: 11px var(--mono); letter-spacing: 1px; color: var(--dim); }
+  .tag.counter { color: var(--mid); }
+  .outs { display: flex; gap: 18px; margin: 14px 0 6px; font-family: var(--mono); }
+  .outs div { display: flex; flex-direction: column; }
+  .outs b { font-size: 20px; }
+  .up { color: var(--hi); } .down { color: var(--lo); }
+  .why { font-size: 13px; color: var(--dim); margin: 8px 0 0; padding-left: 16px; }
   footer { margin-top: 60px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
   footer b { color: var(--text); }
 </style>
@@ -90,6 +104,7 @@
   <div id="event"></div>
   <div class="headline" id="headline"></div>
   <div class="grid" id="grid"></div>
+  <div class="deja" id="deja"></div>
   <div class="error" id="error"></div>
 
   <footer>
@@ -106,6 +121,7 @@ const STAGES = [
   ["rewind", "Rewinding onchain activity"],
   ["buyers", "Early actors found"],
   ["history", "Checking prior launch behaviour"],
+  ["match", "Searching history"],
   ["done", "Scan complete"],
 ];
 let es = null;
@@ -148,11 +164,61 @@ function card(w) {
     </details></div>`;
 }
 
+const FEATURES = [
+  ["actor_quality", "Actor quality", "Size-weighted Launch Reflex of known buyers"],
+  ["entry_speed", "Entry speed", "When the strong buyers arrived"],
+  ["persistence", "Persistence", "Buying that came after each buyer's first window"],
+  ["concentration", "Concentration", "Share of buying from the top 3 buyers"],
+];
+function featureText(k, v) {
+  if (k === "actor_quality") return `Reflex ${Math.round(v)}`;
+  if (k === "entry_speed") return v >= 60 ? "No strong buyer in 1h" : `By ${Math.round(v)} min`;
+  return pct(v);
+}
+function ret(p, dead) {
+  const cls = p > 0 ? "up" : "down";
+  return `<b class="${cls}">${p > 0 ? "+" : ""}${Math.round(p)}%</b>${dead ? '<span class="tag">no trades</span>' : ""}`;
+}
+function analogueCard(a) {
+  const o = a.outcomes;
+  return `<div class="card analogue">
+    <div class="top"><span class="sym">${esc(a.symbol)}</span><span class="tag ${a.counter_example ? "counter" : ""}">
+      ${a.counter_example ? "NEAREST COUNTER-EXAMPLE" : a.closeness.toUpperCase() + " MATCH"}</span></div>
+    <div class="buy">Launched ${a.date}</div>
+    <div class="outs"><div><span class="tag">+6H</span>${ret(o.ret6h_pct, o.ret6h_no_trades)}</div>
+      <div><span class="tag">+24H</span>${ret(o.ret24h_pct, o.ret24h_no_trades)}</div>
+      <div><span class="tag">+7D</span>${ret(o.ret7d_pct, o.ret7d_no_trades)}</div></div>
+    <div class="tag">AFTER ITS FIRST HOUR</div>
+    <ul class="why">${a.matched_on.map(m => `<li>${esc(m.feature)}: ${esc(m.this)} now, ${esc(m.then)} then</li>`).join("")}</ul>
+  </div>`;
+}
+function deja(d) {
+  let html = `<h2>We've seen this before.</h2>`;
+  if (d.fingerprint) {
+    html += `<p class="sub">The first-hour buying pattern of this launch</p><div class="fp">` +
+      FEATURES.map(([k, name, hint]) => `<div class="tile"><div class="label">${name.toUpperCase()}</div>
+        <div class="v">${featureText(k, d.fingerprint[k])}</div><div class="buy">${hint}</div></div>`).join("") + `</div>`;
+  }
+  if (d.analogues.length) {
+    const verdict = d.backtest && d.backtest.verdict;
+    const bt = verdict === "SIGNAL"
+      ? "In a backtest on past launches, launches with similar first-hour buyers tended to have similar next-day outcomes."
+      : verdict === "NO SIGNAL SHOWN"
+      ? "Similar past launches, for context. In our backtest, similarity did not predict what happened next."
+      : "Similar past launches, for context.";
+    html += `<p class="sub">The closest of ${d.corpus_events} sampled past pump.fun launches. ${bt} This is not a prediction.</p>
+      <div class="grid">${d.analogues.map(analogueCard).join("")}</div>`;
+  } else if (d.reason) {
+    html += `<p class="sub">${esc(d.reason)}</p>`;
+  }
+  $("deja").innerHTML = html;
+}
+
 function scan(token) {
   if (es) es.close();
   $("go").disabled = true;
   $("stages").hidden = false;
-  ["event", "headline", "grid", "error"].forEach(id => $(id).innerHTML = "");
+  ["event", "headline", "grid", "deja", "error"].forEach(id => $(id).innerHTML = "");
   setStage("rewind");
   const results = [];
   es = new EventSource("/api/scan?token=" + encodeURIComponent(token));
@@ -172,6 +238,10 @@ function scan(token) {
         <div class="top"><span class="addr">${short(b.wallet)}</span>
         <span class="buy">$${Math.round(b.usd).toLocaleString()} · entered ${mins(b.entry_delay_s)}</span></div>
         <p class="summary">Checking prior launches…</p></div>`).join("");
+    } else if (d.kind === "stage" && d.key === "match") {
+      setStage("match");
+    } else if (d.kind === "deja_view") {
+      deja(d);
     } else if (d.kind === "wallet") {
       results.push(d);
       const el = document.getElementById("w-" + d.wallet);

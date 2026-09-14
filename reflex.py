@@ -22,6 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import launch_data as ld
+import matching as mt
 from nansen_client import OUT, NansenClient, rows, utc
 
 ROOT = Path(__file__).resolve().parent
@@ -91,11 +92,12 @@ class Scanner:
             raise ValueError("This token never reached $5,000 of DEX volume, so it has no launch moment.")
         return info
 
-    def first_hour_buyers(self, token, deploy, t0, now):
+    def first_hour_buys(self, token, deploy, t0, now):
+        """Every buyer after the filters, largest first, with buy USD per first-hour window."""
         m = dt.timedelta(minutes=1)
         edges = [deploy, t0 + 5 * m, t0 + 15 * m, t0 + 30 * m, t0 + 60 * m]
         buys = []
-        for a, b in zip(edges, edges[1:]):
+        for i, (a, b) in enumerate(zip(edges, edges[1:])):
             if a >= now:
                 break
             resp = None
@@ -111,17 +113,19 @@ class Scanner:
                     break
             if resp is None:
                 raise RuntimeError("Nansen did not return first-hour trades. Try again shortly.")
-            buys += rows(resp)
+            buys += [(i, x) for x in rows(resp)]
         seen, wallets = set(), {}
-        for x in buys:
+        for i, x in buys:  # window order, so a buy on a shared edge counts in the earlier window
             k = (x["transaction_hash"], x["trader_address"], x["token_amount"])
             if k in seen:
                 continue
             seen.add(k)
             w = x["trader_address"]
             e = wallets.setdefault(w, {"wallet": w, "usd": 0.0, "buys": 0, "first_buy": x["block_timestamp"],
-                                       "label": x.get("trader_address_label") or ""})
-            e["usd"] += float(x.get("estimated_value_usd") or 0)
+                                       "label": x.get("trader_address_label") or "", "window_usd": [0.0] * 4})
+            usd = float(x.get("estimated_value_usd") or 0)
+            e["usd"] += usd
+            e["window_usd"][i] += usd
             e["buys"] += 1
             e["first_buy"] = min(e["first_buy"], x["block_timestamp"])
         keep = [e for e in wallets.values()
@@ -129,7 +133,10 @@ class Scanner:
         keep.sort(key=lambda e: -e["usd"])
         for e in keep:
             e["entry_delay_s"] = (utc(e["first_buy"]) - t0).total_seconds()
-        return keep[:MAX_BUYERS]
+        return keep
+
+    def first_hour_buyers(self, token, deploy, t0, now):
+        return self.first_hour_buys(token, deploy, t0, now)[:MAX_BUYERS]
 
     # ------------------------------------------------------------------ wallet
 
@@ -172,13 +179,15 @@ class Scanner:
         now = dt.datetime.now(dt.timezone.utc)
         hist = self.history(wallet, cutoff)
         if hist is None:
-            return {**buyer, "scoreable": False, "reason": "Nansen did not return this wallet's history."}
+            return {**buyer, "scoreable": False, "api_failures": 1,
+                    "reason": "Nansen did not return this wallet's history."}
         cands = [v for v in ld.first_buys(hist).values()
                  if ld.plausible_launch(v, now) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff]
         cands.sort(key=lambda v: v["wallet_first_buy"], reverse=True)
         cands = cands[:CANDIDATE_POOL]
         with ThreadPoolExecutor(4) as pool:
             infos = list(pool.map(lambda v: ld.resolve_t0(self.c, v["prior_token_address"], self.t0_cache), cands))
+        failures = sum(1 for info in infos if info is None)
         entries = []
         for v, info in zip(cands, infos):
             if not info or not info.get("deployment_timestamp") or info.get("t0_unresolved_capped"):
@@ -191,6 +200,7 @@ class Scanner:
         entries = entries[:MAX_ENTRIES]
         with ThreadPoolExecutor(4) as pool:
             points = list(pool.map(lambda e: self.market_point(e["prior_token_address"], e["wallet_first_buy"]), entries))
+        failures += sum(1 for p in points if p is None)
         scored = []
         for e, p in zip(entries, points):
             if p and p.get("p0") and p.get("pmax"):
@@ -199,7 +209,7 @@ class Scanner:
                                "mfe60": capped_log(p["pmax"], p["p0"]),
                                "reached_2x": p["pmax"] >= 2 * p["p0"]})
         n = len(scored)
-        result = {**buyer, "history_trades": len(hist), "launch_candidates": len(cands),
+        result = {**buyer, "history_trades": len(hist), "launch_candidates": len(cands), "api_failures": failures,
                   "entries": sorted(scored, key=lambda s: s["bought_at"], reverse=True)}
         conf = confidence(n)
         if conf is None:
@@ -230,7 +240,8 @@ class Scanner:
                  "t0": t0.isoformat(), "first_hour_complete": now >= t0 + dt.timedelta(hours=1),
                  "validated_launchpad": token.endswith("pump")}
         self.emit("event", **event)
-        buyers = self.first_hour_buyers(token, deploy, t0, now)
+        all_buyers = self.first_hour_buys(token, deploy, t0, now)
+        buyers = all_buyers[:MAX_BUYERS]
         self.emit("buyers", buyers=buyers)
         self.emit("stage", key="history", text="Checking prior launch behaviour")
         results = []
@@ -241,11 +252,32 @@ class Scanner:
         self.t0_cache.save()
         self.market.save()
         scoreable = [r for r in results if r["scoreable"]]
+        deja = self.match(token, event, all_buyers, results)
         summary = {**event, "buyers": len(results), "scoreable": len(scoreable),
                    "above_average": sum(1 for r in scoreable if r["reflex"] >= 60),
                    "api_calls": self.c.successful_calls - calls_start}
         self.emit("done", **summary)
-        return {"event": summary, "wallets": results}
+        return {"event": summary, "wallets": results, "deja_view": deja}
+
+    def match(self, token, event, all_buyers, results):
+        """Fingerprint the launch and find similar past launches (docs/CORPUS_PLAN.md)."""
+        self.emit("stage", key="match", text="Searching history")
+        corpus = mt.load_corpus()
+        out = {"fingerprint": None, "analogues": [], "reason": None,
+               "backtest": (corpus or {}).get("backtest")}
+        if not event["first_hour_complete"]:
+            out["reason"] = "Similar launches appear one hour after the launch moment, when the first hour is complete."
+        elif not results:
+            out["reason"] = "No meaningful first-hour buyers."
+        else:
+            out["fingerprint"], out["reason"] = mt.fingerprint(all_buyers, results)
+            if out["fingerprint"] and not (corpus and corpus.get("events")):
+                out["reason"] = "The library of past launches has not been built yet."
+            elif out["fingerprint"]:
+                out["analogues"] = mt.analogues(out["fingerprint"], token, corpus)
+                out["corpus_events"] = len(corpus["events"])
+        self.emit("deja_view", **out)
+        return out
 
 
 if __name__ == "__main__":
@@ -269,6 +301,15 @@ if __name__ == "__main__":
                       f"{data['failed_launch_rate']:.0%} failed")
             else:
                 print(head + f"not scoreable: {data['reason']}")
+        elif kind == "deja_view":
+            if data["fingerprint"]:
+                print("fingerprint: " + ", ".join(mt.describe_feature(f, v) for f, v in data["fingerprint"].items()))
+            if data["reason"]:
+                print(f"similar launches: {data['reason']}")
+            for a in data["analogues"]:
+                o = a["outcomes"]
+                print(f"  {'counter-example ' if a['counter_example'] else ''}{a['symbol']} {a['date']} "
+                      f"({a['closeness']}): 6h {o['ret6h_pct']:+.0f}%  24h {o['ret24h_pct']:+.0f}%  7d {o['ret7d_pct']:+.0f}%")
         elif kind == "done":
             print(f"{data['scoreable']} of {data['buyers']} scoreable, {data['above_average']} above average, "
                   f"{data['api_calls']} API calls")
