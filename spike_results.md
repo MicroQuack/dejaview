@@ -532,3 +532,29 @@ Corpus start balance: about 16,236 credits. Hard cap: 12,000.
 
 **Corpus Amendment 1** at 2026-09-14T19:04:05Z, approved by the user before any outcome data: cap raised to 13,500 credits
 (Stage 2 stop 12,900) to collect until 31 fingerprinted events. No credits bought. See `docs/CORPUS_PLAN.md`.
+
+### Corpus results: backtest verdict **SIGNAL** (2026-09-14)
+
+Final corpus: 31 fingerprinted events with outcomes, from 40 sampled events on 17 dates. Spend: 11,862 credits
+(about 4,370 remain). All 31 had a base price. No feature pair above 0.80, so all four features are used.
+
+| Test | Result |
+|---|---|
+| **Primary: ret24h, all features, 7-day exclusion, leave-one-out scale** | **ρ = 0.565, 99.9% → SIGNAL** |
+| ret6h (reported) | ρ = 0.262, 92.9% |
+| ret7d (reported) | ρ = 0.388, 98.2% |
+| ret24h, concentration only | ρ = 0.504, 99.4% |
+| ret24h, entry speed only | ρ = 0.069, 71.8% |
+| ret24h, persistence only | ρ = −0.088, 47.0% |
+| ret24h, actor quality only | ρ = −0.359, 10.2% |
+
+### Manual inspection (not a gate)
+
+- **Base rate:** 4 of 31 launches were up 24 hours after the decision point. 10 fell 90% or more.
+- **The signal is mostly concentration, and concentration is mostly crowd size.** Concentration and buyer count
+  have rank correlation −0.88. Launches with fewer, more concentrated buyers fell less over the next day than launches
+  with many buyers. A plausible reading: crowded launches peak harder in the first hour and give more back.
+- **Actor quality adds nothing on this sample.** Alone it scores below chance. Launch Reflex still stands on D3,
+  which measured wallets, not events.
+- **Small sample.** 31 events and 4 winners. The effect is real under the frozen test but fragile.
+- **Wording consequence:** the SIGNAL wording ships, with the effect size and the note that concentration drives it.

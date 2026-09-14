@@ -1,54 +1,37 @@
-# Next session: build Déjà View matching
+# Next session: demo, polish, and submission
 
-**Written:** 2026-09-14, at the end of the spike and first product slice.
+**Written:** 2026-09-14, after the corpus and matching were built.
 
 ## Read first
 
-1. `README.md`: what exists and how Launch Reflex works.
-2. `spike_results.md`, sections "D3 results" and "Go/No-Go": the evidence and the frozen product definition.
-3. The master plan, `DEJA_VIEW_CLAUDE_CODE_MASTER_PLAN.md`, sections 7, 8, 15, and 16. It is not in the
-   repo. Ask the user to paste it or save it to `docs/`.
+1. `README.md`: what exists, Launch Reflex, and the "we've seen this before" matching.
+2. `spike_results.md`, the last three sections: corpus freeze, collection, and backtest results.
+3. `docs/CORPUS_PLAN.md`: frozen matching rules and Amendment 1.
+4. `docs/DEJA_VIEW_CLAUDE_CODE_MASTER_PLAN.md`, sections 15, 16, 17, 19, and 25: screens, demo, README, schedule, and definition of done.
 
 ## State
 
 | Item | Status |
 |---|---|
 | Spike | Done. GO. |
-| Launch Reflex scan (`reflex.py`, `app.py`, `web/index.html`) | Working. Live and replay. |
-| Event fingerprint | Not started |
-| Historical corpus | Not started. The D3 retest has 12 sampled events with enriched buyers in `spike_out/d3/`. |
-| Analogue matching and "We've seen this before" screen | Not started |
+| Launch Reflex scan | Working. Live and replay. |
+| Event fingerprint and matching | Working in the scan, the terminal, and the web page. |
+| Corpus | 31 events in `data/corpus.json`. Backtest verdict SIGNAL (ρ = 0.57), driven mostly by concentration. |
 | Demo recording | Not started |
-| API calls | More than 7,000 successful. The competition needs 1,000. |
-| Credits | About 16,500 |
+| API calls | About 15,000 successful. The competition needs 1,000. |
+| Credits | About 4,370 |
 | Deadline | Submit by 2026-09-26 |
 
-## What to build
+## What to do next
 
-1. **Event fingerprint**, four features, all known at T0 + 1 hour:
-   - **Actor quality:** size-weighted mean Launch Reflex of scoreable first-hour buyers.
-   - **Entry speed:** how soon after T0 the above-average buyers arrived.
-   - **Persistence:** whether first-hour buyers kept adding across the four first-hour windows.
-   - **Concentration:** share of first-hour buy volume from the top 3 buyers.
-2. **Corpus** of mechanically sampled past launches, using the D3 sampling rule
-   (`token-screener/historical`, pump.fun, hash order). Store derived features and outcomes only.
-3. **Outcomes per corpus event:** price change from T0 to +6 h, +24 h, and +7 d, from `tgm/dex-trades`.
-4. **Matching:** standardize the four features, then list the 3 nearest corpus events by distance. Show
-   winners and losers. No probabilities.
-5. **Screen:** "We've seen this before." Three analogue cards: why each matched, and what happened next.
-
-## First decision for the user: corpus budget
-
-A cold scan costs about 300 credits. The plan's 50-event corpus would cost about 15,000 credits,
-nearly everything left. Options:
-
-- **Reuse and extend.** Start from the 12 D3 events, which are already largely cached, and add events up to
-  the budget. It is cheaper, but gives fewer analogues.
-- **Buy more credits.** The last $12 bought about 24,000 credits. That funds the full 50-event corpus and
-  leaves room for the demo.
-- **Score fewer prior entries per buyer for corpus events.** Cheaper, but lower confidence on actor quality.
-
-Recommend one option to the user with the cost, and ask before spending.
+1. **Look at the screen in a browser.** The page logic was checked, and the scan stream carries the matching
+   section, but nobody has viewed the new section on screen yet.
+2. **Pick demo launches.** One replay with a clear match and a counter-example, and one live pump.fun launch more
+   than an hour past its launch moment. Corpus tokens are excluded from their own matches.
+3. **Verification command** for API usage (master plan section 13): total and successful requests, endpoint
+   breakdown, credits, and first and last timestamps from `spike_out/calls.jsonl`.
+4. **Clean-clone test:** a fresh clone, setup, and one cold scan in under 10 minutes.
+5. **Recording** that makes sense muted, then README demo link and submission.
 
 ## Working agreements with this user
 
@@ -60,6 +43,8 @@ Recommend one option to the user with the cost, and ask before spending.
 
 ## Known issues
 
-- A full cold scan from a fresh clone has not run end to end yet. Setup and page load were tested.
+- Old copies of `app.py` may still be running on port 8420 with pre-matching code. Restart the app to see matching.
+- A full cold scan from a fresh clone has not run end to end yet.
 - Scores can shift on a rescan when an earlier price request failed.
-- TRUMP (`6p6x…GiPN`) is not a pump.fun launch. The app now warns on non-pump.fun tokens.
+- The historical screener returns next-day tokens on some dates (2026-08-05, 08-08, 08-15).
+- Many corpus buyers are fresh wallets with no history, so about 1 in 4 sampled events had no fingerprint.

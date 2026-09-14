@@ -67,6 +67,30 @@ evaluated. Historical enrichment supplied by Nansen may subsequently be restated
 Launch Reflex is relative. A score of 92 means the wallet ranks above 92% of reference launch buyers.
 It is not a 92% win rate.
 
+## We've seen this before: similar past launches
+
+One hour after the launch moment, Déjà View describes the launch's buying with four measures, and it lists the
+most similar launches from a library of 31 sampled past pump.fun launches. It shows what happened to each one
+next, winners and losers, and never a probability.
+
+| Measure | What it describes |
+|---|---|
+| Actor quality | The Launch Reflex of the top buyers with a known launch record, weighted by the square root of buy size |
+| Entry speed | How many minutes after the launch moment the strong buyers arrived |
+| Concentration | The share of first-hour buying from the 3 largest buyers |
+| Persistence | The share of the top buyers' buying that came after their first buy window |
+
+- **Rules frozen before any outcome data:** [docs/CORPUS_PLAN.md](docs/CORPUS_PLAN.md), reviewed by Codex.
+- **Outcomes start at the decision point,** one hour after the launch moment, because that is when a person could act.
+- **If all three nearest launches went the same way,** the screen adds the nearest launch that went the other way.
+- **If even the nearest launch is far away,** the screen says "We haven't seen this one before."
+
+**Backtest.** Each past launch was matched against launches from other weeks. Its next-day outcome and its
+matches' outcomes had rank correlation 0.57, stronger than 99.9% of random shuffles. **Most of that came from
+concentration,** which mostly reflects how many buyers a launch had: launches with a few large buyers fell less
+over the next day than crowded launches. Actor quality alone did not predict event outcomes. Only 4 of the 31 launches
+were up a day later, so treat the matches as context.
+
 ## Nansen endpoints
 
 | Endpoint | Used for | Credits a call |
@@ -75,7 +99,7 @@ It is not a 92% win rate.
 | `/api/v1/tgm/dex-trades` | Launch moment, first-hour buyers, market prices | 1 |
 | `/api/v1/profiler/dex-trades` | Wallet history before the launch moment | 1 |
 | `/api/v1/token-screener` | Finding recent launches during the spike | 1 |
-| `/api/v1beta1/token-screener/historical` | Sampling past launches without survivorship for the retest | 5 |
+| `/api/v1beta1/token-screener/historical` | Sampling past launches without survivorship, for the retest and the library of past launches | 5 |
 
 ## Performance and caching
 
@@ -91,6 +115,7 @@ It is not a 92% win rate.
 - **Moderate effect.** Treat Launch Reflex as evidence, not a signal to copy.
 - **Shallow history for very active wallets.** Each history window returns up to 1,000 trades, which covers
   only a few days for high-frequency wallets.
+- **Small library of past launches.** 31 launches from 2026-06-10 to 2026-08-15. September conditions can differ.
 - **Small reference set.** Percentiles come from 37 reference buyers, so they move in steps of about 3.
 - **Retries can change a score.** If a price request fails, that entry is left out. A later scan fills it
   in, which can move the score.
@@ -130,7 +155,10 @@ A cold scan uses about 300 credits.
 | `reflex.py` | Scan orchestration and Launch Reflex scoring |
 | `launch_data.py` | Launch moment, wallet first buys, market prices, caches |
 | `nansen_client.py` | Nansen API client with retries and the call ledger |
+| `matching.py` | The four launch measures and the search for similar past launches |
+| `corpus.py` | Samples past launches, measures them, fetches outcomes, and runs the backtest |
 | `data/reflex_reference.json` | Reference scores from the retest; derived numbers only |
+| `data/corpus.json` | The library of past launches: measures and outcomes only, no wallet addresses |
 | `spike_runner.py`, `d3.py` | Spike and retest code |
 | `tools/build_reference.py` | Rebuilds the reference from local retest data |
 
@@ -141,6 +169,5 @@ histories, and API keys stay local in `spike_out/` and `.env`, which git ignores
 
 ## Future work
 
-- Event fingerprint: entry speed, persistence, and concentration of a launch's buyers.
-- Déjà View matching: the nearest past launches with a similar buyer pattern, showing winners and losers.
+- A larger library of past launches. With 31 launches, the backtest result is real but fragile.
 - A larger reference set of launch buyers.

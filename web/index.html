@@ -206,7 +206,8 @@ function deja(d) {
   if (d.analogues.length) {
     const verdict = d.backtest && d.backtest.verdict;
     const bt = verdict === "SIGNAL"
-      ? "In a backtest on past launches, launches with similar first-hour buyers tended to have similar next-day outcomes."
+      ? `In a backtest on ${d.backtest.events} past launches, launches with similar first-hour buyers tended to have similar
+        next-day outcomes (rank correlation ${d.backtest.ret24h.rho.toFixed(2)}). Most of that came from how concentrated the buying was.`
       : verdict === "NO SIGNAL SHOWN"
       ? "Similar past launches, for context. In our backtest, similarity did not predict what happened next."
       : "Similar past launches, for context.";

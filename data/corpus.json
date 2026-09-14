@@ -1,0 +1,1075 @@
+{
+  "source": "docs/CORPUS_PLAN.md",
+  "built_at": "2026-09-14T19:07:51.847735+00:00",
+  "collection": {
+    "reason": "target reached",
+    "fingerprinted": 31,
+    "events": 40,
+    "spent": 11704,
+    "features_used": [
+      "actor_quality",
+      "entry_speed",
+      "concentration",
+      "persistence"
+    ],
+    "feature_rho": {
+      "actor_quality|entry_speed": -0.195,
+      "actor_quality|concentration": -0.05,
+      "actor_quality|persistence": 0.376,
+      "entry_speed|concentration": -0.073,
+      "entry_speed|persistence": -0.114,
+      "concentration|persistence": -0.218
+    },
+    "events_per_date": {
+      "2026-06-10": 3,
+      "2026-06-13": 3,
+      "2026-06-17": 3,
+      "2026-06-20": 3,
+      "2026-06-24": 3,
+      "2026-06-27": 3,
+      "2026-07-01": 2,
+      "2026-07-04": 2,
+      "2026-07-08": 2,
+      "2026-07-11": 2,
+      "2026-07-15": 2,
+      "2026-07-18": 2,
+      "2026-07-22": 2,
+      "2026-07-25": 2,
+      "2026-07-29": 2,
+      "2026-08-01": 2,
+      "2026-08-05": 0,
+      "2026-08-08": 0,
+      "2026-08-12": 2,
+      "2026-08-15": 0
+    }
+  },
+  "checkpoint": null,
+  "events_without_base_price": 0,
+  "features_used": [
+    "actor_quality",
+    "entry_speed",
+    "concentration",
+    "persistence"
+  ],
+  "scale": {
+    "actor_quality": {
+      "mean": 0.7999419354838709,
+      "sd": 0.20823019330228149
+    },
+    "entry_speed": {
+      "mean": 18.944351612903226,
+      "sd": 19.642122455725683
+    },
+    "concentration": {
+      "mean": 0.4177516129032258,
+      "sd": 0.17823387656521153
+    },
+    "persistence": {
+      "mean": 0.08244193548387097,
+      "sd": 0.11626944172965169
+    }
+  },
+  "distance_thresholds": {
+    "median": 1.0033708236625345,
+    "p95": 4.057515761319874
+  },
+  "events": [
+    {
+      "date": "2026-06-10",
+      "token": "9ZtbETDNjnST9Y2zs82FZYy49xUMPgqXRh46YjjRpump",
+      "symbol": "BR\u00f6TCHEN",
+      "deployment": "2026-06-10T10:02:53+00:00",
+      "t0": "2026-06-10T10:06:29+00:00",
+      "buyers": 6,
+      "scoreable_buyers": 5,
+      "top_buyers": 6,
+      "features": {
+        "actor_quality": 0.6898,
+        "entry_speed": 31.85,
+        "persistence": 0.0,
+        "concentration": 0.5939,
+        "actor_quality_pct": 30,
+        "scoreable_buyers": 5,
+        "top_buyers": 6
+      },
+      "outcomes": {
+        "ret6h": 0.14550385468747248,
+        "ret6h_pct": 15.7,
+        "ret6h_no_trades": false,
+        "ret24h": 0.8287415607311407,
+        "ret24h_pct": 129.0,
+        "ret24h_no_trades": false,
+        "ret7d": 0.2002177682390074,
+        "ret7d_pct": 22.2,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:50.219340+00:00"
+    },
+    {
+      "date": "2026-06-10",
+      "token": "BuzVgHAMDvNNz4zNvxcXN4EiTXzij1e7AjCzfmzVpump",
+      "symbol": "\u26a0\ufe0f ACAT",
+      "deployment": "2026-06-10T22:40:24+00:00",
+      "t0": "2026-06-10T22:40:29+00:00",
+      "buyers": 17,
+      "scoreable_buyers": 6,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.6286,
+        "entry_speed": 35.65,
+        "persistence": 0.0,
+        "concentration": 0.2828,
+        "actor_quality_pct": 24,
+        "scoreable_buyers": 6,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -0.36440349452678983,
+        "ret6h_pct": -30.5,
+        "ret6h_no_trades": false,
+        "ret24h": -0.892890113954789,
+        "ret24h_pct": -59.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -96.5,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:42.721946+00:00"
+    },
+    {
+      "date": "2026-06-13",
+      "token": "xwmYyr9oqbNq4AUsWBQmhuhToFoRw43ZunFdt8upump",
+      "symbol": "$TRUJAN",
+      "deployment": "2026-06-13T11:14:57+00:00",
+      "t0": "2026-06-13T12:02:24+00:00",
+      "buyers": 16,
+      "scoreable_buyers": 6,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 1.7156,
+        "entry_speed": 25.4583,
+        "persistence": 0.3233,
+        "concentration": 0.4684,
+        "actor_quality_pct": 100,
+        "scoreable_buyers": 6,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -98.1,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -98.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:40.556323+00:00"
+    },
+    {
+      "date": "2026-06-13",
+      "token": "7xdh2RK9bPVwT3skrHBBxjHxmDDE8gTnFR4dwxYnpump",
+      "symbol": "\u26a0\ufe0f SPACE",
+      "deployment": "2026-06-13T21:02:30+00:00",
+      "t0": "2026-06-13T21:02:33+00:00",
+      "buyers": 8,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.65,
+        "entry_speed": 20.15,
+        "persistence": 0.0,
+        "concentration": 0.5039,
+        "actor_quality_pct": 27,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -1.1371167824340365,
+        "ret6h_pct": -67.9,
+        "ret6h_no_trades": false,
+        "ret24h": -0.23125778079141038,
+        "ret24h_pct": -20.6,
+        "ret24h_no_trades": false,
+        "ret7d": -0.9292546601660189,
+        "ret7d_pct": -60.5,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:43.753253+00:00"
+    },
+    {
+      "date": "2026-06-17",
+      "token": "EvZ6egJEkVhqN2KJkKLuGqrYZ6rDCkb4Ry7Pvk89pump",
+      "symbol": "\u26a0\ufe0f OGSON",
+      "deployment": "2026-06-17T02:00:27+00:00",
+      "t0": "2026-06-17T02:01:34+00:00",
+      "buyers": 8,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7809,
+        "entry_speed": 9.0333,
+        "persistence": 0.0,
+        "concentration": 0.4844,
+        "actor_quality_pct": 41,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -98.5,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -98.5,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -99.4,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:50.377951+00:00"
+    },
+    {
+      "date": "2026-06-17",
+      "token": "852vnpBYoZ1KtZDoKTVcfrMBFMGizdswAvWoeVN8pump",
+      "symbol": "LAVABUNS",
+      "deployment": "2026-06-17T17:13:33+00:00",
+      "t0": "2026-06-17T17:13:58+00:00",
+      "buyers": 40,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.666,
+        "entry_speed": 3.8,
+        "persistence": 0.0543,
+        "concentration": 0.1553,
+        "actor_quality_pct": 27,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -98.4,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -98.5,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:44.078344+00:00"
+    },
+    {
+      "date": "2026-06-17",
+      "token": "HREUDWzLtmJrMjav48RY9iPRJr9r8KoTBLjWNjdPpump",
+      "symbol": "RIV",
+      "deployment": "2026-06-17T19:29:03+00:00",
+      "t0": "2026-06-17T19:29:03+00:00",
+      "buyers": 26,
+      "scoreable_buyers": 5,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.6186,
+        "entry_speed": 0.0,
+        "persistence": 0.0993,
+        "concentration": 0.3767,
+        "actor_quality_pct": 24,
+        "scoreable_buyers": 5,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": 0.37990275061119344,
+        "ret6h_pct": 46.2,
+        "ret6h_no_trades": false,
+        "ret24h": -1.9252517951322623,
+        "ret24h_pct": -85.4,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -98.2,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:39.477419+00:00"
+    },
+    {
+      "date": "2026-06-20",
+      "token": "6WfN6dFzejnCpii6b8xaoA5rpc7hsdLm1We8Aw7spump",
+      "symbol": "AIVEXA",
+      "deployment": "2026-06-20T23:33:43+00:00",
+      "t0": "2026-06-20T23:33:43+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 6,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.8188,
+        "entry_speed": 0.0,
+        "persistence": 0.0,
+        "concentration": 0.4994,
+        "actor_quality_pct": 51,
+        "scoreable_buyers": 6,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": -0.07126506080250103,
+        "ret6h_pct": -6.9,
+        "ret6h_no_trades": false,
+        "ret24h": -0.12090218183191531,
+        "ret24h_pct": -11.4,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:45.690730+00:00"
+    },
+    {
+      "date": "2026-06-24",
+      "token": "zH27yBZiFaW6UMHVBQcpwjzPeDVkWxJTdyWP5rbpump",
+      "symbol": "ABUSE",
+      "deployment": "2026-06-24T12:21:28+00:00",
+      "t0": "2026-06-24T12:21:28+00:00",
+      "buyers": 8,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.6589,
+        "entry_speed": 0.0,
+        "persistence": 0.0,
+        "concentration": 0.6517,
+        "actor_quality_pct": 27,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -99.3,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -99.3,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -99.3,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:40.290995+00:00"
+    },
+    {
+      "date": "2026-06-24",
+      "token": "C1w67uwnZTLSNVfqvypUX4DFM5b4DfyaSbEojkLZpump",
+      "symbol": "VOYAGER",
+      "deployment": "2026-06-24T16:39:33+00:00",
+      "t0": "2026-06-24T16:39:33+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 3,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.8922,
+        "entry_speed": 10.7833,
+        "persistence": 0.0,
+        "concentration": 0.5405,
+        "actor_quality_pct": 65,
+        "scoreable_buyers": 3,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": -0.4083003676762255,
+        "ret6h_pct": -33.5,
+        "ret6h_no_trades": false,
+        "ret24h": -0.30623096463825894,
+        "ret24h_pct": -26.4,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:50.868544+00:00"
+    },
+    {
+      "date": "2026-06-24",
+      "token": "E7wbcQSGnuC29vNeDX8SrosiD46piaUnBHTg5X8apump",
+      "symbol": "\u26a0\ufe0f MEEP",
+      "deployment": "2026-06-24T23:26:09+00:00",
+      "t0": "2026-06-24T23:27:58+00:00",
+      "buyers": 30,
+      "scoreable_buyers": 5,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.6886,
+        "entry_speed": 53.1333,
+        "persistence": 0.0,
+        "concentration": 0.1688,
+        "actor_quality_pct": 30,
+        "scoreable_buyers": 5,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -0.392593420726976,
+        "ret6h_pct": -32.5,
+        "ret6h_no_trades": false,
+        "ret24h": -2.157468904414883,
+        "ret24h_pct": -88.4,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -96.7,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:47.824312+00:00"
+    },
+    {
+      "date": "2026-06-27",
+      "token": "5oXHjmzf785VFTPicc1tYqvyuBJUAAxmydbYMRmApump",
+      "symbol": "WAGIE",
+      "deployment": "2026-06-27T00:02:34+00:00",
+      "t0": "2026-06-27T00:02:34+00:00",
+      "buyers": 11,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.8642,
+        "entry_speed": 0.0,
+        "persistence": 0.0,
+        "concentration": 0.4501,
+        "actor_quality_pct": 65,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": 0.07076422403511222,
+        "ret6h_pct": 7.3,
+        "ret6h_no_trades": false,
+        "ret24h": -0.11776468489063419,
+        "ret24h_pct": -11.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:46.660904+00:00"
+    },
+    {
+      "date": "2026-06-27",
+      "token": "DZTSLoJKieNPPGKgkdhaBdLjjnQBaUnb3oRPHNLfpump",
+      "symbol": "TBLK",
+      "deployment": "2026-06-27T01:20:06+00:00",
+      "t0": "2026-06-27T01:20:06+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 6,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.8175,
+        "entry_speed": 0.0,
+        "persistence": 0.0,
+        "concentration": 0.4903,
+        "actor_quality_pct": 51,
+        "scoreable_buyers": 6,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": -1.4917163015436963,
+        "ret6h_pct": -77.5,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -99.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -99.0,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:51.683598+00:00"
+    },
+    {
+      "date": "2026-07-01",
+      "token": "EGRw7xKkT1r99X8nT8JCZsGLtw6MzAqWivEkUPXJpump",
+      "symbol": "\u26a0\ufe0f CABC",
+      "deployment": "2026-07-01T03:41:51+00:00",
+      "t0": "2026-07-01T03:41:51+00:00",
+      "buyers": 24,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.8429,
+        "entry_speed": 14.0667,
+        "persistence": 0.035,
+        "concentration": 0.3392,
+        "actor_quality_pct": 54,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -97.8,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -97.7,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -98.2,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:40.143844+00:00"
+    },
+    {
+      "date": "2026-07-01",
+      "token": "5qxeGpXRiY8zNKFhpffNtkgtB9XrHVgeQj1NCmRipump",
+      "symbol": "TRIPLEB",
+      "deployment": "2026-07-01T22:17:38+00:00",
+      "t0": "2026-07-01T22:17:38+00:00",
+      "buyers": 92,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7047,
+        "entry_speed": 0.0,
+        "persistence": 0.0,
+        "concentration": 0.0748,
+        "actor_quality_pct": 32,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -98.3,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -98.3,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -98.1,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:47.086370+00:00"
+    },
+    {
+      "date": "2026-07-04",
+      "token": "FDpNJGZZ6mLNabjTovJ34axr4NrLS9p4TNBJrfKdpump",
+      "symbol": "\u26a0\ufe0f GYATTBERG",
+      "deployment": "2026-07-04T16:19:21+00:00",
+      "t0": "2026-07-04T16:19:22+00:00",
+      "buyers": 27,
+      "scoreable_buyers": 6,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.8313,
+        "entry_speed": 13.2667,
+        "persistence": 0.3507,
+        "concentration": 0.3516,
+        "actor_quality_pct": 51,
+        "scoreable_buyers": 6,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -0.9079962107768543,
+        "ret6h_pct": -59.7,
+        "ret6h_no_trades": false,
+        "ret24h": -0.8458107866677759,
+        "ret24h_pct": -57.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.2219595093670095,
+        "ret7d_pct": -89.2,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:39.309283+00:00"
+    },
+    {
+      "date": "2026-07-04",
+      "token": "9owj2aDun64x9jtDjm8g3DVQ7fXrowCZWr1JuJd4pump",
+      "symbol": "FCORE",
+      "deployment": "2026-07-04T21:57:55+00:00",
+      "t0": "2026-07-04T21:57:55+00:00",
+      "buyers": 20,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.8586,
+        "entry_speed": 0.0,
+        "persistence": 0.2658,
+        "concentration": 0.2576,
+        "actor_quality_pct": 62,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -96.8,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -97.5,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:46.166813+00:00"
+    },
+    {
+      "date": "2026-07-11",
+      "token": "2kQHmsGCn4ychGbGAm3FSxDYrWowvUZknsPqiTRKpump",
+      "symbol": "COWIN",
+      "deployment": "2026-07-11T06:27:56+00:00",
+      "t0": "2026-07-11T06:27:56+00:00",
+      "buyers": 8,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7123,
+        "entry_speed": 0.0,
+        "persistence": 0.314,
+        "concentration": 0.6411,
+        "actor_quality_pct": 35,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -0.177507820017099,
+        "ret6h_pct": -16.3,
+        "ret6h_no_trades": false,
+        "ret24h": -0.21800257807543363,
+        "ret24h_pct": -19.6,
+        "ret24h_no_trades": false,
+        "ret7d": -0.27206470051369674,
+        "ret7d_pct": -23.8,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:39.632379+00:00"
+    },
+    {
+      "date": "2026-07-11",
+      "token": "4i7AHzGkMRfuq7dsDtDYRJhNPWJox4Lgh5kN2Awhpump",
+      "symbol": "MEMESAI",
+      "deployment": "2026-07-11T06:56:43+00:00",
+      "t0": "2026-07-11T06:56:43+00:00",
+      "buyers": 27,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7445,
+        "entry_speed": 45.2333,
+        "persistence": 0.0357,
+        "concentration": 0.4222,
+        "actor_quality_pct": 35,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": 0.8894450182520218,
+        "ret6h_pct": 143.4,
+        "ret6h_no_trades": false,
+        "ret24h": 0.6381546036864945,
+        "ret24h_pct": 89.3,
+        "ret24h_no_trades": false,
+        "ret7d": -0.448961378506572,
+        "ret7d_pct": -36.2,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:46.772146+00:00"
+    },
+    {
+      "date": "2026-07-15",
+      "token": "4SFrLxtYKZVhfztqxwMJMYQ9SFu51XQ9WrUPMyTWpump",
+      "symbol": "\u26a0\ufe0f RUNE",
+      "deployment": "2026-07-15T08:13:00+00:00",
+      "t0": "2026-07-15T08:13:13+00:00",
+      "buyers": 11,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7431,
+        "entry_speed": 21.025,
+        "persistence": 0.0987,
+        "concentration": 0.4256,
+        "actor_quality_pct": 35,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -1.0832652613045228,
+        "ret6h_pct": -66.2,
+        "ret6h_no_trades": false,
+        "ret24h": -0.45804937205750135,
+        "ret24h_pct": -36.7,
+        "ret24h_no_trades": false,
+        "ret7d": -1.4113032829663088,
+        "ret7d_pct": -75.6,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:39.688050+00:00"
+    },
+    {
+      "date": "2026-07-15",
+      "token": "3Crz6dCUQYH1dbpxnKeHEpfXP4bpAyQUL1dbtozbpump",
+      "symbol": "GROKKYBARA",
+      "deployment": "2026-07-15T20:35:42+00:00",
+      "t0": "2026-07-15T20:35:57+00:00",
+      "buyers": 112,
+      "scoreable_buyers": 6,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7718,
+        "entry_speed": 11.3833,
+        "persistence": 0.2761,
+        "concentration": 0.1212,
+        "actor_quality_pct": 41,
+        "scoreable_buyers": 6,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -1.4835655955302725,
+        "ret6h_pct": -77.3,
+        "ret6h_no_trades": false,
+        "ret24h": -1.8335174034999349,
+        "ret24h_pct": -84.0,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -92.9,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:47.556662+00:00"
+    },
+    {
+      "date": "2026-07-18",
+      "token": "DUkPWeopcTygyMYM6K3qtzfXVD9fUeRAmuKM8inypump",
+      "symbol": "NUBBY",
+      "deployment": "2026-07-18T00:29:42+00:00",
+      "t0": "2026-07-18T01:04:08+00:00",
+      "buyers": 11,
+      "scoreable_buyers": 5,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.6693,
+        "entry_speed": 9.1167,
+        "persistence": 0.0,
+        "concentration": 0.4061,
+        "actor_quality_pct": 27,
+        "scoreable_buyers": 5,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -1.583892400898313,
+        "ret6h_pct": -79.5,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -91.0,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -91.5,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:47.973079+00:00"
+    },
+    {
+      "date": "2026-07-18",
+      "token": "3wwU3njdLCT3ebRUrTFeHwKG6zamiiCKwmpShSK2pump",
+      "symbol": "MOUSE",
+      "deployment": "2026-07-18T06:10:55+00:00",
+      "t0": "2026-07-18T06:11:02+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 7,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.6756,
+        "entry_speed": 31.425,
+        "persistence": 0.0,
+        "concentration": 0.5237,
+        "actor_quality_pct": 27,
+        "scoreable_buyers": 7,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": 2.302585092994046,
+        "ret6h_pct": 3346.0,
+        "ret6h_no_trades": false,
+        "ret24h": 1.4139134960968804,
+        "ret24h_pct": 311.2,
+        "ret24h_no_trades": false,
+        "ret7d": -1.094684185757883,
+        "ret7d_pct": -66.5,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:39.060323+00:00"
+    },
+    {
+      "date": "2026-07-22",
+      "token": "4PMW96XHxETjscmsRjLBSBoaSeFFMJC7khxxgGqPpump",
+      "symbol": "\u26a0\ufe0f GTA6",
+      "deployment": "2026-07-22T10:18:31+00:00",
+      "t0": "2026-07-22T10:21:39+00:00",
+      "buyers": 12,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.4961,
+        "entry_speed": 60.0,
+        "persistence": 0.0,
+        "concentration": 0.3181,
+        "actor_quality_pct": 5,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -92.7,
+        "ret6h_no_trades": false,
+        "ret24h": -2.302585092994046,
+        "ret24h_pct": -92.0,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -90.3,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:42.117154+00:00"
+    },
+    {
+      "date": "2026-07-25",
+      "token": "5dWMX53NNdDuFtP2HVmxfF8gxXngaSMBzEYAGghapump",
+      "symbol": "\u26a0\ufe0f USOH",
+      "deployment": "2026-07-25T03:01:37+00:00",
+      "t0": "2026-07-25T03:01:37+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 7,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.6444,
+        "entry_speed": 60.0,
+        "persistence": 0.0,
+        "concentration": 0.9764,
+        "actor_quality_pct": 24,
+        "scoreable_buyers": 7,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": 0.0,
+        "ret6h_pct": 0.0,
+        "ret6h_no_trades": false,
+        "ret24h": -0.006550913513740436,
+        "ret24h_pct": -0.7,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:49.663993+00:00"
+    },
+    {
+      "date": "2026-07-25",
+      "token": "6d3K6aYpQNT1pkZ34WAuAcXQWig1MaxD1nz5HErypump",
+      "symbol": "\u26a0\ufe0f RACCROOK",
+      "deployment": "2026-07-25T09:59:13+00:00",
+      "t0": "2026-07-25T09:59:13+00:00",
+      "buyers": 7,
+      "scoreable_buyers": 7,
+      "top_buyers": 7,
+      "features": {
+        "actor_quality": 0.8911,
+        "entry_speed": 0.0,
+        "persistence": 0.0739,
+        "concentration": 0.5988,
+        "actor_quality_pct": 65,
+        "scoreable_buyers": 7,
+        "top_buyers": 7
+      },
+      "outcomes": {
+        "ret6h": -0.08846712474732171,
+        "ret6h_pct": -8.5,
+        "ret6h_no_trades": false,
+        "ret24h": -0.0842013044089135,
+        "ret24h_pct": -8.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -100.0,
+        "ret7d_no_trades": true
+      },
+      "fetched_at": "2026-09-14T19:07:43.207479+00:00"
+    },
+    {
+      "date": "2026-07-29",
+      "token": "4hPRAnsyVVBwtN6pPMVejjF7LPKMDye5C4eVPuFFpump",
+      "symbol": "PVE",
+      "deployment": "2026-07-29T02:59:39+00:00",
+      "t0": "2026-07-29T02:59:46+00:00",
+      "buyers": 17,
+      "scoreable_buyers": 6,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.8581,
+        "entry_speed": 57.1333,
+        "persistence": 0.2848,
+        "concentration": 0.3668,
+        "actor_quality_pct": 62,
+        "scoreable_buyers": 6,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -2.302585092994046,
+        "ret6h_pct": -91.6,
+        "ret6h_no_trades": false,
+        "ret24h": -0.7615043344811644,
+        "ret24h_pct": -53.3,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -97.1,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:42.592997+00:00"
+    },
+    {
+      "date": "2026-08-01",
+      "token": "7MYegHoqDGhWdvrnxeuiAEndgG6qcs1N3W5v6SXspump",
+      "symbol": "BUDDY",
+      "deployment": "2026-08-01T09:41:37+00:00",
+      "t0": "2026-08-01T09:53:39+00:00",
+      "buyers": 10,
+      "scoreable_buyers": 5,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.7933,
+        "entry_speed": 21.7833,
+        "persistence": 0.0842,
+        "concentration": 0.4986,
+        "actor_quality_pct": 41,
+        "scoreable_buyers": 5,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": 0.2639633772870678,
+        "ret6h_pct": 30.2,
+        "ret6h_no_trades": false,
+        "ret24h": -0.464428544825311,
+        "ret24h_pct": -37.2,
+        "ret24h_no_trades": false,
+        "ret7d": -0.4209286443727228,
+        "ret7d_pct": -34.4,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:43.350302+00:00"
+    },
+    {
+      "date": "2026-08-01",
+      "token": "7K4jGRV7PY1EymiY3jx75JSfi1jjzG7Gh5XHqF2Upump",
+      "symbol": "3PLACE",
+      "deployment": "2026-08-01T13:33:19+00:00",
+      "t0": "2026-08-01T13:33:23+00:00",
+      "buyers": 13,
+      "scoreable_buyers": 7,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 1.012,
+        "entry_speed": 40.375,
+        "persistence": 0.0,
+        "concentration": 0.2879,
+        "actor_quality_pct": 92,
+        "scoreable_buyers": 7,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": 0.15178665743433467,
+        "ret6h_pct": 16.4,
+        "ret6h_no_trades": false,
+        "ret24h": 0.377679743248997,
+        "ret24h_pct": 45.9,
+        "ret24h_no_trades": false,
+        "ret7d": 0.6334325026819356,
+        "ret7d_pct": 88.4,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:48.604792+00:00"
+    },
+    {
+      "date": "2026-08-12",
+      "token": "6a8Y8JcZ5iFPKzUYfZaNAuw96jpo7oWj1XSnMVzdpump",
+      "symbol": "\u26a0\ufe0f STEVE",
+      "deployment": "2026-08-12T08:03:41+00:00",
+      "t0": "2026-08-12T08:03:59+00:00",
+      "buyers": 20,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 0.9877,
+        "entry_speed": 5.9667,
+        "persistence": 0.1763,
+        "concentration": 0.2703,
+        "actor_quality_pct": 86,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -1.981591555228408,
+        "ret6h_pct": -86.2,
+        "ret6h_no_trades": false,
+        "ret24h": -2.1281299074452833,
+        "ret24h_pct": -88.1,
+        "ret24h_no_trades": false,
+        "ret7d": -2.302585092994046,
+        "ret7d_pct": -97.0,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:42.851754+00:00"
+    },
+    {
+      "date": "2026-08-12",
+      "token": "45aD3sAFxvxAxBnYRN1Urto645PkSc6Sjz6NqpCypump",
+      "symbol": "\u26a0\ufe0f CALL",
+      "deployment": "2026-08-12T19:33:32+00:00",
+      "t0": "2026-08-12T19:33:39+00:00",
+      "buyers": 12,
+      "scoreable_buyers": 8,
+      "top_buyers": 8,
+      "features": {
+        "actor_quality": 1.0717,
+        "entry_speed": 6.6417,
+        "persistence": 0.0836,
+        "concentration": 0.4041,
+        "actor_quality_pct": 92,
+        "scoreable_buyers": 8,
+        "top_buyers": 8
+      },
+      "outcomes": {
+        "ret6h": -0.14979918390999092,
+        "ret6h_pct": -13.9,
+        "ret6h_no_trades": false,
+        "ret24h": -0.29702620135300534,
+        "ret24h_pct": -25.7,
+        "ret24h_no_trades": false,
+        "ret7d": -0.4780546981873634,
+        "ret7d_pct": -38.0,
+        "ret7d_no_trades": false
+      },
+      "fetched_at": "2026-09-14T19:07:49.151858+00:00"
+    }
+  ],
+  "backtest": {
+    "verdict": "SIGNAL",
+    "ret24h": {
+      "rho": 0.565,
+      "percentile": 0.999
+    },
+    "reported": {
+      "ret6h": {
+        "rho": 0.262,
+        "percentile": 0.929
+      },
+      "ret7d": {
+        "rho": 0.388,
+        "percentile": 0.982
+      },
+      "ret24h_actor_quality_only": {
+        "rho": -0.359,
+        "percentile": 0.102
+      },
+      "ret24h_entry_speed_only": {
+        "rho": 0.069,
+        "percentile": 0.718
+      },
+      "ret24h_concentration_only": {
+        "rho": 0.504,
+        "percentile": 0.994
+      },
+      "ret24h_persistence_only": {
+        "rho": -0.088,
+        "percentile": 0.47
+      }
+    },
+    "events": 31,
+    "winners_24h": 4,
+    "run_at": "2026-09-14T19:08:06.207377+00:00"
+  }
+}
