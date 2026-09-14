@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Déjà View</title>
+<style>
+  :root {
+    --bg: #0b0d10; --panel: #13161b; --line: #232830; --text: #e8eaed; --dim: #8b929c;
+    --hi: #7cf0b5; --mid: #e8c468; --lo: #f07c7c; --accent: #9aa8ff;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 20px 80px; }
+  header h1 { font-size: 44px; letter-spacing: -1.5px; margin: 0; font-weight: 700; }
+  header p { margin: 4px 0 28px; color: var(--dim); font-size: 17px; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; }
+  input { flex: 1 1 420px; background: var(--panel); border: 1px solid var(--line); color: var(--text);
+          padding: 14px 16px; border-radius: 10px; font: 15px var(--mono); }
+  input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  button { background: var(--text); color: var(--bg); border: 0; border-radius: 10px; padding: 14px 22px;
+           font-weight: 650; font-size: 15px; cursor: pointer; }
+  button:disabled { opacity: .4; cursor: default; }
+  .examples { margin-top: 10px; color: var(--dim); font-size: 13px; }
+  .examples a { color: var(--accent); cursor: pointer; text-decoration: none; margin-right: 12px; }
+  .stages { margin: 34px 0 10px; font: 13px var(--mono); letter-spacing: 1.2px; text-transform: uppercase; }
+  .stage { color: var(--dim); padding: 3px 0; }
+  .stage.done { color: var(--text); }
+  .stage.done::before { content: "✓ "; color: var(--hi); }
+  .stage.live::before { content: "● "; color: var(--mid); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .2; } }
+  .event { display: flex; gap: 28px; flex-wrap: wrap; align-items: baseline; margin: 26px 0 8px;
+           padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .event .sym { font-size: 26px; font-weight: 700; }
+  .kv { color: var(--dim); font-size: 13px; }
+  .kv b { color: var(--text); font-weight: 600; font-family: var(--mono); }
+  .headline { font-size: 20px; margin: 22px 0 16px; }
+  .headline b { color: var(--hi); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px;
+          animation: rise .35s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .card.pending { color: var(--dim); }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .addr { font: 14px var(--mono); color: var(--text); text-decoration: none; }
+  .addr:hover { color: var(--accent); }
+  .buy { color: var(--dim); font-size: 13px; }
+  .score { display: flex; align-items: baseline; gap: 12px; margin: 14px 0 2px; }
+  .label { font: 11px var(--mono); letter-spacing: 1.5px; color: var(--dim); }
+  .num { font-size: 52px; font-weight: 750; letter-spacing: -2px; line-height: 1; }
+  .rank { font: 700 14px var(--mono); padding: 4px 8px; border-radius: 6px; letter-spacing: .5px; }
+  .hi .num, .hi .rank { color: var(--hi); } .hi .rank { background: #7cf0b51a; }
+  .mid .num, .mid .rank { color: var(--mid); } .mid .rank { background: #e8c4681a; }
+  .lo .num, .lo .rank { color: var(--lo); } .lo .rank { background: #f07c7c1a; }
+  .conf { font: 11px var(--mono); color: var(--dim); letter-spacing: 1px; }
+  .stats { list-style: none; padding: 0; margin: 12px 0; font-size: 14px; }
+  .stats li { padding: 2px 0; }
+  .stats b { font-family: var(--mono); }
+  .summary { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; }
+  details { margin-top: 10px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font: 12px var(--mono); }
+  td { padding: 3px 4px; border-top: 1px solid var(--line); }
+  td.r { text-align: right; }
+  .error { margin-top: 28px; color: var(--lo); }
+  footer { margin-top: 60px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+  footer b { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Déjà View</h1>
+    <p>We've seen this trade before. Who is buying this Solana launch, and how have their past launch buys played out?</p>
+  </header>
+
+  <form id="f">
+    <input id="token" placeholder="Paste a Solana token address" autocomplete="off" spellcheck="false">
+    <button id="go">Scan launch</button>
+  </form>
+  <div class="examples">Replay:
+    <a data-token="6a8Y8JcZ5iFPKzUYfZaNAuw96jpo7oWj1XSnMVzdpump">STEVE, 12 Aug</a>
+    <a data-token="55VWo7QQpqfYwratKUZHhSSnSghyTVCJx54yNoWVpump">PVE, 13 Sep</a>
+  </div>
+
+  <div class="stages" id="stages" hidden></div>
+  <div id="event"></div>
+  <div class="headline" id="headline"></div>
+  <div class="grid" id="grid"></div>
+  <div class="error" id="error"></div>
+
+  <footer>
+    <b>Launch Reflex</b> ranks how often a wallet's past launch buys went on to offer a strong first-hour
+    opportunity, against a reference set of launch buyers. It uses only trades before this launch took off.
+    It is not a win rate, a profit claim, or a prediction.<br><br>
+    Powered by <b>Nansen API</b>.
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const STAGES = [
+  ["rewind", "Rewinding onchain activity"],
+  ["buyers", "Early actors found"],
+  ["history", "Checking prior launch behaviour"],
+  ["done", "Scan complete"],
+];
+let es = null;
+
+function short(a) { return a.slice(0, 4) + "…" + a.slice(-4); }
+function mins(s) { const m = Math.round(s / 60); return (m >= 0 ? "+" : "") + m + "m"; }
+function pct(x) { return Math.round(x * 100) + "%"; }
+function tone(r) { return r >= 60 ? "hi" : r >= 40 ? "mid" : "lo"; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function setStage(key) {
+  const idx = STAGES.findIndex(s => s[0] === key);
+  $("stages").innerHTML = STAGES.map(([k, t], i) =>
+    `<div class="stage ${i < idx || key === "done" ? "done" : i === idx ? "live" : ""}">${t}</div>`).join("");
+}
+
+function card(w) {
+  const link = `<a class="addr" href="https://solscan.io/account/${w.wallet}" target="_blank" rel="noopener">${short(w.wallet)}</a>`;
+  const buy = `<span class="buy">$${Math.round(w.usd).toLocaleString()} · entered ${mins(w.entry_delay_s)}</span>`;
+  if (!w.scoreable) {
+    return `<div class="card pending"><div class="top">${link}${buy}</div>
+      <div class="score"><span class="label">LAUNCH REFLEX</span><span class="num" style="font-size:28px">—</span></div>
+      <p class="summary">Not scoreable. ${esc(w.reason)}</p></div>`;
+  }
+  const rows = w.entries.map(e => `<tr><td>${esc(e.symbol)}</td><td>${e.bought_at.slice(0, 10)}</td>
+    <td class="r">${Math.exp(e.mfe60).toFixed(1)}×</td><td class="r">${e.failed_launch ? "failed" : ""}</td></tr>`).join("");
+  return `<div class="card ${tone(w.reflex)}">
+    <div class="top">${link}${buy}</div>
+    <div class="score"><span class="label">LAUNCH<br>REFLEX</span><span class="num">${w.reflex}</span>
+      <span class="rank">${w.rank_label}</span></div>
+    <div class="conf">${w.confidence} CONFIDENCE</div>
+    <ul class="stats">
+      <li><b>${w.prior_launch_entries}</b> prior launch entries</li>
+      <li><b>${pct(w.runner_rate)}</b> reached 2× within an hour of entry</li>
+      <li><b>${pct(w.failed_launch_rate)}</b> were launches that never reached $5k volume</li>
+    </ul>
+    <p class="summary">${esc(w.summary)}</p>
+    <details><summary>Why this score</summary>
+      <table><tr><td>Token</td><td>Bought</td><td class="r">Best in 1h</td><td></td></tr>${rows}</table>
+    </details></div>`;
+}
+
+function scan(token) {
+  if (es) es.close();
+  $("go").disabled = true;
+  $("stages").hidden = false;
+  ["event", "headline", "grid", "error"].forEach(id => $(id).innerHTML = "");
+  setStage("rewind");
+  const results = [];
+  es = new EventSource("/api/scan?token=" + encodeURIComponent(token));
+  es.onmessage = m => {
+    const d = JSON.parse(m.data);
+    if (d.kind === "event") {
+      $("event").innerHTML = `<div class="event"><span class="sym">${esc(d.symbol)}</span>
+        <span class="kv">Deployed <b>${d.deployment.slice(0, 16).replace("T", " ")} UTC</b></span>
+        <span class="kv">Launch moment ($5k volume) <b>${d.t0.slice(0, 16).replace("T", " ")} UTC</b></span>
+        <span class="kv">Scored as of <b>launch moment</b></span></div>`;
+    } else if (d.kind === "buyers") {
+      setStage("history");
+      $("headline").innerHTML = `<b>${d.buyers.length}</b> meaningful first-hour buyers`;
+      $("grid").innerHTML = d.buyers.map(b => `<div class="card pending" id="w-${b.wallet}">
+        <div class="top"><span class="addr">${short(b.wallet)}</span>
+        <span class="buy">$${Math.round(b.usd).toLocaleString()} · entered ${mins(b.entry_delay_s)}</span></div>
+        <p class="summary">Checking prior launches…</p></div>`).join("");
+    } else if (d.kind === "wallet") {
+      results.push(d);
+      const el = document.getElementById("w-" + d.wallet);
+      if (el) el.outerHTML = card(d);
+    } else if (d.kind === "done") {
+      setStage("done");
+      const strong = results.filter(r => r.scoreable && r.reflex >= 60).length;
+      $("headline").innerHTML = `<b>${d.buyers}</b> meaningful first-hour buyers · <b>${d.scoreable}</b> scoreable · ` +
+        `<b>${strong}</b> historically above average`;
+      finish();
+    } else if (d.kind === "error") {
+      $("error").textContent = d.message;
+      finish();
+    }
+  };
+  es.onerror = () => { if (es && es.readyState !== 2) { $("error").textContent = "Connection lost."; finish(); } };
+}
+
+function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
+
+$("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t); };
+const auto = new URLSearchParams(location.search).get("token");
+if (auto) { $("token").value = auto; scan(auto); }
+document.querySelectorAll(".examples a").forEach(a => a.onclick = () => { $("token").value = a.dataset.token; scan(a.dataset.token); });
+</script>
+</body>
+</html>
