@@ -227,7 +227,7 @@ def _prices(c, token, start, end, label, field="block_timestamp", direction="ASC
     return [float(x["estimated_swap_price_usd"]) for x in rows(resp) if x.get("estimated_swap_price_usd")]
 
 
-def market_points(c, token, b, label):
+def market_points(c, token, b, label, with_p15=True):
     """P0, P15, and Pmax around a first buy at b (rules from Test D2).
 
     Returns None when a request fails, so the caller can retry later.
@@ -237,6 +237,13 @@ def market_points(c, token, b, label):
         return None
     rec = {"p0": statistics.median(p0) if p0 else None, "p15": None, "pmax": None}
     if not rec["p0"]:
+        return rec
+    if not with_p15:
+        top = _prices(c, token, b, b + 60 * MINUTE, f"{label}:max", field="estimated_swap_price_usd",
+                      direction="DESC", per_page=5)
+        if top is None:
+            return None
+        rec["pmax"] = min(top) if top else None
         return rec
     fwd = _prices(c, token, b + 15 * MINUTE, b + 20 * MINUTE, f"{label}:p15fwd", per_page=10)
     if fwd is None:
