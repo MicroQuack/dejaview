@@ -529,3 +529,6 @@ Corpus start balance: about 16,236 credits. Hard cap: 12,000.
   the sample date, so every candidate failed the deployment rule. These dates yield no events. D3 saw the same on 08-05.
 - Cost per event rose from about 100 credits (dates with D3 caches) to about 500 (new tokens and wallets).
 - Several top buyers are brand-new wallets with no trades in the prior 30 days, so they cannot be scored.
+
+**Corpus Amendment 1** at 2026-09-14T19:04:05Z, approved by the user before any outcome data: cap raised to 13,500 credits
+(Stage 2 stop 12,900) to collect until 31 fingerprinted events. No credits bought. See `docs/CORPUS_PLAN.md`.

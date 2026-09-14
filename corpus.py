@@ -37,8 +37,9 @@ RESERVE_AFTER = 4_000
 OUTCOME_CREDITS = 8
 MIN_EVENTS = 30
 EXCLUDE_DAYS = 7
-CAP = 12_000
-STAGE2_STOP = 11_400
+CAP = 13_500  # Amendment 1; was 12,000
+STAGE2_STOP = 12_900  # Amendment 1; was 11,400
+AMENDMENT1_TARGET = 31
 EVENT_RESERVE = 400
 RERUNS = 2
 SEED = 20260914
@@ -198,6 +199,8 @@ def collect(c, budget):
     def target():
         """Cost-only checkpoint at 30 events: continue to 50 only if 4,000 credits would remain."""
         state = load("state.json", {})
+        if "amendment1" in state:
+            return AMENDMENT1_TARGET
         if fingerprinted() < CHECKPOINT and "checkpoint" not in state:
             return TARGET
         if "checkpoint" not in state:
@@ -219,7 +222,7 @@ def collect(c, budget):
     for rnd in range(1, ROUNDS + 1):
         for date in DATES:
             if fingerprinted() >= target():
-                return finish("target reached" if target() == TARGET else "checkpoint: frozen at 30 on cost")
+                return finish("target reached" if target() in (TARGET, AMENDMENT1_TARGET) else "checkpoint: frozen at 30 on cost")
             rec = dates.setdefault(date, {"checked": []})
             found = [r for r in rec["checked"] if r["result"] == "event"]
             if len(found) < rnd:

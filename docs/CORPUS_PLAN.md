@@ -234,3 +234,19 @@ D3 fetched the same 30-day windows before the same T0, so the copy changes cost,
 3. Up to 3 events per date share market conditions. The backtest excludes neighbours within 7 days for this reason.
 4. A corpus of 30 to 50 events is small. The "not seen before" rule covers launches unlike any of them.
 5. Nansen can restate historical data.
+
+## Amendment 1: budget raise to reach the minimum (made before any outcome data)
+
+**Made:** 2026-09-14T19:04:05Z, after Stage 2 stopped on budget and before Stage 3. No outcome had been fetched or inspected.
+**Approved by:** the user. This is the budget raise that "If the cap stops Stage 2 before 50 events" allows.
+
+**Why:** the budget stop left 29 fingerprinted events, one below the minimum of 30. One missing base price
+in Stage 3 would drop the corpus further.
+
+**Rule:**
+
+1. The hard cap rises from 12,000 to 13,500 credits. The Stage 2 stop rises from 11,400 to 12,900, which keeps 600 for Stage 3.
+2. Collection resumes in the same order and stops as soon as 31 events have a fingerprint, or at the new Stage 2 stop.
+3. The 30-event checkpoint does not apply. Its only possible result at this balance is to stop at 30.
+4. The redundancy check reruns on all fingerprinted events when collection stops, before any outcome.
+5. No credits are bought. Everything else is unchanged.
