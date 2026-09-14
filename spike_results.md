@@ -536,7 +536,7 @@ Corpus start balance: about 16,236 credits. Hard cap: 12,000.
 ### Corpus results: backtest verdict **SIGNAL** (2026-09-14)
 
 Final corpus: 31 fingerprinted events with outcomes, from 40 sampled events on 17 dates. Spend: 11,862 credits
-(about 4,370 remain). All 31 had a base price. No feature pair above 0.80, so all four features are used.
+(balance 4,020 after test scans). All 31 had a base price. No feature pair above 0.80, so all four features are used.
 
 | Test | Result |
 |---|---|

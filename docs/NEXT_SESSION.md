@@ -18,8 +18,8 @@
 | Event fingerprint and matching | Working in the scan, the terminal, and the web page. |
 | Corpus | 31 events in `data/corpus.json`. Backtest verdict SIGNAL (ρ = 0.57), driven mostly by concentration. |
 | Demo recording | Not started |
-| API calls | About 15,000 successful. The competition needs 1,000. |
-| Credits | About 4,370 |
+| API calls | About 19,500 successful, counted from the log rows. The competition needs 1,000. |
+| Credits | About 4,020 |
 | Deadline | Submit by 2026-09-26 |
 
 ## What to do next
@@ -44,6 +44,7 @@
 ## Known issues
 
 - Old copies of `app.py` may still be running on port 8420 with pre-matching code. Restart the app to see matching.
+- The running call total in `calls.jsonl` is wrong when two app copies write at once. The verification command must count successful rows, not read the last total.
 - A full cold scan from a fresh clone has not run end to end yet.
 - Scores can shift on a rescan when an earlier price request failed.
 - The historical screener returns next-day tokens on some dates (2026-08-05, 08-08, 08-15).
