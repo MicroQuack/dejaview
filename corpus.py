@@ -32,7 +32,11 @@ ROUNDS = 3
 MAX_CHECK = 30
 MIN_BUYERS = 6
 TARGET = 50
+CHECKPOINT = 30
+RESERVE_AFTER = 4_000
+OUTCOME_CREDITS = 8
 MIN_EVENTS = 30
+EXCLUDE_DAYS = 7
 CAP = 12_000
 STAGE2_STOP = 11_400
 EVENT_RESERVE = 400
@@ -156,7 +160,7 @@ def score_event(scanner, date, ev):
         if not failures:
             break
     features, reason = mt.fingerprint(ev["buyers"], results)
-    keep = ("usd", "buys", "entry_delay_s", "window_usd", "scoreable", "reflex", "prior_launch_entries",
+    keep = ("usd", "buys", "entry_delay_s", "window_usd", "scoreable", "reflex", "reflex_raw", "prior_launch_entries",
             "runner_rate", "failed_launch_rate", "api_failures")
     return {"date": date, "token": ev["token"], "symbol": ev["symbol"], "deployment": ev["deployment"],
             "t0": ev["t0"], "buyers": len(ev["buyers"]), "scoreable": sum(r["scoreable"] for r in results),
@@ -182,17 +186,40 @@ def collect(c, budget):
 
     def finish(reason):
         state = load("state.json", {})
+        rows = [s["features"] for s in scored.values() if s["features"]]
+        used, rho = mt.select_features(rows) if len(rows) >= 3 else (list(mt.FEATURES), {})
         state["collection_done"] = {"reason": reason, "fingerprinted": fingerprinted(), "events": len(scored),
-                                    "spent": budget.spent(),
+                                    "spent": budget.spent(), "features_used": used, "feature_rho": rho,
                                     "events_per_date": {d: sum(1 for s in scored.values() if s["date"] == d)
                                                         for d in DATES}}
         save("state.json", state)
         print("Collection finished:", state["collection_done"])
 
+    def target():
+        """Cost-only checkpoint at 30 events: continue to 50 only if 4,000 credits would remain."""
+        state = load("state.json", {})
+        if fingerprinted() < CHECKPOINT and "checkpoint" not in state:
+            return TARGET
+        if "checkpoint" not in state:
+            spent = budget.spent()
+            per_event = spent / fingerprinted()
+            projected = spent + per_event * (TARGET - fingerprinted()) + OUTCOME_CREDITS * TARGET
+            left = state["start_balance"] - projected
+            rows = [s["features"] for s in scored.values() if s["features"]]
+            state["checkpoint"] = {"fingerprinted": fingerprinted(), "spent": spent,
+                                   "credits_per_event": round(per_event, 1),
+                                   "projected_spend_for_50": round(projected),
+                                   "projected_left": round(left), "continue_to_50": left >= RESERVE_AFTER,
+                                   "feature_rho": mt.select_features(rows)[1],
+                                   "at": dt.datetime.now(dt.timezone.utc).isoformat()}
+            save("state.json", state)
+            print("Checkpoint:", state["checkpoint"])
+        return TARGET if state["checkpoint"]["continue_to_50"] else CHECKPOINT
+
     for rnd in range(1, ROUNDS + 1):
         for date in DATES:
-            if fingerprinted() >= TARGET:
-                return finish("target reached")
+            if fingerprinted() >= target():
+                return finish("target reached" if target() == TARGET else "checkpoint: frozen at 30 on cost")
             rec = dates.setdefault(date, {"checked": []})
             found = [r for r in rec["checked"] if r["result"] == "event"]
             if len(found) < rnd:
@@ -246,7 +273,7 @@ def outcomes(c, budget):
         rec["fetched_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
         return s["token"], rec
 
-    if not budget.ok(CAP, 8 * len(jobs)):
+    if not budget.ok(CAP, OUTCOME_CREDITS * len(jobs)):
         sys.exit("STOP: outcomes would pass the budget cap.")
     with ThreadPoolExecutor(8) as pool:
         for token, rec in pool.map(job, jobs):
@@ -269,6 +296,10 @@ def build():
     scored = load("scored.json", {})
     got = load("outcomes.json", {})
     state = load("state.json", {})
+    done = state.get("collection_done")
+    if not done:
+        sys.exit("Collection has not finished.")
+    only = done["features_used"]
     events, no_base = [], 0
     for s in sorted(scored.values(), key=lambda s: (s["date"], s["t0"])):
         o = got.get(s["token"])
@@ -286,34 +317,42 @@ def build():
             out[name + "_no_trades"] = not p
         events.append({"date": s["date"], "token": s["token"], "symbol": s["symbol"],
                        "deployment": s["deployment"], "t0": s["t0"], "buyers": s["buyers"],
-                       "scoreable_buyers": s["scoreable"],
+                       "scoreable_buyers": s["features"]["scoreable_buyers"],
+                       "top_buyers": s["features"]["top_buyers"],
                        "features": {k: round(v, 4) for k, v in s["features"].items()},
                        "outcomes": out, "fetched_at": o["fetched_at"]})
     if len(events) < MIN_EVENTS:
-        print(f"Only {len(events)} events with a fingerprint and outcomes; the minimum is {MIN_EVENTS}. Stopping.")
-    stats = mt.scale(events) if len(events) > 1 else {}
-    nearest = sorted(mt.neighbours(e["features"], events, stats, k=1, skip=lambda x, e=e: x is e)[0][0]
-                     for e in events) if len(events) > 1 else []
-    terciles = [nearest[len(nearest) // 3], nearest[2 * len(nearest) // 3]] if nearest else [0, 0]
+        sys.exit(f"Only {len(events)} events with a fingerprint and outcomes; the minimum is {MIN_EVENTS}. "
+                 "Matching does not ship. Report to the user.")
+    nearest = mt.loo_nearest_distances(events, only)
     corpus = {"source": "docs/CORPUS_PLAN.md", "built_at": dt.datetime.now(dt.timezone.utc).isoformat(),
-              "collection": state.get("collection_done"), "events_without_base_price": no_base,
-              "scale": stats, "distance_terciles": terciles, "events": events,
-              "backtest": (mt.load_corpus() or {}).get("backtest")}
+              "collection": done, "checkpoint": state.get("checkpoint"),
+              "events_without_base_price": no_base, "features_used": only,
+              "scale": mt.scale(events, only),
+              "distance_thresholds": {"median": statistics.median(nearest),
+                                      "p95": statistics.quantiles(nearest, n=20)[-1]},
+              "events": events, "backtest": (mt.load_corpus() or {}).get("backtest")}
     mt.CORPUS_FILE.write_text(json.dumps(corpus, indent=2))
-    print(f"Wrote {mt.CORPUS_FILE} with {len(events)} events.")
+    print(f"Wrote {mt.CORPUS_FILE} with {len(events)} events, features {only}.")
 
 
-def backtest(events, stats, outcome, only=mt.FEATURES):
-    """Spearman correlation of each event's outcome with its 3 nearest other-date events' mean outcome."""
-    lists = [[e2 for _, e2 in mt.neighbours(e["features"], events, stats,
-                                            skip=lambda x, e=e: x["date"] == e["date"], only=only)]
-             for e in events]
+def backtest(events, outcome, only):
+    """Leave one out: each event's outcome against the mean outcome of its 3 nearest events.
+
+    The scale is learned without the held-out event, and neighbours within 7 days of its
+    sample date are excluded. Neighbour lists stay fixed while outcomes are shuffled.
+    """
     idx = {id(e): i for i, e in enumerate(events)}
-    nb = [[idx[id(x)] for x in lst] for lst in lists]
+    nb = []
+    for e in events:
+        day = dt.date.fromisoformat(e["date"])
+        rest = [x for x in events if abs((dt.date.fromisoformat(x["date"]) - day).days) > EXCLUDE_DAYS]
+        rest_scale = mt.scale([x for x in events if x is not e], only)
+        nb.append([idx[id(x)] for _, x in mt.neighbours(e["features"], rest, rest_scale, only)])
     y = [e["outcomes"][outcome] for e in events]
 
     def stat(vals):
-        return d3.spearman(vals, [statistics.mean(vals[j] for j in js) for js in nb])
+        return mt.spearman(vals, [statistics.mean(vals[j] for j in js) for js in nb])
 
     real = stat(y)
     rng = random.Random(SEED)
@@ -328,17 +367,17 @@ def analyze():
     corpus = mt.load_corpus()
     if not corpus or len(corpus["events"]) < MIN_EVENTS:
         sys.exit("Build a corpus with at least 30 events first.")
-    events, stats = corpus["events"], corpus["scale"]
-    rho, pct = backtest(events, stats, "ret24h")
+    events, only = corpus["events"], corpus["features_used"]
+    rho, pct = backtest(events, "ret24h", only)
     verdict = "SIGNAL" if rho > 0 and pct >= 0.95 else "NO SIGNAL SHOWN"
     print(f"Primary ret24h: rho={rho:.3f} percentile={pct:.1%} events={len(events)} -> {verdict}")
     reported = {}
     for o in ("ret6h", "ret7d"):
-        r, p = backtest(events, stats, o)
+        r, p = backtest(events, o, only)
         reported[o] = {"rho": round(r, 3), "percentile": round(p, 3)}
         print(f"Reported {o}: rho={r:.3f} percentile={p:.1%}")
-    for f in mt.FEATURES:
-        r, p = backtest(events, stats, "ret24h", only=(f,))
+    for f in only:
+        r, p = backtest(events, "ret24h", (f,))
         reported[f"ret24h_{f}_only"] = {"rho": round(r, 3), "percentile": round(p, 3)}
         print(f"Reported ret24h, {f} only: rho={r:.3f} percentile={p:.1%}")
     winners = sum(1 for e in events if e["outcomes"]["ret24h_pct"] > 0)

@@ -1,7 +1,18 @@
-# Déjà View corpus and matching: rules for review
+# Déjà View corpus and matching: frozen rules
 
-**Version:** 1, draft 2026-09-14. **Status:** not frozen. No corpus data has been fetched.
-**Author:** Claude Code. **To review:** Codex. **To approve:** the user.
+**Version:** 2, 2026-09-14. **Status:** frozen at 2026-09-14T17:45:53Z, before any corpus request.
+**Author:** Claude Code. **Reviewed by:** Codex. **Approved by:** the user.
+
+## Changes from version 1 after Codex review
+
+| # | Change | Reason |
+|---|---|---|
+| 1 | Collection pauses at 30 fingerprinted events for a cost-only checkpoint. It continues to 50 only if 4,000 credits would remain. | 50 events could cost most of the balance. The decision uses cost, not results. |
+| 2 | The backtest excludes neighbours with sample dates within 7 days, not only the same date. | Sample dates are 3 to 4 days apart, and one market week can make both fingerprints and outcomes alike. |
+| 3 | Before outcomes, drop any feature with an absolute Spearman correlation above 0.80 against a higher-priority feature. | Persistence can depend on entry speed. Redundant features would count twice. |
+| 4 | Actor quality uses the underlying shrunk Reflex, weighted by the square root of buy USD. | The percentile depends on 37 reference buyers, and raw USD weights let one large buyer dominate. |
+| 5 | A launch whose nearest match is farther than the 95th percentile of corpus nearest-neighbour distances gets "We haven't seen this one before." | A nearest-neighbour search always returns something, even when nothing is close. |
+| 6 | The backtest learns the scale without the held-out event. | The test is then fully leave one out. |
 
 This document fixes how Déjà View builds its library of past launches, how it describes each launch,
 how it finds similar past launches, and how it checks whether those matches mean anything. The rules
@@ -22,7 +33,7 @@ It shows observed past cases, winners and losers. It never shows a probability.
 | Decision point | T0 + 1 hour. Every fingerprint feature is known at this time. |
 | Buyer | A wallet with buys of at least $500 from deployment to T0 + 1 hour, after the label and 25-buy filters |
 | Top buyers | The 8 buyers with the largest total buy USD (the live scan's rule) |
-| Launch Reflex | The live scan's score for a buyer, a percentile from 0 to 100, computed only from trades before T0 |
+| Launch Reflex | The live scan's score for a buyer, computed only from trades before T0. The underlying value is the shrunk mean `mfe60`. The screen shows it as a percentile of the D3 reference buyers. |
 | Scoreable buyer | A top buyer with at least 3 priced prior launch entries (the live scan's rule) |
 | Event | One sampled launch |
 | Corpus | The library of events with a fingerprint and outcomes |
@@ -57,7 +68,7 @@ the corpus evenly across dates if the stop rule ends collection early. Each date
 candidates in total. Each event is fingerprinted as soon as it is selected, before the next date.
 
 **Stop rule.** Stop as soon as 50 events have a fingerprint, or when the budget stop in "Budget" applies,
-or when all 3 rounds finish. If collection stops inside a round, then later dates in that round have one
+or when the checkpoint at 30 events stops collection, or when all 3 rounds finish. If collection stops inside a round, then later dates in that round have one
 fewer event. The count per date is reported.
 
 **API failures.** Retry a failed request up to 3 times. If a candidate still fails, then record it as
@@ -75,8 +86,8 @@ events and live scans use the same functions, so the features mean the same thin
 
 | Feature | Definition |
 |---|---|
-| **Actor quality** | Mean Launch Reflex of scoreable top buyers, weighted by each buyer's first-hour buy USD |
-| **Entry speed** | Median minutes from T0 to the first buy of scoreable top buyers with Launch Reflex of 50 or more, clipped to 0 to 60. If there are none, then 60. |
+| **Actor quality** | Mean underlying Launch Reflex of scoreable top buyers, weighted by the square root of each buyer's first-hour buy USD |
+| **Entry speed** | Median minutes from T0 to the first buy of strong buyers, clipped to 0 to 60. A strong buyer is a scoreable top buyer whose underlying Launch Reflex is above the median D3 reference buyer. If there are none, then 60. |
 | **Persistence** | Share of the top buyers' first-hour buy USD that falls in windows after each buyer's first window |
 | **Concentration** | Share of all buyers' first-hour buy USD that comes from the 3 largest buyers |
 
@@ -88,8 +99,26 @@ similar launches."
 
 - Entry speed uses 60 when no strong buyer arrives, because "no strong buyer in the first hour" is the
   slowest possible arrival. A buyer who entered before T0 counts as 0 minutes.
-- Launch Reflex of 50 means the buyer ranks above half of the D3 reference buyers.
+- A strong buyer is one whose displayed Launch Reflex is 50 or more. Matching uses the underlying value.
+- Matching never uses the displayed percentile.
 - Persistence ignores buyers outside the top 8, so a burst of late small buyers does not inflate the value.
+
+**Checkpoint at 30 fingerprinted events, before any outcome:**
+
+1. Credits per event = corpus spend so far ÷ fingerprinted events.
+2. Projected spend = spend so far + credits per event × 20 + 8 credits × 50 for outcomes.
+3. If the start balance minus projected spend is at least 4,000, then continue to 50. Otherwise, stop at 30.
+
+The checkpoint also reports the feature correlations. It uses no outcome data.
+
+**Feature redundancy, when Stage 2 stops and before any outcome:**
+
+1. Priority order: actor quality, entry speed, concentration, persistence.
+2. Compute Spearman correlations between features across all fingerprinted events.
+3. Walk the features in priority order. Keep a feature unless its absolute correlation with an already kept
+   feature is above 0.80.
+4. Matching, the backtest, and the screen's "matched on" lines use only the kept features. The screen still
+   shows all four values.
 
 ## Stage 3: outcomes
 
@@ -119,14 +148,20 @@ better than it is.
 
 ## Matching
 
-1. Standardize each feature with the corpus mean and standard deviation.
-2. Distance is Euclidean over the 4 standardized features, with equal weights.
+1. Standardize each kept feature with the corpus mean and standard deviation.
+2. Distance is Euclidean over the standardized kept features, with equal weights.
 3. Show the 3 nearest corpus events, nearest first. Each card shows the features that matched closest,
    and the outcome at 6 h, 24 h, and 7 d.
 4. If all 3 are winners, or if all 3 are losers, then add a fourth card: the nearest event with the other
    result, labeled "Nearest counter-example".
 5. Never exclude the event being scanned by outcome. Exclude it only when it is itself a corpus token.
 6. A live launch gets matching only after its decision point.
+7. **Closeness.** For each corpus event, compute its distance to its nearest other event, with the scale
+   learned without it. A match at or below the median of those distances is "close". A match at or below
+   the 95th percentile is "moderate". A farther match is "distant".
+8. **Not seen before.** If the nearest match is distant, then the screen says "We haven't seen this one
+   before. No close historical analogue yet." It shows the nearest launches below that, for context only.
+9. Each card shows how many of the top buyers were scoreable, for both the live launch and the past launch.
 
 ## Backtest: do nearby launches share outcomes?
 
@@ -134,9 +169,10 @@ better than it is.
 
 **Method, leave one out.** For each corpus event:
 
-1. Find its 3 nearest other events, excluding events from the same sample date. Same-date launches share
-   market conditions, which would inflate the result.
-2. Take the mean `ret24h` of those 3 events.
+1. Learn the mean and standard deviation of each kept feature from the other events only.
+2. Find its 3 nearest events, excluding events whose sample date is within 7 days of its own. Launches from
+   the same market week share conditions, which would inflate the result.
+3. Take the mean `ret24h` of those 3 events.
 
 **Statistic:** Spearman correlation across events between each event's own `ret24h` and its neighbours'
 mean `ret24h`.
@@ -144,7 +180,9 @@ mean `ret24h`.
 **Null:** keep every neighbour list fixed. Shuffle `ret24h` values across events, 5,000 times, seed
 20260914. Recompute the statistic each time. The percentile is the share of shuffles with a lower statistic.
 
-**Reported only:** the same test for `ret6h` and `ret7d`, and the test for each single feature alone.
+**Reported only:** the same test for `ret6h` and `ret7d`, and the test for each kept feature alone.
+
+The live product matches against the whole corpus. The 7-day exclusion applies to the backtest only.
 
 | Verdict | Rule | What Déjà View may say |
 |---|---|---|
@@ -168,7 +206,7 @@ Both verdicts ship the matching screen. Neither verdict allows a probability.
 | **Total** | **About 11,000 to 14,000** |
 
 **Hard cap:** 12,000 credits from the start balance, enforced in code. Stage 2 stops when its spend
-reaches 11,400, which keeps 600 for Stage 3.
+reaches 11,400, which keeps 600 for Stage 3. The checkpoint at 30 events can stop collection earlier.
 
 **If the cap stops Stage 2 before 50 events:** the user may buy credits and raise the cap. Because no
 outcome data exists at that point, raising the cap is not a rule change. It is logged as an amendment.
@@ -188,26 +226,11 @@ addresses and no raw trades. Raw responses stay in `spike_out/corpus/`, which gi
 scan also uses. Before collection, `corpus.py` copies D3 wallet histories into the scan's history cache.
 D3 fetched the same 30-day windows before the same T0, so the copy changes cost, not results.
 
-## Questions for the reviewer
-
-These are the judgement calls in this draft. Each has a reason above.
-
-1. Returns start at the decision point, T0 + 1 h, not at T0 as the brief said.
-2. Entry speed uses 60 minutes when no buyer has Launch Reflex of 50 or more.
-3. The fingerprint needs at least 3 scoreable top buyers.
-4. Up to 3 events per date across 20 dates, instead of more dates with 1 event each. This choice reuses
-   cached screener results and T0 lookups.
-5. The counter-example card appears only when the 3 nearest events all have the same 24 h result.
-6. The backtest excludes same-date neighbours, and it keeps neighbour lists fixed while it shuffles outcomes.
-7. The backtest is not a gate on shipping. It controls only the wording.
-8. The budget cap is 12,000 credits of about 16,200, which leaves about 4,000 for the demo and checks.
-
 ## Known limits
 
 1. Pump.fun only, and the dates run from 2026-06-10 to 2026-08-15. Market conditions in September can differ.
 2. Launch Reflex percentiles come from the 37 D3 reference buyers. Some corpus buyers are those same buyers.
    This affects the scale of actor quality, not its order.
-3. Up to 3 events per date share market conditions. The backtest excludes same-date neighbours for this reason.
-4. Fifty events is a small corpus. The nearest analogue can still be far away. The screen shows the distance
-   as "close", "moderate", or "distant", using the corpus's own distance terciles.
+3. Up to 3 events per date share market conditions. The backtest excludes neighbours within 7 days for this reason.
+4. A corpus of 30 to 50 events is small. The "not seen before" rule covers launches unlike any of them.
 5. Nansen can restate historical data.

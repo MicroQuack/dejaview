@@ -506,3 +506,15 @@ from cache. No actor was lost to API failure.
   capped log returns; point-in-time cutoff at the event's T0.
 - Limits to state in the README: pump.fun only, moderate effect size, opportunity rather than profit,
   shallow history for high-frequency wallets.
+
+## Déjà View corpus and matching — frozen
+
+Rules: `docs/CORPUS_PLAN.md` version 2, after Codex review and user approval. Frozen at 2026-09-14T17:45:53Z,
+file SHA-256 prefix `425b13f45be8d633`, before any corpus request. The rules do not change after data arrives.
+
+Codex review changes: a cost-only checkpoint at 30 events, a 7-day neighbour exclusion in the backtest,
+a redundancy check that drops features correlated above 0.80 before outcomes, actor quality from the
+underlying Reflex with square-root USD weights, a "not seen before" rule at the 95th percentile of corpus
+nearest-neighbour distances, and a fully leave-one-out scale in the backtest.
+
+Corpus start balance: about 16,236 credits. Hard cap: 12,000.

@@ -13,7 +13,6 @@ Test D3):
 - Point in time: only trades and outcomes known before the event's T0 count.
 """
 
-import bisect
 import datetime as dt
 import json
 import math
@@ -26,7 +25,7 @@ import matching as mt
 from nansen_client import OUT, NansenClient, rows, utc
 
 ROOT = Path(__file__).resolve().parent
-REFERENCE = json.loads((ROOT / "data" / "reflex_reference.json").read_text())
+REFERENCE = mt.REFERENCE
 LN10 = math.log(10)
 MIN_BUY_USD = 500
 MAX_BUYERS = 8
@@ -41,9 +40,7 @@ def capped_log(a, b):
     return max(-LN10, min(LN10, math.log(a / b))) if a and b else None
 
 
-def percentile(shrunk):
-    ref = REFERENCE["shrunk_mean_mfe60"]
-    return round(100 * bisect.bisect_left(ref, shrunk) / len(ref))
+percentile = mt.percentile
 
 
 def describe(pct):
@@ -221,7 +218,7 @@ class Scanner:
         pct = percentile(shrunk)
         step = math.ceil(100 / len(REFERENCE["shrunk_mean_mfe60"]))  # finest rank the reference supports
         rank = f"TOP {max(step, 100 - pct)}%" if pct >= 50 else f"BOTTOM {max(step, pct)}%"
-        return {**result, "scoreable": True, "reflex": pct, "rank_label": rank,
+        return {**result, "scoreable": True, "reflex": pct, "reflex_raw": shrunk, "rank_label": rank,
                 "confidence": conf, "prior_launch_entries": n,
                 "runner_rate": sum(s["reached_2x"] for s in scored) / n,
                 "failed_launch_rate": sum(s["failed_launch"] for s in scored) / n,
@@ -263,7 +260,7 @@ class Scanner:
         """Fingerprint the launch and find similar past launches (docs/CORPUS_PLAN.md)."""
         self.emit("stage", key="match", text="Searching history")
         corpus = mt.load_corpus()
-        out = {"fingerprint": None, "analogues": [], "reason": None,
+        out = {"fingerprint": None, "analogues": [], "seen_before": None, "reason": None,
                "backtest": (corpus or {}).get("backtest")}
         if not event["first_hour_complete"]:
             out["reason"] = "Similar launches appear one hour after the launch moment, when the first hour is complete."
@@ -274,8 +271,9 @@ class Scanner:
             if out["fingerprint"] and not (corpus and corpus.get("events")):
                 out["reason"] = "The library of past launches has not been built yet."
             elif out["fingerprint"]:
-                out["analogues"] = mt.analogues(out["fingerprint"], token, corpus)
-                out["corpus_events"] = len(corpus["events"])
+                found = mt.analogues(out["fingerprint"], token, corpus)
+                out.update(analogues=found["cards"], seen_before=found["seen_before"],
+                           corpus_events=len(corpus["events"]))
         self.emit("deja_view", **out)
         return out
 
@@ -303,9 +301,12 @@ if __name__ == "__main__":
                 print(head + f"not scoreable: {data['reason']}")
         elif kind == "deja_view":
             if data["fingerprint"]:
-                print("fingerprint: " + ", ".join(mt.describe_feature(f, v) for f, v in data["fingerprint"].items()))
+                print("fingerprint: " + ", ".join(mt.describe_feature(f, data["fingerprint"]) for f in mt.FEATURES)
+                      + f" ({data['fingerprint']['scoreable_buyers']} known buyers)")
             if data["reason"]:
                 print(f"similar launches: {data['reason']}")
+            if data["seen_before"] is False:
+                print("We haven't seen this one before. No close historical analogue yet; nearest shown for context.")
             for a in data["analogues"]:
                 o = a["outcomes"]
                 print(f"  {'counter-example ' if a['counter_example'] else ''}{a['symbol']} {a['date']} "

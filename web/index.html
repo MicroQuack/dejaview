@@ -170,8 +170,9 @@ const FEATURES = [
   ["persistence", "Persistence", "Buying that came after each buyer's first window"],
   ["concentration", "Concentration", "Share of buying from the top 3 buyers"],
 ];
-function featureText(k, v) {
-  if (k === "actor_quality") return `Reflex ${Math.round(v)}`;
+function featureText(k, fp) {
+  const v = fp[k];
+  if (k === "actor_quality") return `Reflex ${fp.actor_quality_pct}`;
   if (k === "entry_speed") return v >= 60 ? "No strong buyer in 1h" : `By ${Math.round(v)} min`;
   return pct(v);
 }
@@ -184,7 +185,7 @@ function analogueCard(a) {
   return `<div class="card analogue">
     <div class="top"><span class="sym">${esc(a.symbol)}</span><span class="tag ${a.counter_example ? "counter" : ""}">
       ${a.counter_example ? "NEAREST COUNTER-EXAMPLE" : a.closeness.toUpperCase() + " MATCH"}</span></div>
-    <div class="buy">Launched ${a.date}</div>
+    <div class="buy">Launched ${a.date} · ${a.scoreable_buyers} of ${a.top_buyers} top buyers known</div>
     <div class="outs"><div><span class="tag">+6H</span>${ret(o.ret6h_pct, o.ret6h_no_trades)}</div>
       <div><span class="tag">+24H</span>${ret(o.ret24h_pct, o.ret24h_no_trades)}</div>
       <div><span class="tag">+7D</span>${ret(o.ret7d_pct, o.ret7d_no_trades)}</div></div>
@@ -193,12 +194,15 @@ function analogueCard(a) {
   </div>`;
 }
 function deja(d) {
-  let html = `<h2>We've seen this before.</h2>`;
+  const unseen = d.seen_before === false;
+  let html = `<h2>${unseen ? "We haven't seen this one before." : "We've seen this before."}</h2>`;
   if (d.fingerprint) {
-    html += `<p class="sub">The first-hour buying pattern of this launch</p><div class="fp">` +
+    html += `<p class="sub">The first-hour buying pattern of this launch, from ${d.fingerprint.scoreable_buyers} of
+      ${d.fingerprint.top_buyers} top buyers with a known launch record</p><div class="fp">` +
       FEATURES.map(([k, name, hint]) => `<div class="tile"><div class="label">${name.toUpperCase()}</div>
-        <div class="v">${featureText(k, d.fingerprint[k])}</div><div class="buy">${hint}</div></div>`).join("") + `</div>`;
+        <div class="v">${featureText(k, d.fingerprint)}</div><div class="buy">${hint}</div></div>`).join("") + `</div>`;
   }
+  if (unseen) html += `<p class="sub">No close historical analogue yet. The nearest past launches are shown for context only.</p>`;
   if (d.analogues.length) {
     const verdict = d.backtest && d.backtest.verdict;
     const bt = verdict === "SIGNAL"
