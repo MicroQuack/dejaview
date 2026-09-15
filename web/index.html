@@ -50,8 +50,6 @@
   .examples { margin-top: 12px; font-size: 13px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
   .chip { all: unset; cursor: pointer; color: var(--now); font: 12px var(--mono); border-bottom: 1px dashed rgba(54,230,245,.45); }
   .chip:focus-visible { outline: 2px solid var(--now); }
-  .graffiti { font: 34px/1 var(--hand); color: rgba(196,107,255,.55); transform: rotate(-8deg); margin: 44px 0 0 6px; max-width: 260px;
-              text-shadow: 0 0 14px rgba(196,107,255,.35); }
   .error { margin-top: 16px; padding: 10px 14px; border-left: 3px solid var(--gold); background: rgba(245,197,66,.08); max-width: 560px; font-size: 14px; }
   .error:empty { display: none; }
   .scene { position: relative; margin-right: -24px; min-height: 520px; overflow: hidden; background: linear-gradient(#1a0f33, #0a0a16 77%, #07070f 77%); }
@@ -61,14 +59,16 @@
   .party { position: absolute; left: 18px; top: 16px; padding: 7px 14px; border-radius: 6px; background: rgba(10,8,22,.72); border: 1px solid rgba(196,107,255,.45);
            backdrop-filter: blur(6px); font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
   .party span { font: 900 22px/1 var(--display); letter-spacing: .02em; color: #ffd8ff; margin-right: 6px; text-shadow: 0 0 12px rgba(196,107,255,.8); vertical-align: -2px; }
-  .lineup { position: absolute; left: 18px; right: 18px; bottom: 18px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; align-items: end; }
+  .lineup { position: absolute; left: 18px; right: 17%; bottom: 18px; display: flex; flex-direction: row-reverse; gap: 8px; align-items: flex-end; }
+  .lineup .guest { flex: 0 0 calc((100% - 7 * 8px) / 8); }
   .guest { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 2px solid rgba(236,238,250,.14);
            background: linear-gradient(180deg, #2a1650, #0e0c1e); transition: transform .35s, border-color .35s, box-shadow .35s; }
   .guest > img, .guest > svg:not(.crown) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
   .guest .crown { position: absolute; top: 5px; left: 6px; width: 24px; height: 15px; filter: drop-shadow(0 0 4px rgba(245,197,66,.8)); }
   .guest .tag { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 4px 6px; text-align: center; font: 600 10px/1.2 var(--mono); color: var(--dim);
                 background: linear-gradient(180deg, transparent, rgba(7,8,15,.94) 55%); }
-  .guest .tag b { font-size: 12px; }
+  .guest .tag small { display: block; font: 600 9px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+  .guest .tag b { display: block; font: 900 20px/1 var(--display); }
   .guest.waiting { border-style: dashed; border-color: rgba(236,238,250,.1); background: rgba(14,12,30,.55); }
   .guest.waiting > img, .guest.waiting > svg { filter: brightness(0); opacity: .45; }
   .guest.pending .tag { color: var(--text); }
@@ -77,15 +77,21 @@
   .guest.strong { border-color: var(--now); box-shadow: 0 0 16px rgba(54,230,245,.35); } .guest.strong .tag { color: var(--now); }
   .guest.vip { border-color: var(--gold); box-shadow: 0 0 22px rgba(245,197,66,.5); } .guest.vip .tag { color: var(--gold); }
   .guest.focus { transform: translateY(-10px); }
-  .guest.arrive { animation: arrive .7s cubic-bezier(.2,.8,.2,1) both; }
+  .guest.arrive { animation: arrive .8s cubic-bezier(.2,.8,.2,1) both; }
+  .guest.focus:not(.arrive) .tag { animation: stamp .45s cubic-bezier(.2,1.6,.4,1) both; }
+  @keyframes stamp { from { transform: scale(1.6); opacity: 0; } }
   .guest.arrive > img { animation: lights-up .9s ease-out both; }
-  @keyframes arrive { from { transform: translate(-28px, 0); opacity: .3; } }
+  @keyframes arrive { from { transform: translate(-70px, -10px) scale(.92); opacity: 0; } }
   @keyframes lights-up { from { filter: brightness(0); } }
   .guest.vip { animation: vip-glow 2.4s ease-in-out infinite; }
   @keyframes vip-glow { 50% { box-shadow: 0 0 34px rgba(245,197,66,.8); } }
   .guest.echo { outline: 2px solid var(--then); outline-offset: 2px; }
+  .lineup.finale .guest.echo { animation: echo-pulse 1.8s ease-in-out infinite; }
+  @keyframes echo-pulse { 50% { transform: translateY(-6px); box-shadow: 0 0 30px rgba(196,107,255,.85); } }
+  .guest.dim { opacity: .4; filter: saturate(.35); animation: none; box-shadow: none; }
   .echo-tag { position: absolute; top: 5px; right: 5px; max-width: calc(100% - 10px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
               padding: 2px 5px; border-radius: 4px; background: rgba(40,14,70,.9); color: #efd9ff; font: 600 9px var(--mono); }
+  .guest.vip .echo-tag { max-width: calc(100% - 36px); }
   .bouncer { position: absolute; right: 1%; bottom: 0; height: 64%; }
   .bouncer img { width: 100%; height: 100%; display: block; }
   .says { position: absolute; right: 62%; top: 9%; white-space: nowrap; padding: 7px 13px; border-radius: 18px; background: rgba(10,6,20,.88);
@@ -168,7 +174,7 @@
   .echo-feature > svg { width: 76px; height: 76px; }
   .echo-feature .sym { font: 800 26px/1 var(--display); color: var(--then); text-transform: uppercase; overflow-wrap: anywhere; }
   .echo-feature .line { font-size: 13.5px; margin: 4px 0; }
-  .move { font: 900 34px/1 var(--display); }
+  .move { font: 900 24px/1 var(--display); }
   .move small { display: block; font: 11px var(--mono); color: var(--dim); margin-top: 4px; }
   .echo-row { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; width: 100%;
               padding: 9px 4px; border-bottom: 1px solid var(--rule); }
@@ -222,9 +228,9 @@
     .hero { grid-template-columns: 1fr; }
     .scene { margin: 0 -24px; min-height: 380px; }
     .scene.art { min-height: 380px; }
-    .lineup { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .lineup { flex-wrap: wrap; right: 18px; }
+    .lineup .guest { flex-basis: calc((100% - 3 * 8px) / 4); }
     .hero-copy { padding-bottom: 0; }
-    .graffiti { display: none; }
     .panels { grid-template-columns: 1fr; }
     .controls { grid-template-columns: auto 1fr; }
     .buyers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -248,7 +254,6 @@
       </form>
       <div class="examples" id="examples"></div>
       <div class="error" id="error" role="alert"></div>
-      <p class="graffiti" aria-hidden="true">Memes bring people back</p>
     </div>
     <div class="scene" id="scene" role="img" aria-label="The launch party: the biggest first-hour buyers queue at the door"></div>
   </section>
@@ -312,7 +317,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const STRONG = 60, VIP = 95, REPLAY_SECONDS = 20;
+const STRONG = 60, VIP = 95, REPLAY_SECONDS = 20, HOLD_MS = 1500;
 let es = null, S = null, raf = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
@@ -446,12 +451,13 @@ function coin(symbol, token) {
 const TIER_TAG = {pending: "Checking…", fresh: "New face", known: "Known", strong: "Strong", vip: "VIP"};
 function artScene(symbol, guests, line) {
   const sign = esc(cleanSym(symbol || "").replace(/^\$/, "").toUpperCase().slice(0, 14));
-  const cards = guests.map(g => {
+  const finale = guests.some(g => g.finale && g.echo);
+  const cards = guests.filter(g => !g.hidden).map(g => {
     const art = guestArt(g.seed), state = g.hidden ? "waiting" : g.tier;
     const face = art ? `<img src="art/guests/${art.id}.webp" alt="">` : `<svg viewBox="0 0 100 100">${guestParts(g.seed, {body: true})}</svg>`;
     const tag = g.hidden ? "Not here yet" : g.score !== undefined && (g.tier === "vip" || g.tier === "strong" || g.tier === "known")
-      ? `${TIER_TAG[g.tier]} · <b>${g.score}</b>` : TIER_TAG[g.tier];
-    const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : ""}`;
+      ? `<small>${TIER_TAG[g.tier]}</small><b>${g.score}</b>` : TIER_TAG[g.tier];
+    const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : finale ? " dim" : ""}`;
     return `<div class="${cls}">${face}${g.tier === "vip" && !g.hidden ? `<svg class="crown" viewBox="34 0 32 20">${CROWN}</svg>` : ""}
       ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}<span class="tag">${tag}</span></div>`;
   }).join("");
@@ -459,7 +465,7 @@ function artScene(symbol, guests, line) {
   return `<img class="club" src="${ART.manifest.bg.src}" alt=""><div class="shade"></div>
     <div class="bouncer" style="aspect-ratio:${bouncer.w} / ${bouncer.h}"><img src="${bouncer.src}" alt="">${line ? `<span class="says">${esc(line)}</span>` : ""}</div>
     ${sign ? `<div class="party"><span>$${sign}</span> launch party</div>` : ""}
-    <div class="lineup" style="--n:${Math.max(4, guests.length)}">${cards}</div>`;
+    <div class="lineup${finale ? " finale" : ""}">${cards}</div>`;
 }
 function scene(symbol, guests, line) {
   if (ART.scene) return artScene(symbol, guests, line);
@@ -524,7 +530,7 @@ function drawScene() {
     const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, tier = tierOf(r), here = S.arrived.has(b.wallet);
     const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
     return {seed: b.wallet, tier, hidden: !here, score: r?.scoreable ? r.reflex : undefined, focus: S.focus === b.wallet,
-            echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "",
+            echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "", finale: S.ready && S.now >= 3600,
             label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : "NEW FACE") : "CHECKING THE LIST…"};
   }), bouncerLine()));
 }
@@ -582,18 +588,27 @@ function drawTrack() {
 
 /* ---------- playback ---------- */
 function resetPlayback() {
-  S.now = S.tape ? S.tape.start_s : 0; S.arrived = new Set(); S.resolved = new Set(); S.firedEchoes = []; S.bannerEcho = null; S.focus = null;
+  S.now = S.tape ? S.tape.start_s : 0; S.arrived = new Set(); S.resolved = new Set(); S.firedEchoes = []; S.bannerEcho = null; S.focus = null; S.holdUntil = 0;
+}
+function admit(s, b) {
+  s.arrived.add(b.wallet); s.focus = b.wallet;
+  setTimeout(() => { if (S === s && s.byWallet[b.wallet]) { s.resolved.add(b.wallet); render(); } }, reduced ? 0 : 700 / s.speed);
+}
+/* Jump straight to a replay second, with everyone who arrived by then already checked. Used by the ?at= test hook. */
+function jumpTo(sec) {
+  S.now = Math.min(3600, sec);
+  S.buyers.filter(b => b.entry_delay_s <= S.now).forEach(b => { S.arrived.add(b.wallet); if (S.byWallet[b.wallet]) S.resolved.add(b.wallet); });
+  step(0);
 }
 function step(dt) {
-  const s = S, span = 3600 - s.tape.start_s;
+  const s = S, span = 3600 - s.tape.start_s, t = performance.now();
+  if (t < s.holdUntil) dt = 0;  /* the clock waits while the newest guest is checked at the door */
   s.now = Math.min(3600, s.now + dt * span / REPLAY_SECONDS * s.speed);
-  [...s.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).forEach(b => {
-    if (b.entry_delay_s <= s.now && !s.arrived.has(b.wallet)) {
-      s.arrived.add(b.wallet); s.focus = b.wallet; s.focusUntil = s.now + span * .06;
-      setTimeout(() => { if (S === s && s.byWallet[b.wallet]) { s.resolved.add(b.wallet); render(); } }, reduced ? 0 : 700 / s.speed);
-    }
-  });
-  if (s.focus && s.now > s.focusUntil && s.resolved.has(s.focus)) s.focus = null;
+  if (t >= s.holdUntil) {
+    const next = [...s.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).find(b => !s.arrived.has(b.wallet));
+    if (next && next.entry_delay_s <= s.now) { admit(s, next); s.holdUntil = t + (reduced ? 0 : HOLD_MS / s.speed); }
+    else if (s.focus && s.resolved.has(s.focus)) s.focus = null;
+  }
   (s.echo?.echoes || []).slice(0, 3).forEach(e => {
     const here = e.wallets.filter(w => s.byBuyer[w]);
     if (here.length >= 2 && here.every(w => s.resolved.has(w)) && !s.firedEchoes.includes(e)) { s.firedEchoes.push(e); if (!s.bannerEcho) s.bannerEcho = e; }
@@ -624,8 +639,8 @@ function statusText() {
   if (!S) return "Paste a launch, or pick a replay";
   if (!S.ready) return S.stage;
   if (S.now >= 3600) return S.echo?.echoes?.length ? "Replay complete · echoes found" : "Replay complete";
-  if (S.focus && !S.resolved.has(S.focus)) return "Buyer arrived · checking launch record";
-  if (S.focus) { const t = tierOf(S.byWallet[S.focus]); return t === "vip" ? "VIP detected" : t === "strong" ? "Strong record" : t === "known" ? "Known buyer" : "New face"; }
+  if (S.focus && !S.resolved.has(S.focus)) return `Guest ${S.arrived.size} of ${S.buyers.length} · checking launch record`;
+  if (S.focus) { const t = tierOf(S.byWallet[S.focus]); return `Guest ${S.arrived.size} of ${S.buyers.length} · ${t === "vip" ? "VIP" : t === "strong" ? "strong record" : t === "known" ? "known buyer" : "new face"}`; }
   if (S.bannerEcho) return "Echo detected";
   return S.playing ? "Rewinding the first hour…" : "Paused";
 }
@@ -726,6 +741,7 @@ function render() {
     : `<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1l10 6-10 6z" fill="#eceefa"/></svg>`;
   $("play").setAttribute("aria-label", S && S.playing ? "Pause replay" : "Play replay");
   $("share").disabled = !(S && S.ready && S.now >= 3600 && S.buyers.length);
+  $("share").style.visibility = $("share").disabled ? "hidden" : "visible";
   clipId = 0;
   drawScene(); drawTrack(); renderAnswer(); renderBuyers(); renderEchoes();
 }
@@ -841,7 +857,7 @@ function scan(token, replay) {
       finish(); S.ready = true; resetPlayback(); renderSetups();
       const at = +new URLSearchParams(location.search).get("at");  /* jump to a replay second, for testing */
       if (!S.buyers.length) { $("error").textContent = "No buyers of $500 or more in this launch's first hour."; render(); }
-      else if (at) { step((at - S.tape.start_s) / (3600 - S.tape.start_s) * REPLAY_SECONDS); render(); }
+      else if (at) { jumpTo(at); render(); }
       else play();
       return;
     }
