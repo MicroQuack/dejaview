@@ -90,6 +90,7 @@
   .links { display: inline-flex; gap: 12px; font: 11px var(--mono); }
   .links a { color: var(--dim); text-decoration: none; border-bottom: 1px solid var(--rule); }
   .links a:hover { color: var(--now); border-color: var(--now); }
+  .links a.primary { color: var(--text); border-color: rgba(233,236,245,.35); }
   .warn { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--warn); background: rgba(242,193,78,.08); color: var(--warn); font-size: 14px; }
   .error { margin-top: 24px; padding: 12px 16px; border-left: 3px solid var(--warn); background: rgba(242,193,78,.08); }
   .error:empty { display: none; }
@@ -292,11 +293,11 @@ const day = iso => new Date(iso.length === 10 ? iso + "T00:00:00Z" : iso).toLoca
 const plural = (n, one, many) => n === 1 ? one : many;
 
 function walletLinks(w) {
-  return `<span class="links"><a href="https://app.nansen.ai/profiler?address=${w}&chain=solana" target="_blank" rel="noopener">Nansen</a>
+  return `<span class="links"><a class="primary" href="https://app.nansen.ai/profiler?address=${w}&chain=solana" target="_blank" rel="noopener" title="Open this wallet's full history on Nansen">View on Nansen ↗</a>
     <a href="https://solscan.io/account/${w}" target="_blank" rel="noopener">Solscan</a></span>`;
 }
 function tokenLinks(t) {
-  return `<span class="links"><a href="https://app.nansen.ai/token-god-mode?chain=solana&tokenAddress=${t}" target="_blank" rel="noopener">Nansen</a>
+  return `<span class="links"><a class="primary" href="https://app.nansen.ai/token-god-mode?chain=solana&tokenAddress=${t}" target="_blank" rel="noopener" title="Open this token on Nansen">View on Nansen ↗</a>
     <a href="https://solscan.io/token/${t}" target="_blank" rel="noopener">Solscan</a></span>`;
 }
 
