@@ -33,7 +33,7 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 ## Next steps, in order
 
 1. **Done 2026-09-15: art wired in.** `tools/build_art.py` turns `web/art/raw/` into `web/art/` (WebP plus
-   `manifest.json`). The page uses the painted club, bouncer, 23 guests, and head avatars, and falls back to the
+   `manifest.json`). The page uses the painted club, bouncer, guests, and head avatars, and falls back to the
    code-drawn scene per image. All 24 guests are used, and buyers at one launch always get different faces.
    Raw PNGs are not committed. The user rejected likeness worries about the bouncer and the plant creature: use all art.
 2. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
