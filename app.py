@@ -25,6 +25,7 @@ PUBLIC = os.environ.get("DEJAVIEW_PUBLIC") == "1"
 PORT = int(os.environ.get("PORT") or os.environ.get("DEJAVIEW_PORT", "8420"))
 TOKEN_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")  # Solana base58 address
 STATIC = {"/bg.jpg": "image/jpeg", "/hero.jpg": "image/jpeg"}
+ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|manifest\.json)$")
 SAVED = ROOT / "spike_out" / "scans"
 REPLAY_DIRS = [ROOT / "data" / "replays"] + ([] if PUBLIC else [SAVED])
 
@@ -38,6 +39,13 @@ def client():
         from nansen_client import NansenClient
         _client = NansenClient()
     return _client
+
+
+def art_type(path):
+    """Content type for a built art file (see tools/build_art.py), or None."""
+    if not ART_RE.match(path):
+        return None
+    return "application/json" if path.endswith(".json") else "image/webp"
 
 
 def saved_scan(token):
@@ -81,10 +89,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.scan(query.get("token", [""])[0].strip(), query.get("replay", ["0"])[0] == "1")
         if url.path == "/api/replays":
             return self.send_text(200, json.dumps({"public": PUBLIC, "replays": replay_list()}), "application/json")
-        if url.path in STATIC and (ROOT / "web" / url.path.lstrip("/")).exists():
+        ctype = STATIC.get(url.path) or art_type(url.path)
+        if ctype and (ROOT / "web" / url.path.lstrip("/")).exists():
             data = (ROOT / "web" / url.path.lstrip("/")).read_bytes()
             self.send_response(200)
-            self.send_header("Content-Type", STATIC[url.path])
+            self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "max-age=3600")
             self.end_headers()

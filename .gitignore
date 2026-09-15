@@ -11,3 +11,6 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# Generated source art: rebuild web/art/ with tools/build_art.py
+web/art/raw/*.png
