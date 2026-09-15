@@ -1,51 +1,58 @@
-# Next session: demo, polish, and submission
+# Next session: art assets, polish, demo, submission
 
-**Written:** 2026-09-14, after the corpus and matching were built.
+**Written:** 2026-09-15, end of a long session. Submit by 2026-09-26.
 
 ## Read first
 
-1. `README.md`: what exists, Launch Reflex, and the "we've seen this before" matching.
-2. `spike_results.md`, the last three sections: corpus freeze, collection, and backtest results.
-3. `docs/CORPUS_PLAN.md`: frozen matching rules and Amendment 1.
-4. `docs/DEJA_VIEW_CLAUDE_CODE_MASTER_PLAN.md`, sections 15, 16, 17, 19, and 25: screens, demo, README, schedule, and definition of done.
+1. `docs/FINAL_PLAN.md`: the Launch Rewind decision and schedule. The look has since become the **Launch Party**.
+2. `docs/ART_ASSET_BRIEF.md`: the art the user is generating, and how to wire it in.
+3. `docs/reviews/`: Grok's product review and the competition scan.
+4. `README.md` is out of date. It still describes the old scan page and lookalike matching as the headline.
+
+## What the product is now
+
+**Déjà View: same faces, different launch.** Paste a pump.fun token. The page replays the launch's first hour as a party:
+the 8 biggest buyers queue at the club door in arrival order, each as a generated character. As the replay runs, each buyer
+resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan), known (grey), new face (dashed).
+**Echoes** show earlier launches that two or more of today's buyers were also early on, with violet arcs on the timeline.
 
 ## State
 
 | Item | Status |
 |---|---|
-| Spike | Done. GO. |
-| Launch Reflex scan | Working. Live and replay. |
-| Event fingerprint and matching | Working in the scan, the terminal, and the web page. |
-| Corpus | 31 events in `data/corpus.json`. Backtest verdict SIGNAL (ρ = 0.57), driven mostly by concentration. |
-| Demo recording | Not started |
-| API calls | About 19,500 successful, counted from the log rows. The competition needs 1,000. |
-| Credits | About 4,020 |
-| Deadline | Submit by 2026-09-26 |
+| Launch Reflex scan | Working, validated in D3 |
+| Buy timing, volume tape, echo detection | Working (`reflex.py`: `tape`, `echoes`) |
+| Saved replays | Every finished live scan saves to `spike_out/scans/`. `?replay=1` replays without API calls. |
+| Public mode | `DEJAVIEW_PUBLIC=1` replays from `data/replays/` only. Not deployed. `data/replays/` is empty. |
+| Party page | `web/index.html`: code-drawn scene and characters, replay strip, answer, buyers, echoes, drawers, share card |
+| Test hook | `?token=...&replay=1&at=1500` jumps the replay to a second, for headless screenshots |
+| Lookalike matching | Demoted behind "Similar past setups →" |
+| API usage proof | `tools/api_usage.py`. About 20,000 successful calls. |
+| Credits | About 3,000 |
 
-## What to do next
+## Next steps, in order
 
-1. **Look at the screen in a browser.** The page logic was checked, and the scan stream carries the matching
-   section, but nobody has viewed the new section on screen yet.
-2. **Pick demo launches.** One replay with a clear match and a counter-example, and one live pump.fun launch more
-   than an hour past its launch moment. Corpus tokens are excluded from their own matches.
-3. **Verification command** for API usage (master plan section 13): total and successful requests, endpoint
-   breakdown, credits, and first and last timestamps from `spike_out/calls.jsonl`.
-4. **Clean-clone test:** a fresh clone, setup, and one cold scan in under 10 minutes.
-5. **Recording** that makes sense muted, then README demo link and submission.
+1. **Wire in the art** once the user saves images to `web/art/raw/` (see the brief). Keep the code-drawn fallback.
+2. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
+3. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
+   (the `gh` login works, but no remote exists yet), and give the user the Render dashboard link.
+4. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
+5. **Record the silent demo** (30–45 seconds) and submit.
 
 ## Working agreements with this user
 
-- Replies use the four-line format in the user's global `CLAUDE.md`. Plain words, no jargon.
-- Before a large spend, write the rules down and let the user pass them to Codex for review.
-- Freeze pass rules before fetching outcome data. Log every amendment in `spike_results.md`.
+- Replies use the four-line format in the user's global `CLAUDE.md`. Plain words.
+- Before a large spend, write the rules down and let the user pass them to Codex. Grok runs locally: `~/.grok/bin/grok`,
+  headless with `--prompt-file` and `--permission-mode plan` (read-only; it stops if it wants to run code, so give it the data).
+- Never claim: smart money, proven, profitable, coordinated, insider, predictions, or probabilities. Echoes show repeated
+  behaviour, not connected wallets.
+- No copyrighted meme characters (the mockup used Pepe; the product must not).
+- Port 8420 is Déjà View. Port 8787 belongs to another app. The Déjà View server may already be running under `nohup`.
 - Commit in small steps. Never commit `spike_out/` or `.env`.
-- Port 8787 belongs to another app of the user's. Déjà View uses 8420.
 
 ## Known issues
 
-- Old copies of `app.py` may still be running on port 8420 with pre-matching code. Restart the app to see matching.
-- The running call total in `calls.jsonl` is wrong when two app copies write at once. The verification command must count successful rows, not read the last total.
-- A full cold scan from a fresh clone has not run end to end yet.
+- The replay animation uses `requestAnimationFrame`; headless Chrome renders few frames, so use `&at=` for screenshots.
+- The queue in the scene overlaps when buyers arrive close together.
+- Mobile layout is untested for the party page.
 - Scores can shift on a rescan when an earlier price request failed.
-- The historical screener returns next-day tokens on some dates (2026-08-05, 08-08, 08-15).
-- Many corpus buyers are fresh wallets with no history, so about 1 in 4 sampled events had no fingerprint.
