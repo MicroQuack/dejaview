@@ -59,6 +59,54 @@ def confidence(n):
     return "HIGH" if n >= 16 else "MEDIUM" if n >= 8 else "LOW" if n >= 3 else None
 
 
+def tape(all_buyers, deploy, t0):
+    """Buy USD per minute from deployment to T0 + 1 h, across every filtered buyer, for the replay's volume band."""
+    start = (deploy - t0).total_seconds()
+    minutes = int((3600 - start) // 60) + 1
+    usd = [0] * minutes
+    for b in all_buyers:
+        for sec, amount in b["buy_list"]:
+            i = int((sec - start) // 60)
+            if 0 <= i < minutes:
+                usd[i] += amount
+    return {"start_s": round(start), "minute_usd": usd}
+
+
+def echoes(results, top=6):
+    """Earlier launches that two or more of this launch's top buyers were also early on.
+
+    A launch counts for a wallet when the wallet's first buy passed the launch pre-filter
+    and was at least 6 h before this launch's T0. Moves come from the priced entries used
+    for Launch Reflex, so older or unpriced launches have no move.
+    """
+    holders, moves = {}, {}
+    for r in results:
+        for tok, v in (r.get("_launches") or {}).items():
+            holders.setdefault(tok, []).append((r["wallet"], v))
+        for e in r.get("entries", []):
+            moves.setdefault(e["token"], []).append(e["mfe60"])
+    shared = []
+    for tok, hs in holders.items():
+        if len(hs) < 2:
+            continue
+        mv = moves.get(tok)
+        shared.append({"token": tok, "symbol": hs[0][1]["symbol"], "wallets": [w for w, _ in hs],
+                       "first_buys": sorted(v["at"] for _, v in hs),
+                       "best_move_1h_pct": round(100 * (math.exp(max(mv)) - 1)) if mv else None})
+    shared.sort(key=lambda s: s["first_buys"][-1], reverse=True)  # most recent first, then
+    shared.sort(key=lambda s: (-len(s["wallets"]), s["best_move_1h_pct"] is None))  # biggest groups with a move
+    sets = {r["wallet"]: set(r.get("_launches") or {}) for r in results}
+    ws = [w for w, st in sets.items() if len(st) >= 10]
+    together = []
+    for i, a in enumerate(ws):
+        for b in ws[i + 1:]:
+            both = len(sets[a] & sets[b])
+            if both >= 0.5 * min(len(sets[a]), len(sets[b])):
+                together.append({"wallets": [a, b], "shared": both})
+    return {"shared_launches": len(shared), "largest_group": len(shared[0]["wallets"]) if shared else 0,
+            "echoes": shared[:top], "often_together": together}
+
+
 class Scanner:
     def __init__(self, client=None, progress=None):
         self.c = client or NansenClient()
@@ -120,8 +168,10 @@ class Scanner:
             seen.add(k)
             w = x["trader_address"]
             e = wallets.setdefault(w, {"wallet": w, "usd": 0.0, "buys": 0, "first_buy": x["block_timestamp"],
-                                       "label": x.get("trader_address_label") or "", "window_usd": [0.0] * 4})
+                                       "label": x.get("trader_address_label") or "", "window_usd": [0.0] * 4,
+                                       "buy_list": []})
             usd = float(x.get("estimated_value_usd") or 0)
+            e["buy_list"].append([round((utc(x["block_timestamp"]) - t0).total_seconds()), round(usd)])
             e["usd"] += usd
             e["window_usd"][i] += usd
             e["buys"] += 1
@@ -131,6 +181,7 @@ class Scanner:
         keep.sort(key=lambda e: -e["usd"])
         for e in keep:
             e["entry_delay_s"] = (utc(e["first_buy"]) - t0).total_seconds()
+            e["buy_list"].sort()
         return keep
 
     def first_hour_buyers(self, token, deploy, t0, now):
@@ -207,7 +258,10 @@ class Scanner:
                                "mfe60": capped_log(p["pmax"], p["p0"]),
                                "reached_2x": p["pmax"] >= 2 * p["p0"]})
         n = len(scored)
-        result = {**buyer, "history_trades": len(hist), "launch_candidates": len(cands), "api_failures": failures,
+        launches = {v["prior_token_address"]: {"symbol": v["symbol"], "at": v["wallet_first_buy"]}
+                    for v in ld.first_buys(hist).values()
+                    if ld.plausible_launch(v, now) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff}
+        result = {**buyer, "_launches": launches, "history_trades": len(hist), "launch_candidates": len(cands), "api_failures": failures,
                   "entries": sorted(scored, key=lambda s: s["bought_at"], reverse=True)}
         conf = confidence(n)
         if conf is None:
@@ -240,22 +294,24 @@ class Scanner:
         self.emit("event", **event)
         all_buyers = self.first_hour_buys(token, deploy, t0, now)
         buyers = all_buyers[:MAX_BUYERS]
-        self.emit("buyers", buyers=buyers)
+        self.emit("buyers", buyers=buyers, tape=tape(all_buyers, deploy, t0))
         self.emit("stage", key="history", text="Checking prior launch behaviour")
         results = []
         with ThreadPoolExecutor(4) as pool:
             for res in pool.map(lambda b: self.score_wallet(b, t0), buyers):
                 results.append(res)
-                self.emit("wallet", **res)
+                self.emit("wallet", **{k: v for k, v in res.items() if not k.startswith("_")})
         self.t0_cache.save()
         self.market.save()
         scoreable = [r for r in results if r["scoreable"]]
+        self.emit("echo", **echoes(results))
         deja = self.match(token, event, all_buyers, results)
         summary = {**event, "buyers": len(results), "scoreable": len(scoreable),
                    "above_average": sum(1 for r in scoreable if r["reflex"] >= 60),
                    "api_calls": self.c.successful_calls - calls_start}
         self.emit("done", **summary)
-        return {"event": summary, "wallets": results, "deja_view": deja}
+        return {"event": summary, "wallets": [{k: v for k, v in r.items() if not k.startswith("_")} for r in results],
+                "deja_view": deja}
 
     def match(self, token, event, all_buyers, results):
         """Fingerprint the launch and find similar past launches (docs/CORPUS_PLAN.md)."""
