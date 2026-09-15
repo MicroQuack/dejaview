@@ -18,6 +18,7 @@
     --mono: "Martian Mono", ui-monospace, Menlo, monospace;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body { margin: 0; background: var(--ink); color: var(--text); font: 15px/1.55 var(--body); }
   a { color: inherit; }
   :focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
@@ -47,11 +48,22 @@
            font: 800 20px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
   button:hover { background: #7aeefa; }
   button:disabled { opacity: .35; cursor: default; }
-  .replay { margin-top: 10px; color: var(--dim); font-size: 13px; }
+  .replay { margin-top: 10px; color: var(--dim); font-size: 13px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
   .replay button { all: unset; cursor: pointer; color: var(--now); margin-left: 8px; font: 12px var(--mono);
                    border-bottom: 1px dashed #38e1f266; }
   .replay button:focus-visible { outline: 2px solid var(--now); }
 
+  .guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 30px; }
+  .step { border-top: 2px solid var(--rule); padding-top: 12px; }
+  .step h3 { font: 800 22px/1.1 var(--display); text-transform: uppercase; margin: 0 0 6px; }
+  .step h3 span { color: var(--now); margin-right: 8px; }
+  .step p { margin: 0; color: var(--dim); font-size: 14px; }
+  .step p b { color: var(--text); font-weight: 500; }
+  .guide-note { grid-column: 1 / -1; font-size: 13px; color: var(--dim); margin: 0; }
+  .replay .howto { all: unset; cursor: pointer; order: 2; margin-left: auto; font: 11px var(--mono); color: var(--dim); border-bottom: 1px solid var(--rule); }
+  .replay .howto:focus-visible { outline: 2px solid var(--now); }
+  .tok { color: var(--faint); font-size: 9.5px; margin-left: 6px; }
+  @media (max-width: 760px) { .guide { grid-template-columns: 1fr; } }
   .rail { display: flex; gap: 0; margin: 30px 0 0; padding: 0; list-style: none; font: 10.5px var(--mono);
           letter-spacing: .08em; text-transform: uppercase; color: var(--faint); flex-wrap: wrap; }
   .rail li { padding: 8px 16px 8px 0; margin-right: 16px; border-top: 2px solid var(--rule); flex: 1 1 150px; }
@@ -180,8 +192,20 @@
     <input id="token" aria-label="Solana token address" placeholder="Paste a pump.fun token address" autocomplete="off" spellcheck="false">
     <button id="go">Scan launch</button>
   </form>
-  <div class="replay">Replay a past launch:<button type="button" data-token="9LuwgFQemAoV9rgVBBtwbRSxBmamcRRbysEK8yL2pump">BRAIN · 14 Sep</button><button type="button" data-token="55VWo7QQpqfYwratKUZHhSSnSghyTVCJx54yNoWVpump">PVE · 13 Sep</button></div>
+  <div class="replay"><button type="button" class="howto" id="howto" aria-controls="guide" aria-expanded="true">How to read this</button>Replay a past launch:<button type="button" data-token="9LuwgFQemAoV9rgVBBtwbRSxBmamcRRbysEK8yL2pump">BRAIN · 14 Sep</button><button type="button" data-token="55VWo7QQpqfYwratKUZHhSSnSghyTVCJx54yNoWVpump">PVE · 13 Sep</button></div>
 
+  <section class="guide" id="guide">
+    <div class="step"><h3><span>1</span>Paste a launch</h3>
+      <p>Paste a <b>pump.fun token address</b>. Similar launches appear once the coin is <b>at least an hour past</b> its launch moment,
+        the first time it reached $5,000 of trading.</p></div>
+    <div class="step"><h3><span>2</span>Read the top</h3>
+      <p><b>Similar past launches</b> had first-hour buying that looked like this one. Each card shows what their price did
+        <b>over the next 6 hours, day, and week</b>. If the closest ones mostly fell, that is worth knowing before you buy.</p></div>
+    <div class="step"><h3><span>3</span>Check the buyers</h3>
+      <p><b>Launch Reflex</b> scores each big early buyer on their earlier launch buys. A high score means their past picks often
+        <b>doubled within an hour</b>. Open <b>Nansen</b> on a wallet to see its full history.</p></div>
+    <p class="guide-note">Déjà View shows evidence from past launches. It is not a forecast and it is not advice.</p>
+  </section>
   <ol class="rail" id="rail" hidden></ol>
   <div id="event"></div>
   <section class="deja" id="deja" hidden></section>
@@ -259,10 +283,12 @@ function featureValue(k, f) {
 }
 function featureContext(k, rank) {
   const p = Math.round(rank[k] * 100);
-  if (k === "actor_quality") return `Stronger buyers than ${p}% of past launches`;
-  if (k === "entry_speed") return `Strong buyers arrived faster than ${p}% of past launches`;
-  if (k === "concentration") return `Top 3 buyers' share, higher than ${p}% of past launches`;
-  return `Buying that came back later, higher than ${p}% of past launches`;
+  const vs = (more, less) => p >= 99 ? `${more} than any past launch` : p <= 1 ? `${less} than any past launch`
+    : p >= 50 ? `${more} than ${p}% of past launches` : `${less} than ${100 - p}% of past launches`;
+  if (k === "actor_quality") return vs("Stronger buyers", "Weaker buyers");
+  if (k === "entry_speed") return vs("Strong buyers arrived faster", "Strong buyers arrived slower");
+  if (k === "concentration") return vs("Top 3 buyers hold a bigger share", "Top 3 buyers hold a smaller share");
+  return vs("More buying came back later", "Less buying came back later");
 }
 
 function setStage(key) {
@@ -273,7 +299,7 @@ function setStage(key) {
 function buyerCard(w) {
   const top = `<div class="card-top"><span class="addr">${short(w.wallet)}</span>
     <span class="buy">$${Math.round(w.usd).toLocaleString()} · entered ${mins(w.entry_delay_s)}</span></div>`;
-  const rows = w.entries.map(e => `<tr><td>${esc(e.symbol)}</td><td>${day(e.bought_at)}</td>
+  const rows = w.entries.map(e => `<tr><td>${esc(e.symbol)}<span class="tok">${e.token.slice(0, 4)}</span></td><td>${day(e.bought_at)}</td>
     <td class="r">${Math.exp(e.mfe60).toFixed(1)}×</td><td class="r">${e.failed_launch ? "failed" : ""}</td></tr>`).join("");
   return `<article class="card ${tone(w.reflex)}">${top}
     <div class="score"><span class="num">${w.reflex}</span><div><div class="lab">Launch Reflex · ${w.confidence.toLowerCase()} confidence</div>
@@ -358,6 +384,7 @@ function scan(token) {
   if (es) es.close();
   $("go").disabled = true;
   $("rail").hidden = false;
+  showGuide(false);
   $("event").innerHTML = ""; $("error").textContent = "";
   $("deja").hidden = true; $("buyers").hidden = true; $("unknown").hidden = true;
   $("grid").innerHTML = ""; $("unknown").innerHTML = "";
@@ -404,6 +431,9 @@ function scan(token) {
   };
   es.onerror = () => { if (es && es.readyState !== 2) { $("error").textContent = "The connection to the scan dropped. Scan again."; finish(); } };
 }
+
+function showGuide(on) { $("guide").hidden = !on; $("howto").setAttribute("aria-expanded", on); }
+$("howto").onclick = () => showGuide($("guide").hidden);
 
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
