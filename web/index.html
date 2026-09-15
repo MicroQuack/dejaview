@@ -6,201 +6,187 @@
 <title>Déjà View</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Martian+Mono:wght@400;600&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Martian+Mono:wght@400;600&family=Onest:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
-  /* Colour has one meaning each: cyan is this launch, violet is the past,
-     amber is a warning or counterexample, green and red are price outcomes. */
+  /* Colour meanings: cyan = this launch, violet = seen before, grey = ordinary or new,
+     gold = rare VIP (top 5% Launch Reflex), green and red = price moves only. */
   :root {
-    --ink: #0a0d16; --panel: rgba(17, 22, 36, .82); --rule: rgba(120, 135, 170, .18);
-    --text: #e9ecf5; --dim: #939bb2; --faint: #545d78;
-    --now: #38e1f2; --then: #c86bff; --up: #5fe3a1; --down: #ff6b5e; --warn: #f2c14e;
+    --ink: #07080f; --panel: rgba(14, 16, 32, .88); --panel-2: rgba(22, 24, 46, .9);
+    --rule: rgba(140, 150, 200, .16); --text: #eceefa; --dim: #9aa0bf; --faint: #5a6080;
+    --now: #36e6f5; --then: #c46bff; --gold: #f5c542; --up: #5fe3a1; --down: #ff6464; --rope: #a3173f;
     --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
     --body: Onest, -apple-system, "Segoe UI", sans-serif;
     --mono: "Martian Mono", ui-monospace, Menlo, monospace;
+    --hand: "Permanent Marker", "Comic Sans MS", cursive;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { background: var(--ink); }
-  body { margin: 0; color: var(--text); font: 15px/1.55 var(--body); min-height: 100vh;
-         background: radial-gradient(ellipse 70% 60% at 50% 30%, rgba(10,13,22,.05), rgba(10,13,22,.55) 70%),
-                     linear-gradient(180deg, rgba(10,13,22,.15) 0%, rgba(10,13,22,.45) 45%, rgba(10,13,22,.88) 100%),
-                     url("/bg.jpg") center top / cover no-repeat fixed, var(--ink); }
+  body { margin: 0; color: var(--text); font: 15px/1.5 var(--body); min-height: 100vh;
+         background: radial-gradient(120% 70% at 70% 0%, #1f0f3a 0%, #0d0b1c 45%, var(--ink) 80%); }
   a { color: inherit; }
+  button { font: inherit; color: inherit; }
   :focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 44px 20px 90px; }
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px 80px; }
 
-  /* A brief chromatic echo, once, on brand headings. */
-  .ghost { position: relative; isolation: isolate; }
-  .ghost::before, .ghost::after { content: attr(data-text); position: absolute; inset: 0; z-index: -1;
-    mix-blend-mode: screen; pointer-events: none; animation: echo .9s cubic-bezier(.2,.7,.2,1) both; }
-  .ghost::before { color: var(--then); transform: translate(.028em, .02em); opacity: .9; }
-  .ghost::after { color: var(--now); transform: translate(-.018em, -.012em); opacity: .7; }
-  @keyframes echo { 0% { transform: translate(.18em, .06em); opacity: 0; } 60% { opacity: 1; } }
-
-  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
-  .wordmark { font: 900 clamp(60px, 10vw, 118px)/.84 var(--display); text-transform: uppercase; margin: 0; letter-spacing: -.005em; }
-  .tagline { font: 600 clamp(20px, 2.4vw, 26px)/1.25 var(--body); margin: 18px 0 8px; max-width: 620px; }
-  .tagline em { font-style: normal; color: var(--now); }
-  .lede { color: var(--dim); margin: 0; max-width: 620px; }
-  .powered { font: 11px var(--mono); color: var(--dim); text-decoration: none; white-space: nowrap; }
-  .powered b { color: var(--text); font-weight: 600; }
-
-  form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
-  input { flex: 1 1 420px; min-width: 0; background: rgba(12,16,28,.85); border: 1px solid var(--rule); color: var(--text);
-          padding: 17px 18px; border-radius: 6px; font: 13px var(--mono); backdrop-filter: blur(6px); }
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: minmax(340px, 5fr) 7fr; gap: 12px; align-items: stretch; min-height: 520px; }
+  .hero-copy { padding: 54px 0 30px; position: relative; z-index: 2; }
+  .wordmark { font: 900 clamp(64px, 8.4vw, 124px)/.82 var(--display); text-transform: uppercase; margin: 0; letter-spacing: -.005em;
+              color: #f3eaff; text-shadow: 0 0 18px rgba(196,107,255,.55), 0 0 2px #fff; position: relative; isolation: isolate; }
+  .wordmark::before { content: attr(data-text); position: absolute; inset: 0; z-index: -1; color: var(--then);
+                      transform: translate(.03em, .025em); animation: echo 1s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes echo { from { transform: translate(.2em, .08em); opacity: 0; } }
+  .strap { font: 600 13px var(--mono); letter-spacing: .42em; color: var(--now); margin: 18px 0; text-transform: uppercase; }
+  .lede { font-size: 19px; margin: 0; max-width: 470px; }
+  form { display: flex; gap: 10px; margin-top: 26px; max-width: 560px; flex-wrap: wrap; }
+  input { flex: 1 1 280px; min-width: 0; background: rgba(8,10,22,.9); border: 1px solid var(--rule); color: var(--text);
+          padding: 16px; border-radius: 6px; font: 13px var(--mono); }
   input::placeholder { color: var(--faint); }
-  .go { background: var(--now); color: var(--ink); border: 0; border-radius: 6px; padding: 0 28px; min-height: 54px;
-        font: 800 21px var(--display); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
-  .go:hover { background: #7aeefa; }
-  .go:disabled { opacity: .35; cursor: default; }
-  .below-form { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-top: 10px; color: var(--dim); font-size: 13px; }
-  .chip { all: unset; cursor: pointer; color: var(--now); font: 12px var(--mono); border-bottom: 1px dashed rgba(56,225,242,.4); }
+  .go { background: var(--now); color: #041016; border: 0; border-radius: 6px; padding: 0 24px; min-height: 52px; cursor: pointer;
+        font: 800 19px var(--display); letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 0 24px rgba(54,230,245,.35); }
+  .go:hover { background: #7df0fa; }
+  .go:disabled { opacity: .4; cursor: default; }
+  .examples { margin-top: 12px; font-size: 13px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+  .chip { all: unset; cursor: pointer; color: var(--now); font: 12px var(--mono); border-bottom: 1px dashed rgba(54,230,245,.45); }
   .chip:focus-visible { outline: 2px solid var(--now); }
-  .howto { all: unset; cursor: pointer; margin-left: auto; font: 11px var(--mono); color: var(--dim); border-bottom: 1px solid var(--rule); }
-  .howto:focus-visible { outline: 2px solid var(--now); }
-
-  .guide { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 38px; }
-  .step h3 { font: 600 17px/1.3 var(--body); margin: 0 0 6px; }
-  .step h3 span { font: 800 22px var(--display); color: var(--now); margin-right: 8px; }
-  .step p { margin: 0; color: var(--dim); font-size: 14px; }
-  .step p b { color: var(--text); font-weight: 500; }
-  .guide-note { grid-column: 1 / -1; font-size: 13px; color: var(--faint); margin: 0; }
-
-  /* Scan story */
-  .story { margin-top: 34px; }
-  .rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none;
-          font: 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
-  .rail li { padding-top: 9px; border-top: 2px solid var(--rule); transition: color .3s, border-color .3s; }
-  .rail li.done { color: var(--dim); border-color: var(--now); }
-  .rail li.live { color: var(--text); border-color: var(--then); }
-  .dots { display: flex; gap: 10px; margin-top: 16px; min-height: 16px; align-items: center; flex-wrap: wrap; }
-  .dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--faint); transition: background .3s, border-color .3s;
-         animation: pop .3s ease-out both; }
-  .dot.known { background: var(--dim); border-color: var(--dim); }
-  .dot.strong { background: var(--now); border-color: var(--now); animation: pop .3s ease-out both, ping .7s ease-out .2s 1; }
-  .dot.none { border-style: dashed; }
-  .dots-label { font: 11px var(--mono); color: var(--dim); margin-left: 6px; }
-  @keyframes pop { from { transform: scale(.2); opacity: 0; } }
-  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(56,225,242,.7); } 100% { box-shadow: 0 0 0 12px rgba(56,225,242,0); } }
-
-  .event { display: flex; flex-wrap: wrap; gap: 6px 26px; align-items: baseline; margin-top: 28px; }
-  .event .sym { font: 800 40px/1 var(--display); text-transform: uppercase; }
-  .kv { font: 11px var(--mono); color: var(--dim); }
-  .kv b { color: var(--text); font-weight: 400; }
-  .links { display: inline-flex; gap: 12px; font: 11px var(--mono); }
-  .links a { color: var(--dim); text-decoration: none; border-bottom: 1px solid var(--rule); }
-  .links a:hover { color: var(--now); border-color: var(--now); }
-  .links a.primary { color: var(--text); border-color: rgba(233,236,245,.35); }
-  .warn { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--warn); background: rgba(242,193,78,.08); color: var(--warn); font-size: 14px; }
-  .error { margin-top: 24px; padding: 12px 16px; border-left: 3px solid var(--warn); background: rgba(242,193,78,.08); }
+  .graffiti { font: 34px/1 var(--hand); color: rgba(196,107,255,.55); transform: rotate(-8deg); margin: 44px 0 0 6px; max-width: 260px;
+              text-shadow: 0 0 14px rgba(196,107,255,.35); }
+  .error { margin-top: 16px; padding: 10px 14px; border-left: 3px solid var(--gold); background: rgba(245,197,66,.08); max-width: 560px; font-size: 14px; }
   .error:empty { display: none; }
+  .scene { position: relative; margin-right: -24px; min-height: 520px; overflow: hidden; background: linear-gradient(#1a0f33, #0a0a16 77%, #07070f 77%); }
+  .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-  /* Answer */
-  .answer { margin-top: 26px; padding: 30px; background: var(--panel); border-radius: 10px; backdrop-filter: blur(10px);
-            animation: rise .5s ease-out both; }
-  .headline { font: 600 clamp(24px, 3.2vw, 34px)/1.2 var(--body); margin: 0; max-width: 880px; letter-spacing: -.01em; }
-  .headline .n { font: 800 1.35em/1 var(--display); color: var(--now); }
-  .subline { color: var(--dim); margin: 10px 0 0; }
-  .signals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--rule); }
-  .sig .k { font: 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
-  .sig .v { font: 600 20px/1.2 var(--body); margin: 5px 0 3px; color: var(--now); }
-  .sig .d { font-size: 13px; color: var(--dim); }
-  .history { margin: 24px 0 0; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 17px; }
-  .history .up { color: var(--up); } .history .down { color: var(--down); }
-  .history .then { color: var(--then); }
-  .history a { color: var(--dim); font: 11px var(--mono); margin-left: 6px; }
-  @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+  /* ---------- replay strip ---------- */
+  .strip { margin-top: -6px; background: linear-gradient(180deg, rgba(10,14,30,.96), rgba(8,10,22,.96)); border: 1px solid rgba(54,230,245,.28);
+           border-radius: 10px; padding: 14px 18px 10px; box-shadow: 0 0 40px rgba(54,230,245,.08); position: relative; z-index: 3; }
+  .controls { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 16px; align-items: center; }
+  .play { width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--rule); background: var(--panel-2); cursor: pointer; display: grid; place-items: center; }
+  .play:disabled { opacity: .4; cursor: default; }
+  .status { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--now); min-width: 0; }
+  .bar { height: 3px; background: var(--rule); margin-top: 8px; border-radius: 2px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--now); box-shadow: 0 0 10px var(--now); }
+  .clock { font: 12px var(--mono); color: var(--dim); white-space: nowrap; }
+  .speeds { display: flex; gap: 6px; }
+  .speed { border: 1px solid var(--rule); background: transparent; border-radius: 5px; padding: 6px 12px; font: 12px var(--mono); cursor: pointer; color: var(--dim); }
+  .speed[aria-pressed="true"] { border-color: var(--now); color: var(--now); background: rgba(54,230,245,.1); }
+  .share { border: 1px solid var(--now); background: transparent; color: var(--now); border-radius: 6px; padding: 9px 14px; font: 700 14px var(--display);
+           letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+  .share:disabled { opacity: .35; cursor: default; }
+  .track { position: relative; height: 128px; margin-top: 10px; }
+  .track > svg { width: 100%; height: 100%; display: block; }
+  .mark { position: absolute; top: 40px; width: 38px; height: 38px; margin-left: -19px; }
+  .mark svg { width: 100%; height: 100%; display: block; }
+  .tick { position: absolute; top: 84px; width: 2px; height: 8px; margin-left: -1px; background: var(--now); opacity: .6; }
+  .callout { position: absolute; top: -6px; transform: translateX(-50%); background: rgba(8,12,26,.95); border: 1px solid; border-radius: 8px;
+             padding: 5px 10px; font: 11px var(--mono); white-space: nowrap; animation: pop .3s both; }
+  .echo-banner { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); padding: 6px 14px; border-radius: 6px; white-space: nowrap;
+                 background: rgba(40,14,70,.92); border: 1px solid var(--then); color: #efd9ff; font: 600 12px var(--mono); letter-spacing: .04em;
+                 box-shadow: 0 0 24px rgba(196,107,255,.45); animation: pop .5s ease-out both; max-width: 96%; overflow: hidden; text-overflow: ellipsis; }
+  .echo-banner b { color: var(--then); letter-spacing: .12em; margin-right: 8px; }
+  @keyframes pop { from { opacity: 0; } }
 
-  /* Buyers */
-  section.block { margin-top: 64px; }
-  .block-title { font: 800 44px/1 var(--display); text-transform: uppercase; margin: 0; }
-  .block-sub { color: var(--dim); margin: 8px 0 22px; }
-  .tier { font: 10.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 26px 0 12px; }
-  .strong-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-  .buyer { background: var(--panel); border-radius: 10px; padding: 22px; animation: rise .45s ease-out both; }
-  .buyer-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
-  .addr { font: 12.5px var(--mono); }
-  .buyer-score { display: flex; align-items: flex-end; gap: 14px; margin: 14px 0 6px; }
-  .num { font: 900 88px/.78 var(--display); color: var(--now); font-variant-numeric: tabular-nums; }
-  .rank { font: 600 12px var(--mono); color: var(--now); background: rgba(56,225,242,.1); padding: 4px 8px; border-radius: 4px; }
-  .lab { font: 10.5px var(--mono); color: var(--dim); margin-top: 6px; }
-  .bought { font: 12px var(--mono); color: var(--dim); margin: 12px 0 0; }
-  .facts { margin: 10px 0 0; padding: 0; list-style: none; font-size: 14.5px; }
-  .facts b { font-weight: 600; }
-  .blurb { color: var(--dim); font-size: 14px; margin: 10px 0 0; }
-  .buyer-foot { margin-top: 14px; }
-  details summary { cursor: pointer; color: var(--now); font: 11px var(--mono); list-style: none; }
-  details summary::-webkit-details-marker { display: none; }
-  details[open] summary { margin-bottom: 8px; }
-  table { width: 100%; border-collapse: collapse; font: 11px var(--mono); }
-  td { padding: 4px 3px; border-top: 1px solid var(--rule); }
-  td.r { text-align: right; }
-  .tok { color: var(--faint); font-size: 9.5px; margin-left: 6px; }
-  .rows { display: grid; gap: 1px; }
-  .row { display: grid; grid-template-columns: minmax(120px, 1.2fr) 60px minmax(90px, 1fr) minmax(150px, 2.4fr) auto; gap: 16px; align-items: baseline;
-         padding: 12px 16px; background: var(--panel); font-size: 13.5px; animation: rise .4s ease-out both; }
-  .row:first-child { border-radius: 8px 8px 0 0; } .row:last-child { border-radius: 0 0 8px 8px; } .row:only-child { border-radius: 8px; }
-  .row .rnum { font: 800 26px/1 var(--display); }
-  .row .muted { color: var(--dim); }
-  .pending-row { color: var(--faint); }
-  .none-box { margin-top: 18px; }
-  .none-box > summary { color: var(--dim); font: 12px var(--mono); padding: 10px 0; }
-  .none-box > summary::before { content: "▸ "; } .none-box[open] > summary::before { content: "▾ "; }
+  /* ---------- panels ---------- */
+  .panels { display: grid; grid-template-columns: 1.15fr 1.25fr 1fr; gap: 14px; margin-top: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 22px; min-width: 0; }
+  .panel h2 { font: 800 21px/1 var(--display); text-transform: uppercase; margin: 0 0 14px; letter-spacing: .02em; display: flex; gap: 10px; align-items: center; }
+  .count { font: 11px var(--mono); background: var(--panel-2); border: 1px solid var(--rule); padding: 2px 7px; border-radius: 4px; color: var(--dim); }
+  .answer { font: 900 clamp(30px, 3vw, 44px)/.95 var(--display); text-transform: uppercase; margin: 0; }
+  .answer .n { color: var(--now); }
+  .answer-sub { font-size: 16px; color: var(--dim); margin: 12px 0 0; }
+  .signals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  .sig { display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
+  .sig svg { width: 28px; height: 28px; }
+  .sig .k { font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .sig .v { font-weight: 600; color: var(--now); }
+  .sig .d { font-size: 12.5px; color: var(--dim); }
+  .placeholder { color: var(--faint); font-size: 14px; }
 
-  /* Déjà View */
-  .deja-title { font: 900 clamp(46px, 7vw, 84px)/.9 var(--display); text-transform: uppercase; margin: 0; }
-  .print { display: grid; grid-template-columns: minmax(280px, 420px) 1fr; gap: 36px; align-items: center; margin-top: 26px;
-           padding: 28px; background: var(--panel); border-radius: 10px; }
-  .print svg { width: 100%; height: auto; display: block; overflow: visible; }
-  .readouts { display: grid; gap: 16px; }
-  .readout { display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: baseline; }
-  .readout .name { font: 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
-  .readout .val { font: 600 16px var(--body); }
-  .readout .val span { color: var(--now); }
-  .readout .ctx { font-size: 13px; color: var(--dim); }
-  .print-note { grid-column: 1 / -1; font-size: 12.5px; color: var(--dim); margin: 0; }
-  .arc { animation: draw 1s cubic-bezier(.3,.7,.2,1) both; }
-  .arc.past { animation-delay: .25s; }
-  @keyframes draw { from { stroke-dasharray: 0 100; } }
+  .buyers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .bcard { all: unset; box-sizing: border-box; cursor: pointer; background: var(--panel-2); border: 1px solid var(--rule); border-radius: 8px; padding: 10px;
+           display: flex; flex-direction: column; gap: 4px; min-width: 0; transition: border-color .2s, transform .2s; }
+  .bcard:not([disabled]):hover, .bcard:focus-visible { border-color: var(--now); transform: translateY(-2px); }
+  .bcard[disabled] { cursor: default; }
+  .bcard.ghostcard { opacity: .25; }
+  .bcard.vip { border-color: rgba(245,197,66,.55); }
+  .bcard .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .bcard .addr { font: 10.5px var(--mono); color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bcard .av { width: 46px; height: 46px; flex: none; }
+  .bcard .score { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+  .bcard .num { font: 900 34px/1 var(--display); }
+  .bcard .rank { font: 600 10px var(--mono); color: var(--now); }
+  .bcard .meta { font-size: 11.5px; color: var(--dim); line-height: 1.35; }
+  .bcard .cta { font: 10.5px var(--mono); color: var(--now); margin-top: 4px; }
+  .bcard.known .num { color: var(--text); } .bcard.known .rank { color: var(--dim); }
+  .bcard.strong .num { color: var(--now); } .bcard.vip .num, .bcard.vip .rank { color: var(--gold); }
+  .bcard.fresh .num { color: var(--faint); font-size: 22px; }
 
-  .analogues { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 18px; }
-  .an { background: var(--panel); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
-        border: 1px solid transparent; animation: fromPast .55s cubic-bezier(.2,.7,.2,1) both; }
-  .an.counter { border-color: rgba(242,193,78,.45); }
-  @keyframes fromPast { from { opacity: 0; transform: translateX(-22px); } }
-  .an-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-  .badge { font: 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--then); }
-  .badge.counter { color: var(--warn); }
-  .an-sym { font: 800 28px/1 var(--display); text-transform: uppercase; margin-top: 6px; overflow-wrap: anywhere; }
-  .an-meta { font: 10.5px var(--mono); color: var(--dim); margin-top: 6px; }
-  .big-out { font: 900 64px/.85 var(--display); }
-  .big-out small { display: block; font: 11px var(--mono); color: var(--dim); margin-top: 8px; }
-  .up { color: var(--up); } .down { color: var(--down); }
-  .small-outs { display: flex; gap: 18px; font: 12px var(--mono); color: var(--dim); }
-  .small-outs b { font-weight: 600; }
-  .counter-line { font-size: 14px; color: var(--warn); margin: 0; }
-  .why { margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--dim); display: grid; gap: 4px; }
-  .why .n { color: var(--now); } .why .t { color: var(--then); }
-  .legend { display: flex; gap: 22px; font: 10.5px var(--mono); color: var(--dim); margin-top: 22px; flex-wrap: wrap; }
-  .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 8px; vertical-align: middle; }
-  .legend .l-now::before { background: var(--now); } .legend .l-then::before { background: var(--then); }
-  .backtest { font-size: 12.5px; color: var(--dim); margin: 18px 0 0; max-width: 840px; }
+  .echo-feature { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 76px 1fr; gap: 14px; align-items: center; width: 100%;
+                  background: linear-gradient(135deg, rgba(90,30,140,.35), rgba(30,14,60,.5)); border: 1px solid var(--then); border-radius: 10px; padding: 16px;
+                  box-shadow: 0 0 28px rgba(196,107,255,.18); }
+  .echo-feature:hover, .echo-feature:focus-visible { box-shadow: 0 0 36px rgba(196,107,255,.4); }
+  .echo-feature > svg { width: 76px; height: 76px; }
+  .echo-feature .sym { font: 800 26px/1 var(--display); color: var(--then); text-transform: uppercase; overflow-wrap: anywhere; }
+  .echo-feature .line { font-size: 13.5px; margin: 4px 0; }
+  .move { font: 900 34px/1 var(--display); }
+  .move small { display: block; font: 11px var(--mono); color: var(--dim); margin-top: 4px; }
+  .echo-row { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; width: 100%;
+              padding: 9px 4px; border-bottom: 1px solid var(--rule); }
+  .echo-row > svg { width: 32px; height: 32px; }
+  .echo-row:hover .esym, .echo-row:focus-visible .esym { color: var(--then); }
+  .echo-row .esym { font-weight: 600; font-size: 14px; }
+  .echo-row .esub { font-size: 11.5px; color: var(--dim); }
+  .echo-row .emove { font: 700 15px var(--mono); }
+  .up { color: var(--up); } .down { color: var(--down); } .nodata { color: var(--faint); font: 11px var(--mono); }
+  .echo-note { font-size: 11.5px; color: var(--faint); margin: 12px 0 0; }
 
-  footer { margin-top: 80px; padding-top: 22px; border-top: 1px solid var(--rule); color: var(--dim); font-size: 13px;
-           display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  .below { margin-top: 18px; display: flex; gap: 20px; flex-wrap: wrap; font: 12px var(--mono); }
+  .below button { all: unset; cursor: pointer; color: var(--dim); border-bottom: 1px solid var(--rule); }
+  .below button:hover, .below button:focus-visible { color: var(--then); }
+  .extra { margin-top: 14px; }
+  .extra p { color: var(--dim); max-width: 900px; }
+  .extra p b { color: var(--text); font-weight: 600; }
+  .setup-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 2fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 13px; align-items: baseline; }
+  .setup-row .s { font: 700 18px var(--display); color: var(--then); text-transform: uppercase; }
+
+  /* ---------- drawer ---------- */
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 100%); background: #0c0d1c; border-left: 1px solid var(--rule);
+            box-shadow: -30px 0 60px rgba(0,0,0,.5); z-index: 20; padding: 26px; overflow-y: auto; animation: slide .3s ease-out both; }
+  @keyframes slide { from { transform: translateX(30px); opacity: 0; } }
+  .drawer .close { all: unset; cursor: pointer; position: absolute; top: 18px; right: 20px; font: 12px var(--mono); color: var(--dim); }
+  .drawer h3 { font: 900 32px/1 var(--display); text-transform: uppercase; margin: 6px 0 4px; }
+  .eyebrow { font: 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--then); }
+  .drawer table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+  .drawer th { text-align: left; font: 10px var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .06em; padding: 6px 4px; }
+  .drawer td { padding: 8px 4px; border-top: 1px solid var(--rule); vertical-align: middle; }
+  .drawer td.r, .drawer th.r { text-align: right; }
+  .drawer .note { font-size: 12.5px; color: var(--dim); margin-top: 16px; }
+  .drawer .who { display: flex; gap: 14px; align-items: center; margin-top: 14px; }
+  .drawer .who > svg { width: 72px; height: 72px; flex: none; }
+  .drawer .mini { width: 30px; height: 30px; vertical-align: middle; margin-right: 8px; }
+  .links { display: flex; gap: 12px; font: 11px var(--mono); margin-top: 14px; }
+  .links a { color: var(--dim); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .links a.primary { color: var(--text); border-color: rgba(236,238,250,.4); }
+  .links a:hover { color: var(--now); border-color: var(--now); }
+  .scrim { position: fixed; inset: 0; background: rgba(3,4,10,.55); z-index: 19; }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--dim); font-size: 12.5px;
+           display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
   footer b { color: var(--text); font-weight: 600; }
 
-  @media (max-width: 860px) {
-    .guide, .signals { grid-template-columns: 1fr 1fr; }
-    .print { grid-template-columns: 1fr; }
-    .row { grid-template-columns: 1fr auto; }
-    .row > :nth-child(3), .row > :nth-child(4) { grid-column: 1 / -1; }
-    footer { grid-template-columns: 1fr; }
+  @media (max-width: 1180px) {
+    .panels { grid-template-columns: 1fr 1fr; }
+    .panels > :last-child { grid-column: 1 / -1; }
   }
-  @media (max-width: 520px) {
-    .guide, .signals, .rail { grid-template-columns: 1fr; }
-    .readout { grid-template-columns: 1fr; gap: 2px; }
-    .answer, .print { padding: 20px; }
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .scene { margin: 0 -24px; min-height: 380px; }
+    .hero-copy { padding-bottom: 0; }
+    .graffiti { display: none; }
+    .panels { grid-template-columns: 1fr; }
+    .controls { grid-template-columns: auto 1fr; }
+    .buyers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    footer { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -209,353 +195,556 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div>
-      <h1 class="wordmark ghost" data-text="Déjà View">Déjà View</h1>
-      <p class="tagline">See who got in early, and <em>whether they've done it before.</em></p>
-      <p class="lede">Déjà View checks a pump.fun launch's biggest first-hour buyers against their earlier launch buys,
-        then finds past launches that looked the same.</p>
+  <section class="hero">
+    <div class="hero-copy">
+      <h1 class="wordmark" data-text="Déjà View">Déjà View</h1>
+      <p class="strap">Same faces. Different launch.</p>
+      <p class="lede">Replay the first hour of a pump.fun launch and see which buyers we've seen before.</p>
+      <form id="f">
+        <input id="token" aria-label="pump.fun token address" placeholder="Paste a pump.fun token address" autocomplete="off" spellcheck="false">
+        <button class="go" id="go">Scan launch</button>
+      </form>
+      <div class="examples" id="examples"></div>
+      <div class="error" id="error" role="alert"></div>
+      <p class="graffiti" aria-hidden="true">Memes bring people back</p>
     </div>
-    <a class="powered" href="https://www.nansen.ai/" target="_blank" rel="noopener">Powered by <b>Nansen API</b></a>
-  </header>
-
-  <form id="f">
-    <input id="token" aria-label="Solana token address" placeholder="Paste a pump.fun token address" autocomplete="off" spellcheck="false">
-    <button class="go" id="go">Scan launch</button>
-  </form>
-  <div class="below-form">
-    <span>Replay a past launch:</span>
-    <button type="button" class="chip" data-token="9LuwgFQemAoV9rgVBBtwbRSxBmamcRRbysEK8yL2pump">BRAIN · 14 Sep</button>
-    <button type="button" class="chip" data-token="55VWo7QQpqfYwratKUZHhSSnSghyTVCJx54yNoWVpump">PVE · 13 Sep</button>
-    <button type="button" class="howto" id="howto" aria-controls="guide" aria-expanded="true">How to read this</button>
-  </div>
-
-  <section class="guide" id="guide">
-    <div class="step"><h3><span>1</span>Paste a launch</h3>
-      <p>Paste a <b>pump.fun token address</b>. Buyers appear right away. Similar past launches appear once the coin is
-        <b>an hour past its launch moment</b>, the first time it reached $5,000 of trading.</p></div>
-    <div class="step"><h3><span>2</span>Read the answer</h3>
-      <p>The top box tells you <b>whether buyers with a good launch record are in</b>, how this launch's buying compares
-        with usual, and <b>what happened to launches that looked the same</b>.</p></div>
-    <div class="step"><h3><span>3</span>Dig in</h3>
-      <p>Check each strong buyer's earlier launches, open the wallet on <b>Nansen</b>, and compare the past launches,
-        including the one that went the other way.</p></div>
-    <p class="guide-note">Déjà View shows evidence from past launches. It is not a forecast and it is not advice.</p>
+    <div class="scene" id="scene" role="img" aria-label="The launch party: the biggest first-hour buyers queue at the door"></div>
   </section>
 
-  <div class="story" id="story" hidden>
-    <ol class="rail" id="rail"></ol>
-    <div class="dots" id="dots"></div>
-  </div>
-  <div id="event"></div>
-  <div class="error" id="error" role="alert"></div>
-  <div id="answer"></div>
-
-  <section class="block" id="buyers" hidden>
-    <h2 class="block-title">Who is buying</h2>
-    <p class="block-sub" id="buyers-sub"></p>
-    <div id="pending" class="rows"></div>
-    <div id="strong-wrap" hidden><p class="tier">Better launch record than most</p><div class="strong-grid" id="strong"></div></div>
-    <div id="known-wrap" hidden><p class="tier">Other buyers with a launch record</p><div class="rows" id="known"></div></div>
-    <details class="none-box" id="none-wrap" hidden><summary id="none-sum"></summary><div class="rows" id="none"></div></details>
+  <section class="strip" aria-label="First-hour replay">
+    <div class="controls">
+      <button class="play" id="play" aria-label="Play replay" disabled></button>
+      <div><div class="status" id="status" aria-live="polite">Paste a launch, or pick a replay</div><div class="bar"><i id="bar"></i></div></div>
+      <div class="clock" id="clock">00:00 / 60:00</div>
+      <div class="speeds" role="group" aria-label="Replay speed">
+        <button class="speed" data-speed="1" aria-pressed="true">1×</button>
+        <button class="speed" data-speed="2" aria-pressed="false">2×</button>
+        <button class="speed" data-speed="4" aria-pressed="false">4×</button>
+      </div>
+      <button class="share" id="share" disabled>Share this scan ↗</button>
+    </div>
+    <div class="track" id="track"></div>
   </section>
 
-  <section class="block" id="deja" hidden></section>
+  <section class="panels">
+    <div class="panel" id="answer-panel">
+      <h2>The answer</h2>
+      <p class="placeholder">Who turned up in the first hour, and whether we've seen them do this before.</p>
+    </div>
+    <div class="panel">
+      <h2>The buyers <span class="count" id="buyer-count">0</span></h2>
+      <div class="buyers" id="buyers"><p class="placeholder">The 8 biggest first-hour buyers appear here as they arrive.</p></div>
+    </div>
+    <div class="panel">
+      <h2>We've seen these buyers before <span class="count" id="echo-count">0</span></h2>
+      <div id="echoes"><p class="placeholder">Earlier launches that several of today's buyers were also early on.</p></div>
+    </div>
+  </section>
+
+  <div class="below">
+    <button id="toggle-setups" aria-expanded="false" hidden>Similar past setups →</button>
+    <button id="toggle-method" aria-expanded="false">How Déjà View works →</button>
+  </div>
+  <section class="panel extra" id="setups" hidden></section>
+  <section class="panel extra" id="method" hidden>
+    <h2>How Déjà View works</h2>
+    <p><b>The launch moment</b> is the first time a coin's trading reaches $5,000. <b>The buyers</b> are the 8 biggest buyers of $500 or more
+      in the hour after it. For each buyer, Déjà View looks at their trades in the 30 days before the launch moment, and nothing after it.</p>
+    <p><b>Launch Reflex</b> measures how often a buyer's earlier launch buys went on to offer a strong move within an hour of their buy,
+      ranked against 37 reference launch buyers. In a test frozen before any results were seen, a buyer's score on older launches predicted
+      their score on newer ones. It is historical context, not a profit score, and not a prediction.</p>
+    <p><b>Echoes</b> are earlier launches that two or more of today's buyers were also early on. They show repeated behaviour. They do not show that
+      the wallets are connected.</p>
+    <p><b>Characters</b> are generated from each wallet address, so the same wallet always looks the same, in every launch.</p>
+  </section>
 
   <footer>
-    <div><b>Launch Reflex</b> ranks how often a wallet's earlier launch buys went on to offer a strong first-hour
-      move, against a reference set of launch buyers. It uses only trades from before this launch took off.
-      It is not a win rate, a profit claim, or a prediction.</div>
-    <div><b>Similar launches</b> come from sampled past pump.fun launches, each compared one hour after its launch moment.
-      Outcomes start from that point. Winners and losers are both shown. Data from the <b>Nansen API</b>.</div>
+    <div><b>Launch Reflex</b> measures whether a buyer has repeatedly got into earlier launches that went on to offer strong first-hour moves.
+      It is historical context, not a profit score, a win rate, or a prediction.</div>
+    <div>Data from the <b>Nansen API</b>. Open any wallet or coin on Nansen for its full history.</div>
   </footer>
 </div>
+
+<div id="drawer-root"></div>
 
 <script>
 const $ = id => document.getElementById(id);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const FEATURES = [
-  ["actor_quality", "Buyer quality"],
-  ["entry_speed", "Buying speed"],
-  ["concentration", "Buyer concentration"],
-  ["persistence", "Follow-through"],
-];
-const STRONG = 60;
-let es = null, state = null;
+const STRONG = 60, VIP = 95, REPLAY_SECONDS = 20;
+let es = null, S = null, raf = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const short = a => a.slice(0, 4) + "…" + a.slice(-4);
-const pct = x => Math.round(x * 100) + "%";
-const signed = p => (p > 0 ? "+" : p < 0 ? "−" : "") + Math.abs(Math.round(p)) + "%";
-const usd = x => "$" + Math.round(x).toLocaleString();
-const entered = s => s <= 0 ? "before the launch moment" : `${Math.round(s / 60)} min after launch`;
-const day = iso => new Date(iso.length === 10 ? iso + "T00:00:00Z" : iso).toLocaleDateString("en-GB", {day: "numeric", month: "short", timeZone: "UTC"});
+const cleanSym = s => String(s || "").replace(/^[^\w$]+\s*/, "");
+const usdShort = v => v >= 1000 ? "$" + (v / 1000).toFixed(v >= 10000 ? 0 : 1) + "k" : "$" + Math.round(v);
+const usd = v => "$" + Math.round(v).toLocaleString();
+const pct = v => Math.round(v * 100) + "%";
+const mmss = s => { s = Math.max(0, Math.round(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
+const day = iso => new Date(iso).toLocaleDateString("en-GB", {day: "numeric", month: "short", timeZone: "UTC"});
 const plural = (n, one, many) => n === 1 ? one : many;
+const tierOf = r => !r ? "pending" : !r.scoreable ? "fresh" : r.reflex >= VIP ? "vip" : r.reflex >= STRONG ? "strong" : "known";
+const TIER_COLOR = {pending: "#5a6080", fresh: "#5a6080", known: "#c9cde0", strong: "#36e6f5", vip: "#f5c542"};
+const TIER_LABEL = {fresh: "New face", known: "Known", strong: "Strong record", vip: "VIP"};
+const moveText = p => p === null || p === undefined ? "no price data" : p >= 900 ? "10×+" : (p > 0 ? "+" : "") + p + "%";
+const mfeText = m => { const r = Math.exp(m); return r >= 9.99 ? "10×+" : (r >= 1 ? "+" : "") + Math.round((r - 1) * 100) + "%"; };
 
 function walletLinks(w) {
-  return `<span class="links"><a class="primary" href="https://app.nansen.ai/profiler?address=${w}&chain=solana" target="_blank" rel="noopener" title="Open this wallet's full history on Nansen">View on Nansen ↗</a>
-    <a href="https://solscan.io/account/${w}" target="_blank" rel="noopener">Solscan</a></span>`;
+  return `<div class="links"><a class="primary" href="https://app.nansen.ai/profiler?address=${w}&chain=solana" target="_blank" rel="noopener">View on Nansen ↗</a>
+    <a href="https://solscan.io/account/${w}" target="_blank" rel="noopener">Solscan</a></div>`;
 }
 function tokenLinks(t) {
-  return `<span class="links"><a class="primary" href="https://app.nansen.ai/token-god-mode?chain=solana&tokenAddress=${t}" target="_blank" rel="noopener" title="Open this token on Nansen">View on Nansen ↗</a>
-    <a href="https://solscan.io/token/${t}" target="_blank" rel="noopener">Solscan</a></span>`;
+  return `<div class="links"><a class="primary" href="https://app.nansen.ai/token-god-mode?chain=solana&tokenAddress=${t}" target="_blank" rel="noopener">View on Nansen ↗</a>
+    <a href="https://solscan.io/token/${t}" target="_blank" rel="noopener">Solscan</a></div>`;
 }
 
-/* Fingerprint: four rings, one per measure. A longer arc means a higher value than most past launches. */
-const RADII = [50, 39, 28, 17];
-function rings(layers, labels) {
-  const box = labels ? "-92 0 212 120" : "0 0 120 120";
-  let svg = `<svg viewBox="${box}" role="img" aria-label="Launch fingerprint">`;
-  RADII.forEach(r => svg += `<circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(120,135,170,.16)" stroke-width="7" pathLength="100" stroke-dasharray="80 100" transform="rotate(-90 60 60)"/>`);
-  if (labels) FEATURES.forEach(([, name], i) => {
-    const y = 60 - RADII[i];
-    svg += `<line x1="-3" y1="${y}" x2="57" y2="${y}" stroke="rgba(120,135,170,.25)" stroke-width=".5" stroke-dasharray="1.5 1.5"/>
-      <text x="-6" y="${y + 2.4}" font-size="6.6" fill="#939bb2" text-anchor="end" font-family="Martian Mono, monospace">${name}</text>`;
+/* ---------- generated characters: the same wallet always gets the same face ---------- */
+function rng(seed) {
+  let h = 2166136261;
+  for (const ch of seed) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h += 0x6D2B79F5; let t = h; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+const SKIN = ["#8fe3b0", "#b79cff", "#ffb38a", "#7fd4ff", "#e6d3a3", "#c9ced9", "#ff8fb1", "#9ee6e0", "#d8f07a"];
+const CLOTH = ["#1c1f3a", "#2a1640", "#101a2a", "#3a1422", "#16302c", "#2c2c2c"];
+const HAT = ["#36e6f5", "#c46bff", "#f5c542", "#ff5a7a", "#12131f", "#e9ecf5"];
+const CROWN = `<path d="M36 4 L42 14 L50 2 L58 14 L64 4 L62 18 L38 18 Z" fill="#f5c542" stroke="#07080f" stroke-width="1.5"/>`;
+/* Draws inside a 100×100 box: head centred near (50, 42), body below 62. */
+function guestParts(seed, {body = false, crown = false} = {}) {
+  const r = rng(seed), pick = a => a[Math.floor(r() * a.length)];
+  const skin = pick(SKIN), shade = "rgba(0,0,0,.18)", cloth = pick(CLOTH), hat = pick(HAT);
+  const head = Math.floor(r() * 4), ears = Math.floor(r() * 4), eyes = Math.floor(r() * 5), mouth = Math.floor(r() * 4),
+        wear = Math.floor(r() * 5), extra = Math.floor(r() * 3);
+  let g = "";
+  if (body) {
+    g += `<path d="M18 100 C18 74 30 64 50 64 C70 64 82 74 82 100 Z" fill="${cloth}"/>`;
+    if (extra === 1) g += `<path d="M38 68 Q50 80 62 68" fill="none" stroke="#f5c542" stroke-width="2.5"/>`;
+  }
+  if (wear === 3) g += `<path d="M20 50 C18 18 34 8 50 8 C66 8 82 18 80 50 C80 60 72 66 50 66 C28 66 20 60 20 50 Z" fill="${cloth}"/>`;
+  if (ears === 1) g += `<path d="M26 30 L30 8 L44 22 Z M74 30 L70 8 L56 22 Z" fill="${skin}"/>`;
+  if (ears === 2) g += `<circle cx="29" cy="20" r="9" fill="${skin}"/><circle cx="71" cy="20" r="9" fill="${skin}"/><circle cx="29" cy="20" r="4" fill="${shade}"/><circle cx="71" cy="20" r="4" fill="${shade}"/>`;
+  if (ears === 3) g += `<line x1="50" y1="16" x2="56" y2="3" stroke="${skin}" stroke-width="2.5"/><circle cx="57" cy="3" r="3.5" fill="${hat}"/>`;
+  g += [
+    `<circle cx="50" cy="42" r="25" fill="${skin}"/>`,
+    `<rect x="25" y="16" width="50" height="52" rx="17" fill="${skin}"/>`,
+    `<ellipse cx="50" cy="43" rx="23" ry="28" fill="${skin}"/>`,
+    `<path d="M26 44 C24 22 38 14 52 15 C68 16 78 28 75 46 C73 62 62 68 49 67 C35 66 27 58 26 44 Z" fill="${skin}"/>`,
+  ][head];
+  const ey = 40;
+  if (eyes === 0) g += `<rect x="28" y="${ey - 5}" width="44" height="11" rx="5" fill="#07080f"/><rect x="33" y="${ey - 3}" width="9" height="2" rx="1" fill="#fff" opacity=".45"/>`;
+  if (eyes === 1) g += `<rect x="27" y="${ey - 5}" width="46" height="10" rx="5" fill="#36e6f5" opacity=".85" stroke="#07080f" stroke-width="2"/>`;
+  if (eyes === 2) g += `<circle cx="41" cy="${ey}" r="3.8" fill="#07080f"/><circle cx="59" cy="${ey}" r="3.8" fill="#07080f"/>`;
+  if (eyes === 3) g += `<path d="M37 ${ey - 4} l8 8 m0 -8 l-8 8 M55 ${ey - 4} l8 8 m0 -8 l-8 8" stroke="#07080f" stroke-width="2.6" stroke-linecap="round"/>`;
+  if (eyes === 4) g += `<circle cx="40" cy="${ey}" r="7" fill="#fff"/><circle cx="60" cy="${ey}" r="7" fill="#fff"/><circle cx="42" cy="${ey + 1}" r="3.2" fill="#07080f"/><circle cx="62" cy="${ey + 1}" r="3.2" fill="#07080f"/>`;
+  if (mouth === 0) g += `<path d="M41 54 Q50 61 59 54" fill="none" stroke="#07080f" stroke-width="2.4" stroke-linecap="round"/>`;
+  if (mouth === 1) g += `<line x1="42" y1="56" x2="58" y2="56" stroke="#07080f" stroke-width="2.4" stroke-linecap="round"/>`;
+  if (mouth === 2) g += `<rect x="40" y="52" width="20" height="7" rx="3" fill="#fff" stroke="#07080f" stroke-width="2"/>`;
+  if (mouth === 3) g += `<circle cx="50" cy="56" r="3.2" fill="#07080f"/>`;
+  if (wear === 1) g += `<path d="M24 30 C24 10 76 10 76 30 Z" fill="${hat}"/><path d="M50 28 L88 30 L86 34 L50 32 Z" fill="${hat}" opacity=".85"/>`;
+  if (wear === 2) g += `<path d="M25 30 C25 8 75 8 75 30 L75 32 L25 32 Z" fill="${hat}"/><rect x="24" y="28" width="52" height="6" rx="3" fill="rgba(0,0,0,.25)"/><circle cx="50" cy="8" r="5" fill="${hat}"/>`;
+  if (wear === 4) g += `<path d="M22 24 L78 24 L74 30 L26 30 Z" fill="#07080f"/><rect x="34" y="6" width="32" height="19" rx="3" fill="#07080f"/><rect x="34" y="18" width="32" height="4" fill="${hat}"/>`;
+  if (extra === 2) g += `<circle cx="25" cy="50" r="2.6" fill="#f5c542"/>`;
+  if (crown) g += CROWN;
+  return g;
+}
+let clipId = 0;
+function avatar(seed, tier = "pending", cls = "av") {
+  const id = "clip" + (clipId++), ring = TIER_COLOR[tier];
+  return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="${id}"><circle cx="50" cy="50" r="46"/></clipPath></defs>
+    <circle cx="50" cy="50" r="46" fill="#15172c"/><g clip-path="url(#${id})"><g transform="translate(0 10)">${guestParts(seed, {body: true})}</g></g>
+    <circle cx="50" cy="50" r="46" fill="none" stroke="${ring}" stroke-width="${tier === "pending" ? 2 : 5}" ${tier === "fresh" ? 'stroke-dasharray="7 6"' : ""}/>
+    ${tier === "vip" ? `<g transform="translate(0 -4)">${CROWN}</g>` : ""}</svg>`;
+}
+function coin(symbol, token) {
+  const r = rng(token), hue = Math.floor(r() * 360), label = esc(cleanSym(symbol).replace(/[^A-Za-z0-9]/g, "").slice(0, 3).toUpperCase() || "?");
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="hsl(${hue} 55% 28%)" stroke="#c46bff" stroke-width="4"/>
+    <circle cx="50" cy="50" r="36" fill="none" stroke="hsl(${hue} 70% 60%)" stroke-width="2" stroke-dasharray="3 4"/>
+    <text x="50" y="61" text-anchor="middle" font-family="Big Shoulders Display, Impact" font-weight="900" font-size="32" fill="#f3eaff">${label}</text></svg>`;
+}
+
+/* ---------- the party scene ---------- */
+function scene(symbol, guests) {
+  const W = 900, H = 520, d = {x: 400, y: 150, w: 170, h: 250};
+  const sign = esc(cleanSym(symbol || "YOURCOIN").replace(/^\$/, "").toUpperCase().slice(0, 11));
+  const cx = d.x + d.w / 2;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0f33"/><stop offset="1" stop-color="#0a0a16"/></linearGradient>
+    <radialGradient id="doorglow" cx=".5" cy=".65" r=".75"><stop offset="0" stop-color="#c46bff" stop-opacity=".95"/><stop offset=".55" stop-color="#4a2090" stop-opacity=".7"/><stop offset="1" stop-color="#12081f"/></radialGradient>
+    <linearGradient id="carpet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a1238"/><stop offset="1" stop-color="#2a0616"/></linearGradient>
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="bricks" width="60" height="30" patternUnits="userSpaceOnUse"><path d="M0 0H60M0 15H60M30 0V15M0 15V30M60 15V30" stroke="rgba(160,140,220,.07)" stroke-width="1.5" fill="none"/></pattern>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#wall)"/><rect width="${W}" height="400" fill="url(#bricks)"/>
+  <rect x="0" y="400" width="${W}" height="120" fill="#07070f"/>
+  <g filter="url(#neon)" opacity=".7"><path d="M872 0 V380" stroke="#36e6f5" stroke-width="3"/></g>
+  <rect x="${d.x - 70}" y="30" width="${d.w + 140}" height="92" rx="6" fill="#0c0718" stroke="#c46bff" stroke-width="2.5" filter="url(#neon)"/>
+  <text x="${cx}" y="84" text-anchor="middle" font-family="Big Shoulders Display, Impact" font-weight="900" font-size="54" fill="#ffd8ff" filter="url(#neon)">$${sign}</text>
+  <text x="${cx}" y="110" text-anchor="middle" font-family="Martian Mono, monospace" font-size="13" letter-spacing="6" fill="#eee">LAUNCH PARTY</text>
+  <rect x="${d.x - 18}" y="${d.y - 18}" width="${d.w + 36}" height="${d.h + 18}" fill="#0a0612"/>
+  <rect x="${d.x}" y="${d.y}" width="${d.w}" height="${d.h}" fill="url(#doorglow)"/>
+  <rect x="${d.x - 8}" y="${d.y - 8}" width="${d.w + 16}" height="${d.h + 8}" fill="none" stroke="#ff4fd8" stroke-width="3" filter="url(#neon)"/>
+  <text x="${cx}" y="${d.y + 26}" text-anchor="middle" font-family="Martian Mono, monospace" font-size="9" letter-spacing="2" fill="#36e6f5" filter="url(#neon)">SAME FACES. DIFFERENT LAUNCH.</text>
+  ${[0, 1, 2, 3, 4].map(i => `<ellipse cx="${d.x + 30 + i * 28}" cy="${d.y + d.h - 40 + (i % 2) * 8}" rx="13" ry="34" fill="#12081f" opacity=".85"/>`).join("")}
+  <path d="M${d.x} ${d.y + d.h} L${d.x + d.w} ${d.y + d.h} L${d.x + d.w + 170} ${H} L${d.x - 170} ${H} Z" fill="url(#carpet)"/>
+  <g transform="translate(726 176)"><rect width="126" height="200" rx="6" fill="#0c0a18" stroke="#f5c542" stroke-width="2" opacity=".95"/>
+    <g transform="translate(13 12)">${CROWN}</g>
+    <text x="63" y="62" text-anchor="middle" font-family="Big Shoulders Display, Impact" font-weight="900" font-size="22" fill="#f5c542">GUEST LIST</text>
+    ${[["#f5c542", "VIP · TOP 5%"], ["#36e6f5", "STRONG RECORD"], ["#c9cde0", "KNOWN"], ["#5a6080", "NEW FACE"]].map(([c, t], i) =>
+      `<circle cx="16" cy="${92 + i * 27}" r="6" fill="${i === 3 ? "none" : c}" stroke="${c}" stroke-width="2" ${i === 3 ? 'stroke-dasharray="3 2"' : ""}/>
+       <text x="30" y="${96 + i * 27}" font-family="Martian Mono, monospace" font-size="9.5" fill="#dfe2f2">${t}</text>`).join("")}
+  </g>`;
+  const posts = [0, 1, 2, 3].map(i => ({x: d.x - 12 - i * 60, y: d.y + d.h + 18 + i * 34}));
+  posts.forEach((p, i) => { if (i) svg += `<path d="M${posts[i - 1].x} ${posts[i - 1].y - 34} Q${(p.x + posts[i - 1].x) / 2} ${(p.y + posts[i - 1].y) / 2 - 16} ${p.x} ${p.y - 34}" stroke="#a3173f" stroke-width="5" fill="none"/>`; });
+  posts.forEach(p => svg += `<rect x="${p.x - 2.5}" y="${p.y - 38}" width="5" height="40" fill="#d6a93a"/><circle cx="${p.x}" cy="${p.y - 40}" r="5" fill="#f5c542"/>`);
+  svg += `<g transform="translate(${d.x + d.w + 8} ${d.y + 118}) scale(1.32)">${guestParts("bouncer-dejaview-7", {body: true})}</g>
+    <text x="${d.x + d.w + 74}" y="${d.y + 100}" text-anchor="middle" font-family="Permanent Marker, cursive" font-size="15" fill="#c46bff" transform="rotate(-6 ${d.x + d.w + 74} ${d.y + 100})">"I've seen you before."</text>`;
+  const n = guests.length;
+  guests.forEach((g, i) => {
+    const t = n > 1 ? i / (n - 1) : 0;
+    const gx = d.x - 70 - t * 320, gy = d.y + d.h - 128 + t * 128, s = .85 + t * .7;
+    svg += `<g transform="translate(${gx} ${gy}) scale(${s})" opacity="${g.hidden ? .12 : 1}">
+      <ellipse cx="50" cy="102" rx="28" ry="5" fill="rgba(0,0,0,.5)"/>
+      ${g.tier !== "pending" ? `<circle cx="50" cy="42" r="31" fill="none" stroke="${TIER_COLOR[g.tier]}" stroke-width="3" ${g.tier === "fresh" ? 'stroke-dasharray="5 4"' : ""} filter="url(#neon)"/>` : ""}
+      ${guestParts(g.seed, {body: true, crown: g.tier === "vip"})}
+      ${g.label ? `<text x="50" y="-8" text-anchor="middle" font-family="Martian Mono, monospace" font-size="${10 / s * 1.1}" fill="${TIER_COLOR[g.tier]}">${esc(g.label)}</text>` : ""}
+    </g>`;
   });
-  layers.forEach(({rank, color, width, past, blend}) => FEATURES.forEach(([k], i) => {
-    const v = Math.max(1.5, rank[k] * 80);
-    svg += `<circle class="arc ${past ? "past" : ""}" cx="60" cy="60" r="${RADII[i]}" fill="none" stroke="${color}" stroke-width="${width}"
-      stroke-linecap="round" pathLength="100" stroke-dasharray="${v} 100" transform="rotate(-90 60 60)" style="mix-blend-mode:${blend || "normal"}"/>`;
+  return svg + `</svg>`;
+}
+function drawScene() {
+  if (!S || !S.buyers.length) {
+    $("scene").innerHTML = scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666"].map(seed => ({seed, tier: "pending"})));
+    return;
+  }
+  const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s);
+  $("scene").innerHTML = scene(S.event?.symbol, order.map(b => {
+    const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, tier = tierOf(r), here = S.arrived.has(b.wallet);
+    const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
+    return {seed: b.wallet, tier, hidden: !here,
+            label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : "NEW FACE") : "CHECKING THE LIST…"};
   }));
-  return svg + "</svg>";
 }
 
-/* Plain-language levels from where a launch sits among past launches (0 to 1). */
-function level(k, r) {
-  const words = {
-    actor_quality: ["Very low", "Low", "Typical", "High", "Very high"],
-    entry_speed: ["Much slower than usual", "Slower than usual", "Typical", "Faster than usual", "Much faster than usual"],
-    concentration: ["Widely spread", "Spread out", "Typical", "Concentrated", "Very concentrated"],
-    persistence: ["Very weak", "Weak", "Typical", "Strong", "Very strong"],
-  }[k];
-  return words[Math.min(4, Math.floor(r * 5))];
-}
-function detail(k, f) {
-  if (k === "actor_quality") return `Known buyers average Launch Reflex ${f.actor_quality_pct}`;
-  if (k === "entry_speed") return f.entry_speed >= 60 ? "No strong buyer arrived in the first hour" : `Strong buyers were in by ${Math.round(f.entry_speed)} min`;
-  if (k === "concentration") return `Top 3 buyers bought ${pct(f.concentration)} of first-hour volume`;
-  return `${pct(f.persistence)} of big buyers' buying came after their first buys`;
-}
-function shortValue(k, f) {
-  if (k === "actor_quality") return `Reflex ${f.actor_quality_pct}`;
-  if (k === "entry_speed") return f.entry_speed >= 60 ? "none in 1h" : `${Math.round(f.entry_speed)} min`;
-  return pct(f[k]);
-}
-
-function countUp(root) {
-  root.querySelectorAll("[data-count]").forEach(el => {
-    const end = +el.dataset.count;
-    if (reduced) { el.textContent = end; return; }
-    const t0 = performance.now();
-    const tick = t => { const p = Math.min(1, (t - t0) / 700); el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
+/* ---------- replay track ---------- */
+const pos = sec => (sec - S.tape.start_s) / (3600 - S.tape.start_s);
+function drawTrack() {
+  const W = 1000, H = 128, base = 92, el = $("track");
+  if (!S || !S.tape) { el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="rgba(140,150,200,.25)"/></svg>`; return; }
+  const m = S.tape.minute_usd, peak = Math.max(1, ...m), nowX = S.ready ? pos(S.now) * W : W;
+  let band = `M0 ${base}`;
+  m.forEach((v, i) => { const px = i / m.length * W, py = base - v / peak * 34; band += ` L${px} ${py} L${px + W / m.length} ${py}`; });
+  band += ` L${W} ${base} Z`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+    <defs><clipPath id="played"><rect x="0" y="0" width="${nowX}" height="${H}"/></clipPath></defs>
+    <path d="${band}" fill="rgba(54,230,245,.07)"/><path d="${band}" fill="rgba(54,230,245,.24)" clip-path="url(#played)"/>
+    <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="rgba(140,150,200,.3)"/>
+    <line x1="0" y1="${base}" x2="${nowX}" y2="${base}" stroke="#36e6f5" stroke-width="2"/>`;
+  (S.firedEchoes || []).forEach(e => {
+    const pts = e.wallets.filter(w => S.byBuyer[w]).map(w => pos(S.byBuyer[w].entry_delay_s) * W).sort((a, b) => a - b);
+    for (let i = 1; i < pts.length; i++) {
+      const mid = (pts[i] + pts[i - 1]) / 2, lift = Math.min(52, 16 + (pts[i] - pts[i - 1]) * .2);
+      svg += `<path d="M${pts[i - 1]} 50 Q${mid} ${50 - lift} ${pts[i]} 50" stroke="#c46bff" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke"/>`;
+    }
   });
+  if (S.ready) svg += `<line x1="${nowX}" y1="18" x2="${nowX}" y2="${base + 6}" stroke="#36e6f5" stroke-width="1.5" opacity=".8" vector-effect="non-scaling-stroke"/>`;
+  svg += `</svg>`;
+  let marks = "", labels = "";
+  [0, 5, 10, 15, 20, 30, 45, 60].forEach(t => {
+    const left = pos(t * 60) * 100;
+    labels += `<span style="position:absolute;left:${left}%;bottom:0;transform:translateX(${t === 0 ? "0" : t === 60 ? "-100%" : "-50%"});font:11px var(--mono);color:#7d84a6">${t === 0 ? "launch" : "+" + t + "m"}</span>`;
+  });
+  S.buyers.forEach(b => {
+    b.buy_list.forEach(([sec]) => { if (!S.ready || sec <= S.now) marks += `<span class="tick" style="left:${pos(sec) * 100}%"></span>`; });
+    if (!S.arrived.has(b.wallet)) return;
+    const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null;
+    marks += `<span class="mark" style="left:${pos(Math.max(S.tape.start_s, b.entry_delay_s)) * 100}%">${avatar(b.wallet, tierOf(r), "mk")}</span>`;
+  });
+  const focus = S.focus && S.byBuyer[S.focus];
+  if (focus) {
+    const r = S.resolved.has(S.focus) ? S.byWallet[S.focus] : null, tier = tierOf(r), left = Math.min(88, Math.max(8, pos(focus.entry_delay_s) * 100));
+    marks += `<div class="callout" style="left:${left}%;border-color:${TIER_COLOR[tier]}">+${mmss(focus.entry_delay_s - S.tape.start_s)} · ${usdShort(focus.usd)} ·
+      <b style="color:${TIER_COLOR[tier]}">${!r ? "checking launch record…" : r.scoreable ? `Reflex ${r.reflex} · ${esc(r.rank_label)}` : "new face"}</b></div>`;
+  }
+  const banner = S.bannerEcho && !focus ? `<div class="echo-banner"><b>ECHO DETECTED</b>${S.bannerEcho.wallets.length} of these buyers were also early on ${esc(cleanSym(S.bannerEcho.symbol))}</div>` : "";
+  el.innerHTML = svg + `<div style="position:absolute;inset:0;pointer-events:none">${labels}${marks}</div>` + banner;
 }
 
-/* ---------- scan story ---------- */
-function setStage(i, labels) {
-  $("rail").innerHTML = labels.map((t, j) => `<li class="${j < i ? "done" : j === i ? "live" : ""}">${t}</li>`).join("");
+/* ---------- playback ---------- */
+function resetPlayback() {
+  S.now = S.tape ? S.tape.start_s : 0; S.arrived = new Set(); S.resolved = new Set(); S.firedEchoes = []; S.bannerEcho = null; S.focus = null;
 }
-function stageLabels() {
-  const n = state.buyers.length, known = state.results.filter(r => r.scoreable).length;
-  return [
-    "Rewinding the launch",
-    n ? `${n} big ${plural(n, "buyer", "buyers")} found` : "Finding big buyers",
-    state.results.length === n && n ? `${known} with a launch record` : "Checking their history",
-    state.deja?.corpus_events ? `Searched ${state.deja.corpus_events} past launches` : "Searching past launches",
-  ];
+function step(dt) {
+  const s = S, span = 3600 - s.tape.start_s;
+  s.now = Math.min(3600, s.now + dt * span / REPLAY_SECONDS * s.speed);
+  [...s.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).forEach(b => {
+    if (b.entry_delay_s <= s.now && !s.arrived.has(b.wallet)) {
+      s.arrived.add(b.wallet); s.focus = b.wallet; s.focusUntil = s.now + span * .06;
+      setTimeout(() => { if (S === s && s.byWallet[b.wallet]) { s.resolved.add(b.wallet); render(); } }, reduced ? 0 : 700 / s.speed);
+    }
+  });
+  if (s.focus && s.now > s.focusUntil && s.resolved.has(s.focus)) s.focus = null;
+  (s.echo?.echoes || []).slice(0, 3).forEach(e => {
+    const here = e.wallets.filter(w => s.byBuyer[w]);
+    if (here.length >= 2 && here.every(w => s.resolved.has(w)) && !s.firedEchoes.includes(e)) { s.firedEchoes.push(e); if (!s.bannerEcho) s.bannerEcho = e; }
+  });
+  if (s.now >= 3600) {
+    s.buyers.forEach(b => { s.arrived.add(b.wallet); if (s.byWallet[b.wallet]) s.resolved.add(b.wallet); });
+    (s.echo?.echoes || []).slice(0, 3).forEach(e => { if (!s.firedEchoes.includes(e)) s.firedEchoes.push(e); });
+    s.bannerEcho = s.bannerEcho || s.echo?.echoes?.[0] || null;
+    s.focus = null; s.playing = false;
+  }
 }
-function drawDots() {
-  const by = Object.fromEntries(state.results.map(r => [r.wallet, r]));
-  $("dots").innerHTML = state.buyers.map(b => {
-    const r = by[b.wallet];
-    const cls = !r ? "" : !r.scoreable ? "none" : r.reflex >= STRONG ? "strong" : "known";
-    return `<span class="dot ${cls}" title="${short(b.wallet)}"></span>`;
-  }).join("") + (state.buyers.length ? `<span class="dots-label">cyan: better launch record than most</span>` : "");
+function loop(t) {
+  if (!S || !S.playing) return;
+  const dt = S.last ? Math.min(.5, (t - S.last) / 1000) : 0; S.last = t;
+  step(dt); render();
+  if (S.playing) raf = requestAnimationFrame(loop); else S.last = null;
 }
+function play() {
+  if (!S || !S.ready) return;
+  if (S.now >= 3600) resetPlayback();
+  if (reduced) { S.now = 3599.9; step(1); render(); return; }
+  S.playing = true; S.last = null; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); render();
+}
+function pause() { if (S) { S.playing = false; S.last = null; render(); } }
 
-/* ---------- buyers ---------- */
-function strongCard(w, i) {
-  const rows = w.entries.map(e => `<tr><td>${esc(e.symbol)}<span class="tok">${e.token.slice(0, 4)}</span></td><td>${day(e.bought_at)}</td>
-    <td class="r">${Math.exp(e.mfe60).toFixed(1)}×</td><td class="r">${e.failed_launch ? "failed" : ""}</td></tr>`).join("");
-  return `<article class="buyer" style="animation-delay:${i * 80}ms">
-    <div class="buyer-top"><span class="addr">${short(w.wallet)}</span>${walletLinks(w.wallet)}</div>
-    <div class="buyer-score"><span class="num" data-count="${w.reflex}">${w.reflex}</span>
-      <div><span class="rank">${w.rank_label}</span><div class="lab">Launch Reflex · ${w.confidence.toLowerCase()} confidence</div></div></div>
-    <p class="bought">${usd(w.usd)} bought · ${entered(w.entry_delay_s)}</p>
-    <ul class="facts">
-      <li><b>${pct(w.runner_rate)}</b> of their ${w.prior_launch_entries} earlier launches reached 2× within an hour</li>
-      ${w.failed_launch_rate ? `<li><b>${pct(w.failed_launch_rate)}</b> never reached $5k of trading</li>` : ""}
-    </ul>
-    <p class="blurb">${esc(w.summary)}</p>
-    <div class="buyer-foot"><details><summary>Why ${w.reflex}? →</summary>
-      <table><tr><td>Earlier launch</td><td>Bought</td><td class="r">Best in 1h</td><td></td></tr>${rows}</table></details></div>
-  </article>`;
+/* ---------- panels ---------- */
+function statusText() {
+  if (!S) return "Paste a launch, or pick a replay";
+  if (!S.ready) return S.stage;
+  if (S.now >= 3600) return S.echo?.echoes?.length ? "Replay complete · echoes found" : "Replay complete";
+  if (S.focus && !S.resolved.has(S.focus)) return "Buyer arrived · checking launch record";
+  if (S.focus) { const t = tierOf(S.byWallet[S.focus]); return t === "vip" ? "VIP detected" : t === "strong" ? "Strong record" : t === "known" ? "Known buyer" : "New face"; }
+  if (S.bannerEcho) return "Echo detected";
+  return S.playing ? "Rewinding the first hour…" : "Paused";
 }
-function knownRow(w) {
-  return `<div class="row"><span class="addr">${short(w.wallet)}</span><span class="rnum">${w.reflex}</span>
-    <span class="muted">${w.rank_label}</span><span class="muted">${usd(w.usd)} · ${entered(w.entry_delay_s)} · ${w.prior_launch_entries} earlier launches</span>${walletLinks(w.wallet)}</div>`;
-}
-function noneRow(w) {
-  return `<div class="row"><span class="addr">${short(w.wallet)}</span><span class="rnum muted">—</span>
-    <span class="muted">${usd(w.usd)}</span><span class="muted">${entered(w.entry_delay_s)} · no priced launch buys in the prior 30 days</span>${walletLinks(w.wallet)}</div>`;
+const ICONS = {
+  q: `<svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="none" stroke="#36e6f5" stroke-width="2"/><path d="M14 7l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5L6.8 12l5-.6z" fill="none" stroke="#36e6f5" stroke-width="1.6"/></svg>`,
+  s: `<svg viewBox="0 0 28 28"><path d="M16 2L6 16h7l-2 10 11-15h-7z" fill="none" stroke="#c46bff" stroke-width="2" stroke-linejoin="round"/></svg>`,
+  c: `<svg viewBox="0 0 28 28">${[[7, 9], [15, 6], [21, 12], [9, 18], [17, 19], [22, 23]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.6" fill="#c46bff"/>`).join("")}</svg>`,
+  p: `<svg viewBox="0 0 28 28"><path d="M3 21l7-7 5 4 9-10" fill="none" stroke="#c46bff" stroke-width="2.2"/><path d="M18 8h6v6" fill="none" stroke="#c46bff" stroke-width="2.2"/></svg>`,
+};
+function renderAnswer() {
+  const el = $("answer-panel");
+  if (!S || !S.buyers.length) return;
+  const n = S.buyers.length, done = S.ready && S.now >= 3600;
+  const seen = S.results.filter(r => S.resolved.has(r.wallet)), strongSeen = seen.filter(r => r.scoreable && r.reflex >= STRONG);
+  let head, sub = "";
+  if (!S.ready) head = `Checking <span class="n">${S.results.length}</span> of ${n} buyers…`;
+  else if (!done) { head = `<span class="n">${strongSeen.length}</span> strong ${plural(strongSeen.length, "record", "records")} so far`; sub = `${S.arrived.size} of ${n} big buyers have arrived.`; }
+  else {
+    const all = S.results.filter(r => r.scoreable && r.reflex >= STRONG).sort((a, b) => a.entry_delay_s - b.entry_delay_s);
+    head = all.length ? `<span class="n">${all.length} of the ${n}</span> biggest buyers ${plural(all.length, "has", "have")} a better launch record than most.`
+                      : `None of the ${n} biggest buyers has a better launch record than most.`;
+    if (all.length) sub = `The first strong buyer arrived ${Math.max(0, Math.round(all[0].entry_delay_s / 60))} minutes after launch.`;
+    const top10 = S.results.filter(r => r.scoreable && r.reflex >= 90).length;
+    if (top10) sub += ` ${top10} ${plural(top10, "ranks", "rank")} in the top 10%.`;
+  }
+  let signals = "";
+  const d = S.deja;
+  if (done && d && d.fingerprint && d.fingerprint_rank) {
+    const r = d.fingerprint_rank, f = d.fingerprint, lv = (v, w) => w[Math.min(4, Math.floor(v * 5))];
+    signals = `<div class="signals">
+      <div class="sig">${ICONS.q}<div><div class="k">Buyer quality</div><div class="v">${lv(r.actor_quality, ["Very low", "Low", "Typical", "High", "Very high"])}</div><div class="d">Average Launch Reflex ${f.actor_quality_pct}</div></div></div>
+      <div class="sig">${ICONS.s}<div><div class="k">Buying speed</div><div class="v">${lv(r.entry_speed, ["Much slower than usual", "Slower than usual", "Typical", "Faster than usual", "Much faster than usual"])}</div><div class="d">${f.entry_speed >= 60 ? "No strong buyer in the first hour" : `Strong buyers in by ${Math.round(f.entry_speed)} min`}</div></div></div>
+      <div class="sig">${ICONS.c}<div><div class="k">Buyer spread</div><div class="v">${lv(r.concentration, ["Widely spread", "Spread out", "Typical", "Concentrated", "Very concentrated"])}</div><div class="d">Top 3 buyers = ${pct(f.concentration)} of first-hour buying</div></div></div>
+      <div class="sig">${ICONS.p}<div><div class="k">Follow-through</div><div class="v">${lv(r.persistence, ["Very weak", "Weak", "Typical", "Strong", "Very strong"])}</div><div class="d">${pct(f.persistence)} of big buyers' buying came later</div></div></div>
+    </div>`;
+  }
+  el.innerHTML = `<h2>The answer</h2><p class="answer">${head}</p>${sub ? `<p class="answer-sub">${sub}</p>` : ""}${signals}`;
 }
 function renderBuyers() {
-  const done = new Set(state.results.map(r => r.wallet));
-  $("pending").innerHTML = state.buyers.filter(b => !done.has(b.wallet)).map(b =>
-    `<div class="row pending-row"><span class="addr">${short(b.wallet)}</span><span></span><span>${usd(b.usd)}</span><span>Checking earlier launch buys…</span><span></span></div>`).join("");
-  const strong = state.results.filter(r => r.scoreable && r.reflex >= STRONG).sort((a, b) => b.reflex - a.reflex);
-  const known = state.results.filter(r => r.scoreable && r.reflex < STRONG).sort((a, b) => b.reflex - a.reflex);
-  const none = state.results.filter(r => !r.scoreable);
-  const prev = $("strong").children.length;
-  $("strong-wrap").hidden = !strong.length;
-  $("strong").innerHTML = strong.map(strongCard).join("");
-  if (strong.length !== prev) countUp($("strong"));
-  $("known-wrap").hidden = !known.length;
-  $("known").innerHTML = known.map(knownRow).join("");
-  $("none-wrap").hidden = !none.length;
-  $("none-sum").textContent = `${none.length} ${plural(none.length, "buyer has", "buyers have")} no launch record yet`;
-  $("none").innerHTML = none.map(noneRow).join("");
+  const el = $("buyers");
+  if (!S || !S.buyers.length) return;
+  $("buyer-count").textContent = S.buyers.length;
+  const done = S.ready && S.now >= 3600, score = r => r?.scoreable ? r.reflex : -1;
+  const list = S.buyers.map(b => ({b, r: S.resolved.has(b.wallet) || !S.ready ? S.byWallet[b.wallet] : null}))
+    .sort((p, q) => done ? score(q.r) - score(p.r) : p.b.entry_delay_s - q.b.entry_delay_s);
+  el.innerHTML = list.map(({b, r}) => {
+    const tier = tierOf(r), here = !S.ready || S.arrived.has(b.wallet);
+    if (!here) return `<div class="bcard ghostcard" aria-hidden="true"><div class="top">${avatar(b.wallet)}</div></div>`;
+    const sc = !r ? `<span class="num" style="font-size:18px;color:var(--faint)">checking…</span>`
+      : r.scoreable ? `<span class="num">${r.reflex}</span><span class="rank">${esc(r.rank_label)}${tier === "vip" ? " · VIP" : ""}</span>` : `<span class="num">New face</span>`;
+    const meta = r && r.scoreable ? `${usd(b.usd)} bought<br>${r.prior_launch_entries} past launches` : `${usd(b.usd)} bought${r ? "<br>no launch record yet" : ""}`;
+    return `<button class="bcard ${tier}" data-wallet="${b.wallet}" ${r ? "" : "disabled"} aria-label="Buyer ${short(b.wallet)}">
+      <div class="top">${avatar(b.wallet, tier)}<span class="addr">${short(b.wallet)}</span></div>
+      <div class="score">${sc}</div><div class="meta">${meta}</div>${r ? `<div class="cta">${r.scoreable ? "View history →" : "View wallet →"}</div>` : ""}</button>`;
+  }).join("");
+  el.querySelectorAll("button.bcard").forEach(btn => btn.onclick = () => openBuyer(btn.dataset.wallet));
 }
-
-/* ---------- answer ---------- */
-function renderAnswer() {
-  const d = state.deja, res = state.results, n = res.length;
-  const known = res.filter(r => r.scoreable);
-  const strong = known.filter(r => r.reflex >= STRONG).sort((a, b) => b.reflex - a.reflex);
-  let head;
-  if (strong.length) head = `<span class="n">${strong.length}</span> of the ${n} biggest early buyers ${plural(strong.length, "has", "have")} a better launch record than most.`;
-  else if (known.length) head = `None of the ${n} biggest early buyers has a better launch record than most.`;
-  else head = `None of the ${n} biggest early buyers has a launch record yet.`;
-  const best = strong[0] || [...known].sort((a, b) => b.reflex - a.reflex)[0];
-  let sub = `${known.length} of ${n} have a launch record we could check.`;
-  if (best) sub += ` Strongest: ${short(best.wallet)}, Launch Reflex ${best.reflex}, ${best.rank_label.toLowerCase()}.`;
-
-  let signals = "", history = "";
-  if (d && d.fingerprint && d.fingerprint_rank) {
-    signals = `<div class="signals">${FEATURES.map(([k, name]) => `<div class="sig"><div class="k">${name}</div>
-      <div class="v">${level(k, d.fingerprint_rank[k])}</div><div class="d">${detail(k, d.fingerprint)}</div></div>`).join("")}</div>`;
+function renderEchoes() {
+  const el = $("echoes");
+  if (!S || !S.echo) return;
+  const done = S.ready && S.now >= 3600, list = done ? S.echo.echoes : S.firedEchoes;
+  $("echo-count").textContent = done ? S.echo.shared_launches : S.firedEchoes.length;
+  if (!list.length) {
+    el.innerHTML = `<p class="placeholder">${done ? "No shared launch history. None of these buyers were early on the same earlier launch in the last 30 days." : S.ready ? "Listening for echoes…" : "Checking launch records…"}</p>`;
+    return;
   }
-  if (d && d.analogues && d.analogues.length) {
-    const near = d.analogues.filter(a => !a.counter_example);
-    const down = near.filter(a => a.outcomes.ret24h_pct <= 0).length;
-    let line = down === near.length ? `<span class="down">All ${near.length} closest past launches were down</span> 24 hours later.`
-      : down === 0 ? `<span class="up">All ${near.length} closest past launches were up</span> 24 hours later.`
-      : `<span class="down">${down} of the ${near.length} closest past launches were down</span> 24 hours later, and <span class="up">${near.length - down} ${plural(near.length - down, "was", "were")} up</span>.`;
-    if (d.seen_before === false) line = `No past launch is close to this one, so treat these loosely. ` + line;
-    const c = d.analogues.find(a => a.counter_example);
-    if (c) line += ` Similar doesn't mean identical: <span class="then">${esc(c.symbol)}</span> ${c.outcomes.ret24h_pct > 0 ? "gained" : "lost"} <span class="${c.outcomes.ret24h_pct > 0 ? "up" : "down"}">${Math.abs(Math.round(c.outcomes.ret24h_pct))}%</span>.`;
-    history = `<p class="history">${line}<a href="#deja">See the matches ↓</a></p>`;
-  } else if (d && d.reason) {
-    history = `<p class="history" style="color:var(--dim);font-size:15px">${esc(d.reason)}</p>`;
+  const [first, ...rest] = list;
+  const mv = p => p === null || p === undefined ? `<span class="nodata">no price data</span>` : `<span class="${p > 0 ? "up" : "down"}">${moveText(p)}</span>`;
+  el.innerHTML = `<button class="echo-feature" data-echo="0">${coin(first.symbol, first.token)}
+      <div><div class="sym">${esc(cleanSym(first.symbol))}</div>
+      <div class="line">${first.wallets.length} of these buyers were also early on ${esc(cleanSym(first.symbol))}.</div>
+      <div class="move">${mv(first.best_move_1h_pct)}<small>best move within 1 h of their buys</small></div></div></button>
+    ${rest.map((e, i) => `<button class="echo-row" data-echo="${i + 1}">${coin(e.symbol, e.token)}<div><div class="esym">${esc(cleanSym(e.symbol))}</div>
+      <div class="esub">${e.wallets.length} of the same buyers · ${day(e.first_buys[e.first_buys.length - 1])}</div></div><div class="emove">${mv(e.best_move_1h_pct)}</div></button>`).join("")}
+    <p class="echo-note">An echo means these buyers were early on the same earlier launch. It shows repeated behaviour, not that the wallets are connected.${
+      S.echo.often_together.length ? ` ${S.echo.often_together.length} ${plural(S.echo.often_together.length, "pair of buyers shares", "pairs of buyers share")} at least half of their earlier launches.` : ""}</p>`;
+  el.querySelectorAll("[data-echo]").forEach(btn => btn.onclick = () => openEcho(list[+btn.dataset.echo]));
+}
+function renderSetups() {
+  const d = S?.deja, btn = $("toggle-setups");
+  btn.hidden = !(d && d.analogues && d.analogues.length);
+  if (btn.hidden) return;
+  $("setups").innerHTML = `<h2>Similar past setups <span class="count">research</span></h2>
+    <p>Past launches whose first hour looked most like this one, from ${d.corpus_events} sampled launches. Context, not a forecast.</p>
+    ${d.analogues.map(a => `<div class="setup-row"><span class="s">${esc(cleanSym(a.symbol))}</span><span>${day(a.date)}</span>
+      <span class="${a.outcomes.ret24h_pct > 0 ? "up" : "down"}">24 h ${a.outcomes.ret24h_pct > 0 ? "+" : ""}${Math.round(a.outcomes.ret24h_pct)}%</span>
+      <span class="nodata">${a.counter_example ? "went the other way" : a.closeness + " match"}</span><span class="nodata">${a.matched_on.map(m => m.feature).join(", ")}</span></div>`).join("")}`;
+}
+function render() {
+  $("status").textContent = statusText();
+  if (S && S.tape) {
+    const span = 3600 - S.tape.start_s, p = S.ready ? S.now - S.tape.start_s : 0;
+    $("bar").style.width = Math.min(100, p / span * 100) + "%";
+    $("clock").textContent = `${mmss(p)} / ${mmss(span)}`;
   }
-  $("answer").innerHTML = `<div class="answer"><h2 class="headline">${head}</h2><p class="subline">${sub}</p>${signals}${history}</div>`;
+  $("play").disabled = !S || !S.ready;
+  $("play").innerHTML = S && S.playing ? `<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="1" width="3.5" height="12" fill="#eceefa"/><rect x="8.5" y="1" width="3.5" height="12" fill="#eceefa"/></svg>`
+    : `<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1l10 6-10 6z" fill="#eceefa"/></svg>`;
+  $("play").setAttribute("aria-label", S && S.playing ? "Pause replay" : "Play replay");
+  $("share").disabled = !(S && S.ready && S.now >= 3600 && S.buyers.length);
+  clipId = 0;
+  drawScene(); drawTrack(); renderAnswer(); renderBuyers(); renderEchoes();
 }
 
-/* ---------- Déjà View ---------- */
-function analogueCard(a, liveRank, i) {
-  const o = a.outcomes, live = state.deja.fingerprint;
-  const names = Object.fromEntries(FEATURES);
-  const why = a.matched_on.map(m => `<li>Similar ${names[m.key].toLowerCase()}: <span class="n">${shortValue(m.key, live)}</span> now,
-    <span class="t">${shortValue(m.key, a.features)}</span> then</li>`).join("");
-  const dead = o.ret24h_no_trades ? " · no trades" : "";
-  return `<article class="an ${a.counter_example ? "counter" : ""}" style="animation-delay:${i * 90}ms">
-    <div class="an-head"><div>
-        <div class="badge ${a.counter_example ? "counter" : ""}">${a.counter_example ? "Counterexample" : a.closeness + " match"}</div>
-        <div class="an-sym">${esc(a.symbol)}</div>
-        <div class="an-meta">Launched ${day(a.date)} · ${a.scoreable_buyers} of ${a.top_buyers} buyers known</div></div>
-      <div style="width:76px;flex:none">${rings([{rank: a.rank, color: "#c86bff", width: 6, past: true}, {rank: liveRank, color: "#38e1f2", width: 2.2, blend: "screen"}])}</div></div>
-    ${a.counter_example ? `<p class="counter-line">Similar buyers. Different outcome.</p>` : ""}
-    <div class="big-out ${o.ret24h_pct > 0 ? "up" : "down"}">${signed(o.ret24h_pct)}<small>24 hours after its first hour${dead}</small></div>
-    <div class="small-outs"><span>6h <b class="${o.ret6h_pct > 0 ? "up" : "down"}">${signed(o.ret6h_pct)}</b></span><span>7d <b class="${o.ret7d_pct > 0 ? "up" : "down"}">${signed(o.ret7d_pct)}</b></span></div>
-    <ul class="why">${why}</ul>
-    ${tokenLinks(a.token)}
-  </article>`;
+/* ---------- drawers ---------- */
+let lastFocus = null;
+function openDrawer(html) {
+  lastFocus = document.activeElement;
+  $("drawer-root").innerHTML = `<div class="scrim" id="scrim"></div><aside class="drawer" role="dialog" aria-modal="true"><button class="close" id="close">Close ✕</button>${html}</aside>`;
+  $("scrim").onclick = closeDrawer; $("close").onclick = closeDrawer; $("close").focus();
 }
-function renderDeja() {
-  const d = state.deja, el = $("deja");
-  if (!d || !d.fingerprint || !d.analogues.length) { el.hidden = true; return; }
-  el.hidden = false;
-  const fp = d.fingerprint, rank = d.fingerprint_rank;
-  const title = d.seen_before === false ? "We haven't seen this one before." : "We've seen this before.";
-  const bt = d.backtest || {};
-  const btText = bt.verdict === "SIGNAL"
-    ? `In a backtest on ${bt.events} past launches, launches with similar buyers tended to have similar next-day outcomes
-       (rank correlation ${bt.ret24h.rho.toFixed(2)}). Most of that came from buyer concentration. Only ${bt.winners_24h} of ${bt.events} were up a day later.`
-    : bt.verdict ? "In our backtest, similarity did not predict what happened next." : "";
-  el.innerHTML = `<h2 class="deja-title ghost" data-text="${title}">${title}</h2>
-    <p class="block-sub">This launch's first hour, compared with ${d.corpus_events} past pump.fun launches at the same point.</p>
-    <div class="print">
-      ${rings([{rank, color: "#38e1f2", width: 7}], true)}
-      <div class="readouts">${FEATURES.map(([k, name]) => `<div class="readout"><div class="name">${name}</div>
-        <div><div class="val"><span>${level(k, rank[k])}</span> · ${shortValue(k, fp)}</div><div class="ctx">${detail(k, fp)}</div></div></div>`).join("")}</div>
-      <p class="print-note">The launch fingerprint, from ${fp.scoreable_buyers} of ${fp.top_buyers} top buyers with a launch record.
-        A longer ring means a higher value than most past launches. For buying speed, longer means faster.</p>
-    </div>
-    <div class="legend"><span class="l-now">This launch</span><span class="l-then">Past launch</span></div>
-    <div class="analogues">${d.analogues.map((a, i) => analogueCard(a, rank, i)).join("")}</div>
-    <p class="backtest">${btText} This is context, not a prediction.</p>`;
+function closeDrawer() { if ($("drawer-root").innerHTML) { $("drawer-root").innerHTML = ""; lastFocus?.focus?.(); } }
+addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+function openBuyer(wallet) {
+  const r = S.byWallet[wallet], b = S.byBuyer[wallet], tier = tierOf(r);
+  const arrived = `${usd(b.usd)} bought · arrived ${Math.max(0, Math.round(b.entry_delay_s / 60))} min after launch`;
+  if (!r.scoreable) {
+    openDrawer(`<div class="eyebrow">New face</div><h3>${short(wallet)}</h3>
+      <div class="who">${avatar(wallet, tier)}<div style="font:12px var(--mono);color:var(--dim)">${arrived}</div></div>
+      <p class="note">${esc(r.reason)} Nansen's own page may show more, such as older trades or other chains.</p>${walletLinks(wallet)}`);
+    return;
+  }
+  const rows = (r.entries || []).map(e => `<tr><td>${esc(cleanSym(e.symbol))}</td><td>${day(e.bought_at)}</td>
+    <td class="r ${e.mfe60 > 0 ? "up" : "down"}">${mfeText(e.mfe60)}</td><td class="r nodata">${e.failed_launch ? "never reached $5k" : ""}</td></tr>`).join("");
+  const echoesHere = (S.echo?.echoes || []).filter(e => e.wallets.includes(wallet));
+  openDrawer(`<div class="eyebrow">Where we've seen this buyer before</div><h3>${short(wallet)}</h3>
+    <div class="who">${avatar(wallet, tier)}<div><div style="font:900 44px/1 var(--display);color:${TIER_COLOR[tier]}">${r.reflex}</div>
+      <div style="font:12px var(--mono);color:var(--dim)">Launch Reflex · ${esc(r.rank_label)} · ${r.confidence.toLowerCase()} confidence</div>
+      <div style="font:12px var(--mono);color:var(--dim);margin-top:4px">${arrived}</div></div></div>
+    <p style="margin-top:16px"><b style="color:var(--now)">${pct(r.runner_rate)}</b> of their ${r.prior_launch_entries} earlier launches offered a 2× move within an hour of their buy.</p>
+    ${echoesHere.length ? `<p class="eyebrow" style="margin-top:18px">Also early, with other buyers here, on</p><p>${echoesHere.map(e => esc(cleanSym(e.symbol))).join(" · ")}</p>` : ""}
+    <table><tr><th>Earlier launch</th><th>Bought</th><th class="r">Best in 1 h</th><th></th></tr>${rows}</table>
+    <p class="note">Launch Reflex measures whether this buyer repeatedly got into launches that later offered strong first-hour moves. It does not measure realised profit.</p>
+    ${walletLinks(wallet)}`);
+}
+function openEcho(e) {
+  const rows = e.wallets.map((w, i) => ({w, at: e.first_buys[i]})).filter(x => S.byBuyer[x.w]);
+  openDrawer(`<div class="eyebrow">Echo</div><h3>${esc(cleanSym(e.symbol))}</h3>
+    <p>${rows.length} of today's biggest buyers were also early on ${esc(cleanSym(e.symbol))}.</p>
+    <table><tr><th>Buyer</th><th>First buy on ${esc(cleanSym(e.symbol))} (UTC)</th><th class="r">Today</th></tr>
+    ${rows.map(({w, at}) => { const r = S.byWallet[w]; return `<tr><td>${avatar(w, tierOf(r), "mini")}${short(w)}</td>
+      <td>${new Date(at).toISOString().slice(0, 16).replace("T", " ")}</td><td class="r">${r?.scoreable ? "Reflex " + r.reflex : "New face"}</td></tr>`; }).join("")}</table>
+    <p class="note">Best move within an hour of these buyers' entries: ${moveText(e.best_move_1h_pct)}. This shows repeated behaviour. It does not show that the wallets are connected.</p>
+    ${tokenLinks(e.token)}`);
+}
+
+/* ---------- share card ---------- */
+async function shareCard() {
+  const c = document.createElement("canvas"); c.width = 1200; c.height = 630; const g = c.getContext("2d");
+  const grad = g.createRadialGradient(900, 0, 50, 700, 300, 900); grad.addColorStop(0, "#2a1450"); grad.addColorStop(1, "#07080f");
+  g.fillStyle = grad; g.fillRect(0, 0, 1200, 630);
+  await document.fonts.ready;
+  const strong = S.results.filter(r => r.scoreable && r.reflex >= STRONG).length;
+  const best = S.results.filter(r => r.scoreable).sort((a, b) => b.reflex - a.reflex)[0];
+  g.font = "900 64px 'Big Shoulders Display'"; g.fillStyle = "#c46bff"; g.fillText("DÉJÀ VIEW", 63, 103); g.fillStyle = "#f3eaff"; g.fillText("DÉJÀ VIEW", 60, 100);
+  g.fillStyle = "#36e6f5"; g.font = "600 18px 'Martian Mono'"; g.fillText("SAME FACES. DIFFERENT LAUNCH.", 60, 140);
+  g.fillStyle = "#ffd8ff"; g.font = "900 96px 'Big Shoulders Display'"; g.fillText("$" + cleanSym(S.event.symbol).replace(/^\$/, "").toUpperCase(), 60, 255);
+  g.fillStyle = "#eceefa"; g.font = "800 44px 'Big Shoulders Display'";
+  g.fillText(`${strong} OF THE ${S.buyers.length} BIGGEST BUYERS HAVE A`, 60, 335); g.fillText("BETTER LAUNCH RECORD THAN MOST", 60, 385);
+  g.font = "500 24px Onest"; g.fillStyle = "#9aa0bf";
+  if (best) g.fillText(`Strongest Launch Reflex: ${best.reflex} · ${best.rank_label}`, 60, 435);
+  const e = S.echo?.echoes?.[0];
+  if (e) { g.fillStyle = "#c46bff"; g.font = "700 25px 'Martian Mono'"; g.fillText(`ECHO: ${e.wallets.length} were also early on ${cleanSym(e.symbol)}`, 60, 495); }
+  g.fillStyle = "#7d84a6"; g.font = "16px 'Martian Mono'"; g.fillText("Historical context, not a prediction · Data from the Nansen API", 60, 590);
+  const faces = [...S.results].sort((a, b) => (b.scoreable ? b.reflex : -1) - (a.scoreable ? a.reflex : -1)).slice(0, 6);
+  await Promise.all(faces.map((r, i) => new Promise(done => {
+    const img = new Image(); img.onload = () => { g.drawImage(img, 770 + (i % 3) * 136, 180 + Math.floor(i / 3) * 150, 120, 120); done(); }; img.onerror = done;
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(avatar(r.wallet, tierOf(r)).replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"'));
+  })));
+  const a = document.createElement("a"); a.download = `dejaview-${cleanSym(S.event.symbol).replace(/[^\w]/g, "") || "scan"}.png`; a.href = c.toDataURL("image/png"); a.click();
 }
 
 /* ---------- scan ---------- */
-function scan(token) {
-  if (/^[a-z0-9]{32,44}$/.test(token)) {
-    $("error").textContent = "This address is all lowercase. Solana addresses are case-sensitive, so copy it again from the original source.";
-    return;
-  }
+function scan(token, replay) {
+  $("error").textContent = "";
+  if (/^[a-z0-9]{32,44}$/.test(token)) { $("error").textContent = "This address is all lowercase. Solana addresses are case-sensitive, so copy it again from the original source."; return; }
   if (es) es.close();
-  state = {buyers: [], results: [], deja: null};
-  $("go").disabled = true;
-  showGuide(false);
-  $("story").hidden = false;
-  ["event", "error", "answer", "dots"].forEach(id => $(id).innerHTML = "");
-  $("buyers").hidden = true; $("deja").hidden = true;
-  ["strong-wrap", "known-wrap", "none-wrap"].forEach(id => $(id).hidden = true);
-  $("pending").innerHTML = ""; $("strong").innerHTML = "";
-  setStage(0, stageLabels());
-  es = new EventSource("/api/scan?token=" + encodeURIComponent(token));
+  cancelAnimationFrame(raf); closeDrawer();
+  S = {event: null, buyers: [], results: [], byWallet: {}, byBuyer: {}, tape: null, echo: null, deja: null, ready: false, playing: false,
+       speed: +document.querySelector(".speed[aria-pressed=true]").dataset.speed, now: 0, arrived: new Set(), resolved: new Set(), firedEchoes: [],
+       bannerEcho: null, focus: null, stage: "Rewinding the first hour…"};
+  $("go").disabled = true; $("setups").hidden = true; $("toggle-setups").hidden = true;
+  $("answer-panel").innerHTML = `<h2>The answer</h2><p class="placeholder">Rewinding the first hour…</p>`;
+  $("buyers").innerHTML = `<p class="placeholder">Finding the biggest first-hour buyers…</p>`;
+  $("echoes").innerHTML = `<p class="placeholder">Listening for echoes…</p>`;
+  render();
+  es = new EventSource(`/api/scan?token=${encodeURIComponent(token)}${replay ? "&replay=1" : ""}`);
   es.onmessage = m => {
     const d = JSON.parse(m.data);
-    if (d.kind === "event") {
-      $("event").innerHTML = `<div class="event"><span class="sym">${esc(d.symbol)}</span>
-        <span class="kv">Deployed <b>${d.deployment.slice(0, 16).replace("T", " ")} UTC</b></span>
-        <span class="kv">Launch moment <b>${d.t0.slice(0, 16).replace("T", " ")} UTC</b></span>${tokenLinks(d.token)}</div>` +
-        (d.validated_launchpad ? "" : `<div class="warn">This is not a pump.fun launch. Déjà View was tested on pump.fun launches only.</div>`);
-      setStage(1, stageLabels());
-    } else if (d.kind === "buyers") {
-      state.buyers = d.buyers;
-      setStage(2, stageLabels()); drawDots();
-      $("buyers").hidden = false;
-      $("buyers-sub").textContent = `The ${d.buyers.length} biggest buyers of $500 or more in the first hour, strongest launch record first.`;
-      renderBuyers();
-    } else if (d.kind === "wallet") {
-      state.results.push(d);
-      drawDots(); renderBuyers();
-    } else if (d.kind === "stage" && d.key === "match") {
-      setStage(3, stageLabels());
-    } else if (d.kind === "deja_view") {
-      state.deja = d;
-      renderAnswer(); renderDeja();
-    } else if (d.kind === "done") {
-      setStage(4, stageLabels());
-      if (!state.deja) renderAnswer();
-      finish();
-    } else if (d.kind === "error") {
-      $("error").textContent = d.message;
-      finish();
+    if (d.kind === "event") { S.event = d; S.stage = "Finding the biggest first-hour buyers…"; }
+    else if (d.kind === "buyers") {
+      S.buyers = d.buyers; S.tape = d.tape; d.buyers.forEach(b => { S.byBuyer[b.wallet] = b; S.arrived.add(b.wallet); });
+      S.stage = `${d.buyers.length} big buyers found · checking launch records`;
     }
+    else if (d.kind === "wallet") { S.results.push(d); S.byWallet[d.wallet] = d; S.resolved.add(d.wallet); S.stage = `Checking launch records · ${S.results.length} of ${S.buyers.length}`; }
+    else if (d.kind === "echo") S.echo = d;
+    else if (d.kind === "stage" && d.key === "match") S.stage = "Listening for echoes…";
+    else if (d.kind === "deja_view") S.deja = d;
+    else if (d.kind === "done") {
+      finish(); S.ready = true; resetPlayback(); renderSetups();
+      const at = +new URLSearchParams(location.search).get("at");  /* jump to a replay second, for testing */
+      if (!S.buyers.length) { $("error").textContent = "No buyers of $500 or more in this launch's first hour."; render(); }
+      else if (at) { step((at - S.tape.start_s) / (3600 - S.tape.start_s) * REPLAY_SECONDS); render(); }
+      else play();
+      return;
+    }
+    else if (d.kind === "error") { $("error").textContent = d.message; finish(); S = null; }
+    render();
   };
   es.onerror = () => { if (es && es.readyState !== 2) { $("error").textContent = "The connection to the scan dropped. Scan again."; finish(); } };
 }
-
-function showGuide(on) { $("guide").hidden = !on; $("howto").setAttribute("aria-expanded", on); }
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
-$("howto").onclick = () => showGuide($("guide").hidden);
-$("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t); };
-document.querySelectorAll(".chip").forEach(b => b.onclick = () => { $("token").value = b.dataset.token; scan(b.dataset.token); });
-const auto = new URLSearchParams(location.search).get("token");
-if (auto) { $("token").value = auto; scan(auto); }
+$("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t, false); };
+$("play").onclick = () => S && S.playing ? pause() : play();
+$("share").onclick = () => shareCard();
+document.querySelectorAll(".speed").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".speed").forEach(o => o.setAttribute("aria-pressed", o === b)); if (S) S.speed = +b.dataset.speed;
+});
+$("toggle-setups").onclick = () => { const on = $("setups").hidden; $("setups").hidden = !on; $("toggle-setups").setAttribute("aria-expanded", on); };
+$("toggle-method").onclick = () => { const on = $("method").hidden; $("method").hidden = !on; $("toggle-method").setAttribute("aria-expanded", on); };
+
+fetch("/api/replays").then(r => r.json()).then(({replays, public: pub}) => {
+  $("examples").innerHTML = replays.length ? `<span>Replay a launch:</span>` + replays.slice(0, 4).map(r =>
+    `<button class="chip" data-token="${r.token}">${esc(cleanSym(r.symbol))} · ${day(r.t0)}</button>`).join("") : "";
+  $("examples").querySelectorAll(".chip").forEach(b => b.onclick = () => { $("token").value = b.dataset.token; scan(b.dataset.token, true); });
+  if (pub) $("token").placeholder = "Public demo: pick a replay below";
+}).catch(() => {});
+render();
+const q = new URLSearchParams(location.search);
+if (q.get("token")) { $("token").value = q.get("token"); scan(q.get("token"), q.get("replay") === "1"); }
 </script>
 </body>
 </html>
