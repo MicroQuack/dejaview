@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "web" / "art" / "raw"
 OUT = ROOT / "web" / "art"
 GUEST_W, HEAD_PX, BG_W = 300, 128, 1672
-SKIP = {"3-6"}  # sheet 3, cell 6: the plant creature looks too close to a famous film character
+SKIP = set()  # sheet-cell ids to leave out, for example "3-6"
 
 # Per-guest head nudges, as fractions of the sprite: (dx, dy, radius scale). Tuned by eye.
 HEAD_FIX = {"2-6": (.05, .02, 1), "2-7": (.03, .09, 1)}

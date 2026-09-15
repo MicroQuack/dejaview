@@ -1,8 +1,8 @@
 # Déjà View art, round 2: prompts to paste
 
 **Why:** the page now uses the painted club as a backdrop, with buyers as portrait cards along the bottom and the
-bouncer on the right. Grok's visual review (`docs/reviews/2026-09-15-grok-visual.md`) found three art gaps:
-blank boards, a still scene, and a bouncer who looks like a famous actor.
+bouncer on the right. Grok's visual review (`docs/reviews/2026-09-15-grok-visual.md`) found two art gaps:
+blank boards and a still scene. **No new characters:** the page uses all 24 guests and the current bouncer.
 
 **Save every file into `web/art/raw/`** with the file name given. Claude compresses them and wires them in.
 
@@ -35,20 +35,7 @@ Prompt:
 > and "KNOWN", a dashed grey ring and "NEW FACE". No other writing anywhere. No people, no cars. The bottom third of the
 > image is plain red carpet and wet pavement. Dark purple night, moody, high detail.
 
-## 2. New bouncer (Codex or Grok Imagine)
-
-- **File:** `bouncer-v2.png`, portrait, at least 1024 × 1536.
-- **Same pose as the current one**, so he fits the same spot: waist-up, arms crossed, three-quarter view facing left.
-
-Prompt:
-
-> Cinematic neon nightlife illustration, semi-realistic stylised 3D. An original nightclub bouncer, clearly not
-> resembling any real person or celebrity. Heavy-set, thick dark beard with grey streaks, shaved sides with a short
-> topknot, small round violet-tinted glasses, a curly earpiece wire, black suit, black shirt, silver lapel pin. Arms
-> crossed, calm and unimpressed. Waist-up, three-quarter view facing left. Magenta and cyan rim light. Flat pure green
-> #00FF00 background with no shadow on it and no green on the character. No text, no letters, no logos.
-
-## 3. Living background loop (Grok Imagine, image to video)
+## 2. Living background loop (Grok Imagine, image to video)
 
 - **Do this after image 1 exists.** Start from `club-bg-v2.png`.
 - **File:** `club-loop.mp4`, 6 seconds, same framing as the still.
@@ -60,9 +47,9 @@ Prompt:
 > from the disco ball turns slowly inside the doorway. Palm leaves and velvet ropes sway slightly in a night breeze. The
 > marquee glow pulses softly. Seamless loop, cinematic.
 
-## 4. Optional: bouncer idle loop (Grok Imagine, image to video)
+## 3. Optional: bouncer idle loop (Grok Imagine, image to video)
 
-- **Only after 1 to 3 are done.** Start from `bouncer-v2.png`.
+- **Only after 1 and 2 are done.** Start from the current `bouncer.png`.
 - **File:** `bouncer-loop.mp4`, 3 seconds.
 
 Prompt:
@@ -73,11 +60,11 @@ Prompt:
 ## Not needed
 
 - **Arrival clips for each guest.** The page now brings each guest in one at a time, so the portraits stay as they are.
-- **Redoing the 24 guest portraits.**
+- **New guests or a new bouncer.**
 
 ## After the files exist (Claude's part)
 
-1. Rebuild `web/art/` with `tools/build_art.py`: new background, cut-out bouncer, and compressed loops.
+1. Rebuild `web/art/` with `tools/build_art.py`: new background and compressed loops.
 2. Play `club-loop` behind the cards, with the still image as the fallback.
 3. Remove the green from `bouncer-loop` into a transparent video, and fall back to the still bouncer.
 4. Keep the total art under about 8 MB.

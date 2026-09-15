@@ -34,8 +34,8 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 
 1. **Done 2026-09-15: art wired in.** `tools/build_art.py` turns `web/art/raw/` into `web/art/` (WebP plus
    `manifest.json`). The page uses the painted club, bouncer, 23 guests, and head avatars, and falls back to the
-   code-drawn scene per image. The plant creature is skipped (too close to Groot). Raw PNGs are not committed.
-   Open question: 23 characters for 8 buyers means most launches show two buyers with the same face.
+   code-drawn scene per image. All 24 guests are used, and buyers at one launch always get different faces.
+   Raw PNGs are not committed. The user rejected likeness worries about the bouncer and the plant creature: use all art.
 2. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
 3. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
    (the `gh` login works, but no remote exists yet), and give the user the Render dashboard link.
