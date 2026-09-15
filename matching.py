@@ -138,6 +138,17 @@ def loo_nearest_distances(events, only):
     return out
 
 
+def corpus_rank(features, corpus):
+    """Where each feature sits among corpus launches, 0 to 1, for drawing. Entry speed is inverted so 1 is fastest."""
+    out = {}
+    for f in FEATURES:
+        vals = [e["features"][f] for e in corpus["events"]]
+        below = sum(v < features[f] for v in vals) + 0.5 * sum(v == features[f] for v in vals)
+        rank = below / len(vals)
+        out[f] = round(1 - rank if f == "entry_speed" else rank, 3)
+    return out
+
+
 def closeness(d, corpus):
     t = corpus["distance_thresholds"]
     return "close" if d <= t["median"] else "moderate" if d <= t["p95"] else "distant"
@@ -148,8 +159,9 @@ def card(d, event, target, corpus, counter=False):
     gaps = sorted(only, key=lambda f: abs(z(target, stats, (f,))[0] - z(event["features"], stats, (f,))[0]))
     return {"token": event["token"], "symbol": event["symbol"], "date": event["date"],
             "distance": round(d, 2), "closeness": closeness(d, corpus), "counter_example": counter,
-            "matched_on": [{"feature": FEATURE_NAMES[f], "this": describe_feature(f, target),
+            "matched_on": [{"key": f, "feature": FEATURE_NAMES[f], "this": describe_feature(f, target),
                             "then": describe_feature(f, event["features"])} for f in gaps[:2]],
+            "features": event["features"], "rank": corpus_rank(event["features"], corpus),
             "scoreable_buyers": event["scoreable_buyers"], "top_buyers": event["top_buyers"],
             "outcomes": event["outcomes"], "winner": event["outcomes"]["ret24h_pct"] > 0}
 

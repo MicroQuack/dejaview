@@ -273,7 +273,8 @@ class Scanner:
             elif out["fingerprint"]:
                 found = mt.analogues(out["fingerprint"], token, corpus)
                 out.update(analogues=found["cards"], seen_before=found["seen_before"],
-                           corpus_events=len(corpus["events"]))
+                           corpus_events=len(corpus["events"]),
+                           fingerprint_rank=mt.corpus_rank(out["fingerprint"], corpus))
         self.emit("deja_view", **out)
         return out
 
