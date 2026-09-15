@@ -21,6 +21,7 @@ from reflex import Scanner
 ROOT = Path(__file__).resolve().parent
 PORT = int(os.environ.get("DEJAVIEW_PORT", "8420"))
 TOKEN_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")  # Solana base58 address
+STATIC = {"/bg.jpg": "image/jpeg"}
 
 client = NansenClient()
 scan_lock = threading.Lock()
@@ -44,6 +45,14 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_text(200, (ROOT / "web" / "index.html").read_text(), "text/html; charset=utf-8")
         if url.path == "/api/scan":
             return self.scan(parse_qs(url.query).get("token", [""])[0].strip())
+        if url.path in STATIC:
+            data = (ROOT / "web" / url.path.lstrip("/")).read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", STATIC[url.path])
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "max-age=3600")
+            self.end_headers()
+            return self.wfile.write(data)
         return self.send_text(404, "Not found")
 
     def scan(self, token):

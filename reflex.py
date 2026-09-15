@@ -84,7 +84,8 @@ class Scanner:
                 break
         self.t0_cache.save()
         if not info or not info.get("deployment_timestamp"):
-            raise ValueError("Nansen has no deployment record for this token on Solana.")
+            raise ValueError("Nansen has no deployment record for this token on Solana. Check the address: "
+                             "Solana addresses are case-sensitive, and pump.fun addresses end in \"pump\".")
         if not info.get("t0_timestamp"):
             raise ValueError("This token never reached $5,000 of DEX volume, so it has no launch moment.")
         return info
