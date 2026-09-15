@@ -93,8 +93,9 @@ def main():
                 head = head_box(sprite, HEAD_FIX.get(cell, (0, 0, 1)))
                 # Square head crop for the round avatars.
                 s = sprite.shape[1]
-                side = round(head["r"] * 2.7 * s)
-                x0, y0 = round(head["x"] * s - side / 2), round(head["y"] * sprite.shape[0] - side / 2)
+                # Loose enough that hair, ears, and hats stay inside the circle.
+                side = round(head["r"] * 3.4 * s)
+                x0, y0 = round(head["x"] * s - side / 2), round(head["y"] * sprite.shape[0] - side * .42)
                 square = np.zeros((side, side, 4), np.uint8)
                 ys0, xs0 = max(0, y0), max(0, x0)
                 ys1, xs1 = min(sprite.shape[0], y0 + side), min(s, x0 + side)

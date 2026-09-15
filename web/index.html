@@ -55,7 +55,42 @@
   .error { margin-top: 16px; padding: 10px 14px; border-left: 3px solid var(--gold); background: rgba(245,197,66,.08); max-width: 560px; font-size: 14px; }
   .error:empty { display: none; }
   .scene { position: relative; margin-right: -24px; min-height: 520px; overflow: hidden; background: linear-gradient(#1a0f33, #0a0a16 77%, #07070f 77%); }
-  .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scene .club { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; }
+  .scene .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,8,15,.35) 0%, transparent 25%, transparent 45%, rgba(7,8,15,.9) 88%); }
+  .party { position: absolute; left: 18px; top: 16px; padding: 7px 14px; border-radius: 6px; background: rgba(10,8,22,.72); border: 1px solid rgba(196,107,255,.45);
+           backdrop-filter: blur(6px); font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .party span { font: 900 22px/1 var(--display); letter-spacing: .02em; color: #ffd8ff; margin-right: 6px; text-shadow: 0 0 12px rgba(196,107,255,.8); vertical-align: -2px; }
+  .lineup { position: absolute; left: 18px; right: 18px; bottom: 18px; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 8px; align-items: end; }
+  .guest { position: relative; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 2px solid rgba(236,238,250,.14);
+           background: linear-gradient(180deg, #2a1650, #0e0c1e); transition: transform .35s, border-color .35s, box-shadow .35s; }
+  .guest > img, .guest > svg:not(.crown) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; }
+  .guest .crown { position: absolute; top: 5px; left: 6px; width: 24px; height: 15px; filter: drop-shadow(0 0 4px rgba(245,197,66,.8)); }
+  .guest .tag { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 4px 6px; text-align: center; font: 600 10px/1.2 var(--mono); color: var(--dim);
+                background: linear-gradient(180deg, transparent, rgba(7,8,15,.94) 55%); }
+  .guest .tag b { font-size: 12px; }
+  .guest.waiting { border-style: dashed; border-color: rgba(236,238,250,.1); background: rgba(14,12,30,.55); }
+  .guest.waiting > img, .guest.waiting > svg { filter: brightness(0); opacity: .45; }
+  .guest.pending .tag { color: var(--text); }
+  .guest.fresh { border-color: rgba(154,160,191,.45); } .guest.fresh .tag { color: var(--text); }
+  .guest.known { border-color: rgba(201,205,224,.55); } .guest.known .tag { color: #dfe2f2; }
+  .guest.strong { border-color: var(--now); box-shadow: 0 0 16px rgba(54,230,245,.35); } .guest.strong .tag { color: var(--now); }
+  .guest.vip { border-color: var(--gold); box-shadow: 0 0 22px rgba(245,197,66,.5); } .guest.vip .tag { color: var(--gold); }
+  .guest.focus { transform: translateY(-10px); }
+  .guest.arrive { animation: arrive .7s cubic-bezier(.2,.8,.2,1) both; }
+  .guest.arrive > img { animation: lights-up .9s ease-out both; }
+  @keyframes arrive { from { transform: translate(-28px, 0); opacity: .3; } }
+  @keyframes lights-up { from { filter: brightness(0); } }
+  .guest.vip { animation: vip-glow 2.4s ease-in-out infinite; }
+  @keyframes vip-glow { 50% { box-shadow: 0 0 34px rgba(245,197,66,.8); } }
+  .guest.echo { outline: 2px solid var(--then); outline-offset: 2px; }
+  .echo-tag { position: absolute; top: 5px; right: 5px; max-width: calc(100% - 10px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+              padding: 2px 5px; border-radius: 4px; background: rgba(40,14,70,.9); color: #efd9ff; font: 600 9px var(--mono); }
+  .bouncer { position: absolute; right: 1%; bottom: 0; height: 64%; }
+  .bouncer img { width: 100%; height: 100%; display: block; }
+  .says { position: absolute; right: 62%; top: 9%; white-space: nowrap; padding: 7px 13px; border-radius: 18px; background: rgba(10,6,20,.88);
+          border: 1px solid var(--then); color: #efd9ff; font: 15px var(--hand); transform: rotate(-3deg); box-shadow: 0 0 18px rgba(196,107,255,.35);
+          animation: pop .3s both; }
 
   /* ---------- replay strip ---------- */
   .strip { margin-top: -6px; background: linear-gradient(180deg, rgba(10,14,30,.96), rgba(8,10,22,.96)); border: 1px solid rgba(54,230,245,.28);
@@ -77,14 +112,19 @@
   .track > :first-child, .track > :first-child > svg { width: 100%; height: 100%; display: block; }
   .mark { position: absolute; top: 40px; width: 38px; height: 38px; margin-left: -19px; }
   .mark svg { width: 100%; height: 100%; display: block; }
+  .mark { transition: opacity .4s, transform .4s; }
+  .mark.echoed { transform: scale(1.15); z-index: 1; }
+  .mark.echoed svg { border-radius: 50%; box-shadow: 0 0 0 3px #c46bff, 0 0 18px 4px rgba(196,107,255,.75); }
+  .mark.dim { opacity: .45; }
   .tick { position: absolute; top: 84px; width: 2px; height: 8px; margin-left: -1px; background: var(--now); opacity: .6; }
   .callout { position: absolute; top: -6px; transform: translateX(-50%); background: rgba(8,12,26,.95); border: 1px solid; border-radius: 8px;
              padding: 5px 10px; font: 11px var(--mono); white-space: nowrap; animation: pop .3s both; }
-  .echo-banner { position: absolute; left: 50%; top: 2px; transform: translateX(-50%); padding: 6px 14px; border-radius: 6px; white-space: nowrap;
+  .echo-banner { position: absolute; right: 0; top: 2px; padding: 6px 14px; border-radius: 6px; white-space: nowrap;
                  background: rgba(40,14,70,.92); border: 1px solid var(--then); color: #efd9ff; font: 600 12px var(--mono); letter-spacing: .04em;
                  box-shadow: 0 0 24px rgba(196,107,255,.45); animation: pop .5s ease-out both; max-width: 96%; overflow: hidden; text-overflow: ellipsis; }
   .echo-banner b { color: var(--then); letter-spacing: .12em; margin-right: 8px; }
   @keyframes pop { from { opacity: 0; } }
+  @media (max-width: 900px) { .echo-banner { right: auto; left: 50%; transform: translateX(-50%); } }
 
   /* ---------- panels ---------- */
   .panels { display: grid; grid-template-columns: 1.15fr 1.25fr 1fr; gap: 14px; margin-top: 14px; }
@@ -181,7 +221,8 @@
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; }
     .scene { margin: 0 -24px; min-height: 380px; }
-    .scene.art { min-height: 0; aspect-ratio: 16 / 9; }
+    .scene.art { min-height: 380px; }
+    .lineup { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .hero-copy { padding-bottom: 0; }
     .graffiti { display: none; }
     .panels { grid-template-columns: 1fr; }
@@ -361,11 +402,25 @@ fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
     loadImage(`art/heads/${g.id}.webp`, img => { ART.heads[g.id] = img; artChanged(); });
   });
 }).catch(() => {});
-/* The same wallet always gets the same character. Returns null until that character's image has loaded. */
+/* A wallet keeps the same character in every launch, unless an earlier arrival in this launch already has it:
+   then it takes the next free one, so no two buyers at one party share a face. */
+let faceCache = {key: "", map: {}};
+function faceIndex(seed, n) {
+  const usual = w => Math.floor(rng(w)() * n);
+  if (!S?.byBuyer[seed]) return usual(seed);
+  const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).map(b => b.wallet), key = n + order.join();
+  if (faceCache.key !== key) {
+    const taken = new Set(), map = {};
+    order.forEach(w => { let i = usual(w); while (taken.has(i) && taken.size < n) i = (i + 1) % n; taken.add(i); map[w] = i; });
+    faceCache = {key, map};
+  }
+  return faceCache.map[seed];
+}
+/* Returns null until that character's image has loaded. */
 function guestArt(seed, kind) {
   const list = ART.manifest?.guests;
   if (!list) return null;
-  const g = list[Math.floor(rng(seed)() * list.length)];
+  const g = list[faceIndex(seed, list.length)];
   return (kind === "head" ? ART.heads : ART.sprites)[g.id] ? g : null;
 }
 
@@ -387,60 +442,27 @@ function coin(symbol, token) {
 }
 
 /* ---------- the party scene ---------- */
-/* Painted club: positions are in the background image's own pixels. */
-function artScene(symbol, guests) {
-  const {bg, bouncer} = ART.manifest, W = bg.w, H = bg.h;
-  const sign = esc(cleanSym(symbol || "YOURCOIN").replace(/^\$/, "").toUpperCase().slice(0, 11));
-  const signSize = Math.min(104, 470 / (.47 * (sign.length + 1)));
-  const bh = 540, bw = bh * bouncer.w / bouncer.h;
-  /* Crop to the box: keep the door, sign, and guest list; lose the far left, or the sky on wide boxes. */
-  const box = $("scene").getBoundingClientRect(), aspect = box.width && box.height ? box.width / box.height : W / H;
-  let vx = 0, vy = 0, vw = W, vh = H;
-  if (aspect < W / H) { vw = Math.round(H * aspect); vx = Math.round(Math.max(0, Math.min(W - vw, 1100 - vw * .62))); }
-  else { vh = Math.round(W / aspect); vy = Math.round((H - vh) * .3); }
-  let svg = `<svg viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  <defs>
-    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <linearGradient id="fadeg" x1="0" y1="0" x2="0" y2="1"><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
-    <mask id="fade" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#fadeg)"/></mask>
-    <filter id="shadowed"><feColorMatrix values="0 0 0 0 .08  0 0 0 0 .05  0 0 0 0 .16  0 0 0 .35 0"/></filter>
-  </defs>
-  <image href="${bg.src}" width="${W}" height="${H}"/>
-  <text x="1150" y="${150 + signSize * .32}" text-anchor="middle" font-family="Big Shoulders Display, Impact" font-weight="900" font-size="${signSize}" fill="#ffd8ff" filter="url(#neon)">$${sign}</text>
-  <text x="1150" y="222" text-anchor="middle" font-family="Martian Mono, monospace" font-size="22" letter-spacing="9" fill="#eee">LAUNCH PARTY</text>
-  <g transform="translate(1470 150)">
-    <g transform="translate(${77 - 50 * 1.6} 4) scale(1.6)">${CROWN}</g>
-    <text x="77" y="86" text-anchor="middle" font-family="Big Shoulders Display, Impact" font-weight="900" font-size="34" fill="#f5c542">GUEST LIST</text>
-    ${[["#f5c542", "VIP", "TOP 5%"], ["#36e6f5", "STRONG", "RECORD"], ["#c9cde0", "KNOWN", ""], ["#5a6080", "NEW", "FACE"]].map(([c, a, b], i) =>
-      `<circle cx="20" cy="${138 + i * 62}" r="10" fill="${i === 3 ? "none" : c}" stroke="${c}" stroke-width="3" ${i === 3 ? 'stroke-dasharray="5 3"' : ""}/>
-       <text x="40" y="${136 + i * 62}" font-family="Martian Mono, monospace" font-size="15" fill="#dfe2f2">${a}</text>
-       <text x="40" y="${156 + i * 62}" font-family="Martian Mono, monospace" font-size="15" fill="#9aa0bf">${b}</text>`).join("")}
-  </g>
-  <image href="${bouncer.src}" x="${1300 - bw / 2}" y="${H - bh + 30}" width="${bw}" height="${bh}"/>
-  <g transform="rotate(-5 1040 470)"><rect x="880" y="440" width="320" height="52" rx="26" fill="rgba(10,6,20,.82)" stroke="#c46bff" stroke-width="2"/>
-    <text x="1040" y="475" text-anchor="middle" font-family="Permanent Marker, cursive" font-size="25" fill="#e9c8ff">"I've seen you before."</text></g>`;
-  const n = guests.length, queueEnd = Math.max(190, vx + 170);  /* the back of the queue stays in view */
-  guests.forEach((g, i) => {
-    const t = n > 1 ? i / (n - 1) : 0, art = guestArt(g.seed);
-    const gh = 190 + t * 190, bottom = 720 + t * 240, cx = 990 - t * (990 - queueEnd);
-    if (!art) {  /* image missing: use the drawing, sized to match */
-      const s = gh / 100;
-      svg += `<g transform="translate(${cx - 50 * s} ${bottom - gh}) scale(${s})" opacity="${g.hidden ? .15 : 1}">${guestParts(g.seed, {body: true, crown: g.tier === "vip"})}</g>`;
-      return;
-    }
-    const gw = gh * art.w / art.h, x = cx - gw / 2, y = bottom - gh;
-    const hx = x + art.head.x * gw, hy = y + art.head.y * gh, hr = art.head.r * gw * 1.08, color = TIER_COLOR[g.tier];
-    svg += `<g>
-      <image href="art/guests/${art.id}.webp" x="${x}" y="${y}" width="${gw}" height="${gh}" mask="url(#fade)" ${g.hidden ? 'filter="url(#shadowed)"' : ""}/>
-      ${g.tier !== "pending" && !g.hidden ? `<circle cx="${hx}" cy="${hy}" r="${hr}" fill="none" stroke="${color}" stroke-width="5" ${g.tier === "fresh" ? 'stroke-dasharray="12 9"' : ""} filter="url(#neon)"/>` : ""}
-      ${g.tier === "vip" && !g.hidden ? `<g transform="translate(${hx - 50 * hr / 20} ${hy - hr - 20 * hr / 20}) scale(${hr / 20})">${CROWN}</g>` : ""}
-      ${g.label ? `<text x="${cx}" y="${Math.min(y, hy - 2 * hr) - 12}" text-anchor="middle" font-family="Martian Mono, monospace" font-size="21" fill="${color}" paint-order="stroke" stroke="#07080f" stroke-width="6">${esc(g.label)}</text>` : ""}
-    </g>`;
-  });
-  return svg + `</svg>`;
+/* Painted club as a backdrop, with the buyers as a lineup of portrait cards. Nothing is drawn onto the painting. */
+const TIER_TAG = {pending: "Checking…", fresh: "New face", known: "Known", strong: "Strong", vip: "VIP"};
+function artScene(symbol, guests, line) {
+  const sign = esc(cleanSym(symbol || "").replace(/^\$/, "").toUpperCase().slice(0, 14));
+  const cards = guests.map(g => {
+    const art = guestArt(g.seed), state = g.hidden ? "waiting" : g.tier;
+    const face = art ? `<img src="art/guests/${art.id}.webp" alt="">` : `<svg viewBox="0 0 100 100">${guestParts(g.seed, {body: true})}</svg>`;
+    const tag = g.hidden ? "Not here yet" : g.score !== undefined && (g.tier === "vip" || g.tier === "strong" || g.tier === "known")
+      ? `${TIER_TAG[g.tier]} · <b>${g.score}</b>` : TIER_TAG[g.tier];
+    const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : ""}`;
+    return `<div class="${cls}">${face}${g.tier === "vip" && !g.hidden ? `<svg class="crown" viewBox="34 0 32 20">${CROWN}</svg>` : ""}
+      ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}<span class="tag">${tag}</span></div>`;
+  }).join("");
+  const {bouncer} = ART.manifest;
+  return `<img class="club" src="${ART.manifest.bg.src}" alt=""><div class="shade"></div>
+    <div class="bouncer" style="aspect-ratio:${bouncer.w} / ${bouncer.h}"><img src="${bouncer.src}" alt="">${line ? `<span class="says">${esc(line)}</span>` : ""}</div>
+    ${sign ? `<div class="party"><span>$${sign}</span> launch party</div>` : ""}
+    <div class="lineup" style="--n:${Math.max(4, guests.length)}">${cards}</div>`;
 }
-function scene(symbol, guests) {
-  if (ART.scene) return artScene(symbol, guests);
+function scene(symbol, guests, line) {
+  if (ART.scene) return artScene(symbol, guests, line);
   const W = 900, H = 520, d = {x: 400, y: 150, w: 170, h: 250};
   const sign = esc(cleanSym(symbol || "YOURCOIN").replace(/^\$/, "").toUpperCase().slice(0, 11));
   const cx = d.x + d.w / 2;
@@ -494,16 +516,25 @@ function setHTML(el, html) { if (el._html !== html) { el._html = html; el.innerH
 function drawScene() {
   $("scene").classList.toggle("art", ART.scene);
   if (!S || !S.buyers.length) {
-    setHTML($("scene"), scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666"].map(seed => ({seed, tier: "pending"}))));
+    setHTML($("scene"), scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666", "g7777777", "h88888888"].slice(0, ART.scene ? 8 : 6).map(seed => ({seed, tier: "pending", hidden: ART.scene})), bouncerLine()));
     return;
   }
   const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s);
   setHTML($("scene"), scene(S.event?.symbol, order.map(b => {
     const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, tier = tierOf(r), here = S.arrived.has(b.wallet);
     const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
-    return {seed: b.wallet, tier, hidden: !here,
+    return {seed: b.wallet, tier, hidden: !here, score: r?.scoreable ? r.reflex : undefined, focus: S.focus === b.wallet,
+            echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "",
             label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : "NEW FACE") : "CHECKING THE LIST…"};
-  })));
+  }), bouncerLine()));
+}
+/* What the bouncer says about the latest arrival. Echo lines describe repeated behaviour, never a connection. */
+function bouncerLine() {
+  if (!S || !S.ready) return S ? "Checking the list…" : "Guest list only.";
+  const f = S.focus;
+  if (f) return !S.resolved.has(f) ? "Name?" : {fresh: "Never seen you before.", known: "You again.", strong: "I've seen you before.", vip: "VIP. Straight in."}[tierOf(S.byWallet[f])];
+  if (S.bannerEcho) return `You ${S.bannerEcho.wallets.filter(w => S.byBuyer[w]).length} were early on ${cleanSym(S.bannerEcho.symbol)} too.`;
+  return S.now >= 3600 ? "That's the first hour." : "";
 }
 
 /* ---------- replay track ---------- */
@@ -522,13 +553,6 @@ function drawTrack() {
     <path d="${band}" fill="rgba(54,230,245,.07)"/><path d="${band}" fill="rgba(54,230,245,.24)" clip-path="url(#played)"/>
     <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="rgba(140,150,200,.3)"/>
     <line x1="0" y1="${base}" x2="${nowX}" y2="${base}" stroke="#36e6f5" stroke-width="2"/>`;
-  (S.firedEchoes || []).forEach(e => {
-    const pts = e.wallets.filter(w => S.byBuyer[w]).map(w => pos(S.byBuyer[w].entry_delay_s) * W).sort((a, b) => a - b);
-    for (let i = 1; i < pts.length; i++) {
-      const mid = (pts[i] + pts[i - 1]) / 2, lift = Math.min(52, 16 + (pts[i] - pts[i - 1]) * .2);
-      svg += `<path d="M${pts[i - 1]} 50 Q${mid} ${50 - lift} ${pts[i]} 50" stroke="#c46bff" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke"/>`;
-    }
-  });
   if (S.ready) svg += `<line x1="${nowX}" y1="18" x2="${nowX}" y2="${base + 6}" stroke="#36e6f5" stroke-width="1.5" opacity=".8" vector-effect="non-scaling-stroke"/>`;
   svg += `</svg>`;
   let marks = "", labels = "";
@@ -536,11 +560,15 @@ function drawTrack() {
     const left = pos(t * 60) * 100;
     labels += `<span style="position:absolute;left:${left}%;bottom:0;transform:translateX(${t === 0 ? "0" : t === 60 ? "-100%" : "-50%"});font:11px var(--mono);color:#7d84a6">${t === 0 ? "launch" : "+" + t + "m"}</span>`;
   });
-  S.buyers.forEach(b => {
-    b.buy_list.forEach(([sec]) => { if (!S.ready || sec <= S.now) marks += `<span class="tick" style="left:${pos(sec) * 100}%"></span>`; });
+  /* Echo buyers glow violet instead of being joined by lines. Close arrivals stack upward instead of overlapping. */
+  const echoed = new Set(S.bannerEcho?.wallets || []);
+  let lastLeft = -99, level = 0;
+  S.buyers.forEach(b => b.buy_list.forEach(([sec]) => { if (!S.ready || sec <= S.now) marks += `<span class="tick" style="left:${pos(sec) * 100}%"></span>`; }));
+  [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).forEach(b => {
     if (!S.arrived.has(b.wallet)) return;
-    const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null;
-    marks += `<span class="mark" style="left:${pos(Math.max(S.tape.start_s, b.entry_delay_s)) * 100}%">${avatar(b.wallet, tierOf(r), "mk")}</span>`;
+    const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, left = pos(Math.max(S.tape.start_s, b.entry_delay_s)) * 100;
+    level = left - lastLeft < 3.2 ? (level + 1) % 3 : 0; lastLeft = left;
+    marks += `<span class="mark${echoed.has(b.wallet) ? " echoed" : echoed.size ? " dim" : ""}" style="left:${left}%;top:${40 - level * 22}px">${avatar(b.wallet, tierOf(r), "mk")}</span>`;
   });
   const focus = S.focus && S.byBuyer[S.focus];
   if (focus) {
@@ -831,7 +859,6 @@ document.querySelectorAll(".speed").forEach(b => b.onclick = () => {
   document.querySelectorAll(".speed").forEach(o => o.setAttribute("aria-pressed", o === b)); if (S) S.speed = +b.dataset.speed;
 });
 $("toggle-setups").onclick = () => { const on = $("setups").hidden; $("setups").hidden = !on; $("toggle-setups").setAttribute("aria-expanded", on); };
-addEventListener("resize", () => { if (ART.scene) artChanged(); });
 $("toggle-method").onclick =() => { const on = $("method").hidden; $("method").hidden = !on; $("toggle-method").setAttribute("aria-expanded", on); };
 
 fetch("/api/replays").then(r => r.json()).then(({replays, public: pub}) => {
