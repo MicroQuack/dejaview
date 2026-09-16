@@ -28,6 +28,9 @@
   button { font: inherit; color: inherit; }
   :focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
   .wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px 80px; }
+  .desktop-note { display: none; margin: 16px 0 0; padding: 10px 14px; border-left: 3px solid var(--gold);
+                  background: rgba(245,197,66,.08); font-size: 14px; }
+  @media (max-width: 900px) { .desktop-note { display: block; } }
 
   /* ---------- hero ---------- */
   .hero { display: grid; grid-template-columns: minmax(340px, 5fr) 7fr; gap: 12px; align-items: stretch; min-height: 520px; }
@@ -282,7 +285,9 @@
     <div class="track" id="track"></div>
   </section>
 
-  <section class="panels">
+  <p class="desktop-note">Déjà View is built for a computer screen. The phone layout is not ready yet.</p>
+
+  <section class="panels" id="panels" hidden>
     <div class="panel" id="answer-panel">
       <h2>The answer</h2>
       <p class="placeholder">Who turned up in the first hour, and whether we've seen them do this before.</p>
@@ -874,7 +879,7 @@ function scan(token, replay) {
   S = {event: null, buyers: [], results: [], byWallet: {}, byBuyer: {}, tape: null, echo: null, deja: null, ready: false, playing: false,
        speed: +document.querySelector(".speed[aria-pressed=true]").dataset.speed, now: 0, arrived: new Set(), resolved: new Set(), firedEchoes: [],
        bannerEcho: null, focus: null, stage: "Rewinding the first hour…"};
-  $("go").disabled = true; $("setups").hidden = true; $("toggle-setups").hidden = true;
+  $("go").disabled = true; $("setups").hidden = true; $("toggle-setups").hidden = true; $("panels").hidden = false;
   $("answer-panel").innerHTML = `<h2>The answer</h2><p class="placeholder">Rewinding the first hour…</p>`;
   $("buyers").innerHTML = `<p class="placeholder">Finding the biggest first-hour buyers…</p>`;
   $("echoes").innerHTML = `<p class="placeholder">Listening for echoes…</p>`;

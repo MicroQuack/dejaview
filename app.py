@@ -27,6 +27,8 @@ TOKEN_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")  # Solana base58 address
 STATIC = {"/bg.jpg": "image/jpeg", "/hero.jpg": "image/jpeg"}
 ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|club-loop\.mp4|bouncer-loop\.webm|manifest\.json)$")
 ART_TYPES = {".webp": "image/webp", ".json": "application/json", ".mp4": "video/mp4", ".webm": "video/webm"}
+# The demo launch a first-time visitor should meet first. The rest follow, newest first.
+FEATURED = ["98kfF7rmsg1QDUEoCqNE7g7M1FdrTt92TEp2CLzypump"]
 SAVED = ROOT / "spike_out" / "scans"
 REPLAY_DIRS = [ROOT / "data" / "replays"] + ([] if PUBLIC else [SAVED])
 
@@ -66,7 +68,8 @@ def replay_list():
             if event and path.stem not in seen:
                 seen[path.stem] = {"token": path.stem, "symbol": event.get("symbol"), "t0": event.get("t0"),
                                    "saved_at": data.get("saved_at")}
-    return sorted(seen.values(), key=lambda r: r["t0"] or "", reverse=True)
+    order = sorted(seen.values(), key=lambda r: r["t0"] or "", reverse=True)
+    return sorted(order, key=lambda r: FEATURED.index(r["token"]) if r["token"] in FEATURED else len(FEATURED))
 
 
 class Handler(BaseHTTPRequestHandler):
