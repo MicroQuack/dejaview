@@ -13,39 +13,41 @@ blank boards and a still scene. **No new characters:** the page uses all 24 gues
 - **Same style as the current art:** cinematic neon nightlife illustration, semi-realistic stylised 3D, dark purple
   night, magenta and violet neon, cyan accents.
 
-## 1. New club background, boards filled in (Codex)
+## 1. New club background, boards filled in
 
-- **File:** `club-bg-v2.png`, landscape 16:9, at least 1920 × 1080.
-- **Keep the layout of the current `club-bg.png`**, so the page still fits: door centre-right, board to its right,
-  palms and skyline on the left.
-- **Keep the bottom third plain** (carpet and wet pavement). The buyer cards cover it.
-- **Keep the right edge fairly plain below the board.** The bouncer stands there.
-- **Check the spelling** of both boards before saving. If the letters come out wrong, try again, or leave the boards
-  lit but blank and tell Claude.
+**Round 2 attempt (16 Sept) cannot be used:** the queue contains Pepe the Frog and a Doge shiba. Both are existing
+meme characters, Pepe is owned by a real artist, and the queue fills the space the buyer cards sit in.
+
+- **File:** `club-bg-v2.png`, landscape 16:9, at least 1600 px wide.
+- **The venue must be empty.** The page draws every character. No frog, no dog, no crowd, no bouncer, nobody at all.
+- **Keep the bottom third plain** (carpet, ropes, wet pavement). The buyer cards cover it.
+- **Keep the right side clear** below the sign. Our own bouncer stands there.
+- **Painted words are fine** if they never change per launch. Keep them to the venue name and club signs.
 
 Prompt:
 
 > Cinematic neon nightlife illustration, semi-realistic stylised 3D, wide 16:9. Night street outside an exclusive
-> nightclub. A glowing doorway at centre-right with violet light spilling out and a disco ball visible inside. A red
-> carpet runs from the door toward the bottom-left, with gold stanchions and red velvet ropes. Palm trees, a brick wall
-> with magenta and cyan neon tubes, wet pavement reflections, a city skyline and water in the distance on the left.
-> Above the door, a black marquee sign lit with magenta neon capital letters that read exactly "DÉJÀ VIEW".
-> To the right of the door, a framed black guest-list board. Its header reads exactly "GUEST LIST" in gold. Below it,
-> four rows, each with a small light and one word: a gold light and "VIP", a cyan light and "STRONG", a pale grey light
-> and "KNOWN", a dashed grey ring and "NEW FACE". No other writing anywhere. No people, no cars. The bottom third of the
-> image is plain red carpet and wet pavement. Dark purple night, moody, high detail.
+> nightclub, seen from across the pavement. A glowing doorway at centre-right with violet light spilling out and a disco
+> ball inside. A red carpet runs from the door toward the bottom-left, with gold stanchions and red velvet ropes. Palm
+> trees, wet pavement reflections, magenta and cyan neon tubes. Above the door, a black marquee lit in neon that reads
+> exactly "DÉJÀ VIEW", and under it in smaller letters "SAME FACES. DIFFERENT LAUNCH." To the right of the door, a
+> framed black guest-list board with the header "GUEST LIST" in gold and four rows, each a small light and one word: a
+> gold light "VIP", a cyan light "STRONG", a pale grey light "KNOWN", a dashed grey ring "NEW FACE".
+> **The venue is completely empty: no people, no animals, no characters, no frog, no dog, no bouncer, no crowd, no
+> silhouettes, nobody in the queue.** No other writing, no coin names, no prices. The bottom third of the image is plain
+> red carpet and wet pavement. Dark purple night, moody, high detail.
 
 ## 2. Living background loop (Grok Imagine, image to video)
 
-- **Do this after image 1 exists.** Start from `club-bg-v2.png`.
-- **File:** `club-loop.mp4`, 6 seconds, same framing as the still.
+- **Do this after image 1 exists and is empty of people.** Start from `club-bg-v2.png`.
+- **File:** `club-loop.mp4`, 6 seconds is plenty. Claude strips the sound and compresses it.
 
 Prompt:
 
-> Animate this still image. The camera does not move. Do not add objects or people, and do not change any writing.
-> Light rain falls on the wet pavement and the reflections ripple. The magenta and cyan neon tubes flicker gently. Light
-> from the disco ball turns slowly inside the doorway. Palm leaves and velvet ropes sway slightly in a night breeze. The
-> marquee glow pulses softly. Seamless loop, cinematic.
+> Animate this still image. The camera does not move. **Do not add any people, animals, or characters.** Do not change
+> any writing. Light rain falls on the wet pavement and the reflections ripple. The magenta and cyan neon tubes flicker
+> gently. Light from the disco ball turns slowly inside the doorway. Palm leaves and velvet ropes sway slightly in a
+> night breeze. The marquee glow pulses softly. Seamless loop, cinematic.
 
 ## 3. Optional: bouncer idle loop (Grok Imagine, image to video)
 
