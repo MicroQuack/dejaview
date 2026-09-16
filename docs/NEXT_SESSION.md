@@ -28,7 +28,7 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 | Test hook | `?token=...&replay=1&at=1500` jumps the replay to a second, for headless screenshots |
 | Lookalike matching | Demoted behind "Similar past setups →" |
 | API usage proof | `tools/api_usage.py`. About 20,000 successful calls. |
-| Credits | About 3,000 |
+| Credits | 1,755 left, from the last call logged on 2026-09-15. One full scan costs roughly 250. |
 
 ## Next steps, in order
 
