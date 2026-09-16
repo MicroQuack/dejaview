@@ -69,6 +69,13 @@ labels ("92" is a reference percentile, "high confidence" means 16+ entries, ech
 participants) need plainer wording. The official deadline is **2026-09-27 23:59 UTC**, and Nansen expects live data
 visible in the recording, so a replay-only video may not satisfy them: check with the organisers.
 
+## Price line (2026-09-16)
+
+`/api/v1/tgm/token-ohlcv` at 1-minute candles costs 1 credit per launch and gives the first hour's closing prices.
+`launch_data.price_minutes()` fetches it, the scan stores it in the tape as `price_s_usd`, and
+`tools/backfill_prices.py` added it to the four saved replays. The timeline and the share card draw it green when
+the hour ended up, red when it ended down. It describes the hour; it is not a forecast.
+
 ## Music credit (must appear in the README and the X post)
 
 Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen", neon synthwave). Free for commercial use, no

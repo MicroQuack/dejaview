@@ -133,15 +133,17 @@
   .share { border: 1px solid var(--now); background: transparent; color: var(--now); border-radius: 6px; padding: 9px 14px; font: 700 14px var(--display);
            letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
   .share:disabled { opacity: .35; cursor: default; }
-  .track { position: relative; height: 128px; margin-top: 10px; }
+  .track { position: relative; height: 150px; margin-top: 10px; }
   .track > :first-child, .track > :first-child > svg { width: 100%; height: 100%; display: block; }
-  .mark { position: absolute; top: 40px; width: 38px; height: 38px; margin-left: -19px; }
+  .mark { position: absolute; top: 56px; width: 38px; height: 38px; margin-left: -19px; }
   .mark svg { width: 100%; height: 100%; display: block; }
   .mark { transition: opacity .4s, transform .4s; }
   .mark.echoed { transform: scale(1.15); z-index: 1; }
   .mark.echoed svg { border-radius: 50%; box-shadow: 0 0 0 3px #c46bff, 0 0 18px 4px rgba(196,107,255,.75); }
   .mark.dim { opacity: .45; }
-  .tick { position: absolute; top: 84px; width: 2px; height: 8px; margin-left: -1px; background: var(--now); opacity: .6; }
+  .tick { position: absolute; top: 102px; width: 2px; height: 8px; margin-left: -1px; background: var(--now); opacity: .6; }
+  .legend { position: absolute; left: 0; top: 0; font: 10.5px var(--mono); color: var(--faint); display: flex; align-items: center; gap: 4px; }
+  .legend i { display: inline-block; width: 10px; height: 2px; border-radius: 1px; }
   .callout { position: absolute; top: -6px; transform: translateX(-50%); background: rgba(8,12,26,.95); border: 1px solid; border-radius: 8px;
              padding: 5px 10px; font: 11px var(--mono); white-space: nowrap; animation: pop .3s both; }
   .echo-banner { position: absolute; right: 0; top: 2px; padding: 6px 14px; border-radius: 6px; white-space: nowrap;
@@ -608,7 +610,7 @@ function bouncerLine() {
 /* ---------- replay track ---------- */
 const pos = sec => (sec - S.tape.start_s) / (observedEnd() - S.tape.start_s);
 function drawTrack() {
-  const W = 1000, H = 128, base = 92, el = $("track");
+  const W = 1000, H = 150, base = 108, el = $("track");
   if (!el.children.length) el.innerHTML = `<div></div><div style="position:absolute;inset:0;pointer-events:none"></div><div></div>`;
   const [tape, overlay, bannerEl] = el.children;
   if (!S || !S.tape) { setHTML(overlay, ""); setHTML(bannerEl, ""); tape.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="rgba(140,150,200,.25)"/></svg>`; return; }
@@ -616,14 +618,26 @@ function drawTrack() {
   let band = `M0 ${base}`;
   m.forEach((v, i) => { const px = i / m.length * W, py = base - v / peak * 34; band += ` L${px} ${py} L${px + W / m.length} ${py}`; });
   band += ` L${W} ${base} Z`;
+  const px = S.tape.price_s_usd || [];
+  let price = "", priceColour = "#5fe3a1", priceLabel = "";
+  if (px.length > 1) {
+    const lo = Math.min(...px.map(p => p[1])), hi = Math.max(...px.map(p => p[1])), top = 6, tall = 44;
+    priceColour = px[px.length - 1][1] >= px[0][1] ? "#5fe3a1" : "#ff6464";
+    price = px.map(([sec, v], i) => `${i ? "L" : "M"}${pos(sec) * W} ${top + tall - (hi === lo ? tall / 2 : (v - lo) / (hi - lo) * tall)}`).join(" ");
+    priceLabel = `${px[px.length - 1][1] >= px[0][1] ? "+" : ""}${Math.round(100 * (px[px.length - 1][1] / px[0][1] - 1))}%`;
+  }
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
     <defs><clipPath id="played"><rect x="0" y="0" width="${nowX}" height="${H}"/></clipPath></defs>
     <path d="${band}" fill="rgba(54,230,245,.07)"/><path d="${band}" fill="rgba(54,230,245,.24)" clip-path="url(#played)"/>
+    ${price ? `<path d="${price}" fill="none" stroke="${priceColour}" stroke-width="2" opacity=".35" vector-effect="non-scaling-stroke"/>
+      <path d="${price}" fill="none" stroke="${priceColour}" stroke-width="2.5" clip-path="url(#played)" vector-effect="non-scaling-stroke"/>` : ""}
     <line x1="0" y1="${base}" x2="${W}" y2="${base}" stroke="rgba(140,150,200,.3)"/>
     <line x1="0" y1="${base}" x2="${nowX}" y2="${base}" stroke="#36e6f5" stroke-width="2"/>`;
   if (S.ready) svg += `<line x1="${nowX}" y1="18" x2="${nowX}" y2="${base + 6}" stroke="#36e6f5" stroke-width="1.5" opacity=".8" vector-effect="non-scaling-stroke"/>`;
   svg += `</svg>`;
-  let marks = "", labels = "";
+  let marks = priceLabel ? `<span class="legend"><i style="background:${priceColour}"></i>price ${esc(priceLabel)} in the hour
+    <i style="background:rgba(54,230,245,.45);margin-left:10px"></i>dollars bought</span>` : "";
+  let labels = "";
   [0, 5, 10, 15, 20, 30, 45, 60].forEach(t => {
     const left = pos(t * 60) * 100;
     labels += `<span style="position:absolute;left:${left}%;bottom:0;transform:translateX(${t === 0 ? "0" : t === 60 ? "-100%" : "-50%"});font:11px var(--mono);color:#7d84a6">${t === 0 ? "launch" : "+" + t + "m"}</span>`;
@@ -636,7 +650,7 @@ function drawTrack() {
     if (!S.arrived.has(b.wallet)) return;
     const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, left = pos(Math.max(S.tape.start_s, b.entry_delay_s)) * 100;
     level = left - lastLeft < 3.2 ? (level + 1) % 3 : 0; lastLeft = left;
-    marks += `<span class="mark${echoed.has(b.wallet) ? " echoed" : echoed.size ? " dim" : ""}" style="left:${left}%;top:${40 - level * 22}px">${avatar(b.wallet, tierOf(r), "mk")}</span>`;
+    marks += `<span class="mark${echoed.has(b.wallet) ? " echoed" : echoed.size ? " dim" : ""}" style="left:${left}%;top:${56 - level * 22}px">${avatar(b.wallet, tierOf(r), "mk")}</span>`;
   });
   const focus = S.focus && S.byBuyer[S.focus];
   if (focus) {
@@ -965,14 +979,33 @@ async function shareCard() {
 
   if (S.tape?.minute_usd?.length) {
     const m = S.tape.minute_usd, peak = Math.max(1, ...m), x0 = 62, w = 520, h = 34;
-    g.fillStyle = "#5a6080"; g.font = "600 11px 'Martian Mono'";
-    g.fillText("DOLLARS BOUGHT PER MINUTE OF THE FIRST HOUR", x0, y);
+    const series = S.tape.price_s_usd || [];
+    const up = series.length > 1 && series[series.length - 1][1] >= series[0][1];
+    const movePct = series.length > 1 ? `${up ? "+" : ""}${Math.round(100 * (series[series.length - 1][1] / series[0][1] - 1))}%` : "";
+    g.font = "600 11px 'Martian Mono'";
+    const caption = "DOLLARS BOUGHT PER MINUTE";
+    g.fillStyle = "#5a6080"; g.fillText(caption, x0, y);
+    if (movePct) {
+      g.fillStyle = "#5a6080"; g.fillText("   ·   PRICE", x0 + g.measureText(caption).width, y);
+      g.fillStyle = up ? "#5fe3a1" : "#ff6464";
+      g.fillText(` ${movePct}`, x0 + g.measureText(caption + "   ·   PRICE").width, y);
+    }
     y += 12;
     g.fillStyle = "rgba(54,230,245,.22)"; g.strokeStyle = "#36e6f5"; g.lineWidth = 2;
     g.beginPath(); g.moveTo(x0, y + h);
-    m.forEach((v, i) => { const px = x0 + i / m.length * w, py = y + h - (v / peak) * h; g.lineTo(px, py); g.lineTo(px + w / m.length, py); });
+    m.forEach((v, i) => { const bx = x0 + i / m.length * w, by = y + h - (v / peak) * h; g.lineTo(bx, by); g.lineTo(bx + w / m.length, by); });
     g.lineTo(x0 + w, y + h); g.closePath(); g.fill();
     g.beginPath(); g.moveTo(x0, y + h + 1); g.lineTo(x0 + w, y + h + 1); g.stroke();
+    if (series.length > 1) {  /* what the coin's price did while they arrived */
+      const lo = Math.min(...series.map(p => p[1])), hi = Math.max(...series.map(p => p[1]));
+      const span = observedEnd() - S.tape.start_s;
+      g.strokeStyle = up ? "#5fe3a1" : "#ff6464"; g.lineWidth = 2.5; g.beginPath();
+      series.forEach(([sec, v], i) => {
+        const bx = x0 + (sec - S.tape.start_s) / span * w, by = y + h - (hi === lo ? h / 2 : (v - lo) / (hi - lo) * h);
+        i ? g.lineTo(bx, by) : g.moveTo(bx, by);
+      });
+      g.stroke();
+    }
     y += h + 26;
   }
   if (echo) {

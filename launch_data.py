@@ -162,6 +162,24 @@ def first_buys(history):
     return out
 
 
+def price_minutes(c, token, t0, end, label):
+    """Closing price per minute from T0, for the replay's price line. One request, one credit."""
+    resp = c.post("/api/v1/tgm/token-ohlcv", {
+        "chain": "solana", "token_address": token, "timeframe": "1m",
+        "date": {"from": iso(t0), "to": iso(end)},
+    }, label)
+    if resp is None:
+        return None
+    out = []
+    for row in rows(resp):
+        start = row.get("interval_start")
+        close = row.get("close")
+        if start and close:
+            out.append([round((utc(start) - t0).total_seconds()), close])
+    out.sort()
+    return out
+
+
 def plausible_launch(buy, as_of):
     """Free pre-filter: the token's whole-day age puts deployment within about a day of the buy.
 

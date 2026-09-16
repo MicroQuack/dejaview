@@ -323,7 +323,10 @@ class Scanner:
         self.emit("event", **event)
         all_buyers = self.first_hour_buys(token, deploy, t0, now)
         buyers = all_buyers[:MAX_BUYERS]
-        self.emit("buyers", buyers=buyers, tape=tape(all_buyers, deploy, t0),
+        band = tape(all_buyers, deploy, t0)
+        band["price_s_usd"] = ld.price_minutes(self.c, token, t0, min(now, t0 + dt.timedelta(hours=1)),
+                                               f"scan:price:{token[:6]}")
+        self.emit("buyers", buyers=buyers, tape=band,
                   capped_windows=getattr(self, "capped_windows", 0), qualifying_buyers=len(all_buyers))
         self.emit("stage", key="history", text="Checking prior launch behaviour")
         results = []
