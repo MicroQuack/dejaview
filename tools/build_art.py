@@ -148,7 +148,7 @@ def main():
                 # Square head crop for the round avatars.
                 s = sprite.shape[1]
                 # Loose enough that hair, ears, and hats stay inside the circle.
-                side = round(head["r"] * 3.4 * s)
+                side = round(head["r"] * 4.0 * s)
                 x0, y0 = round(head["x"] * s - side / 2), round(head["y"] * sprite.shape[0] - side * .42)
                 square = np.zeros((side, side, 4), np.uint8)
                 ys0, xs0 = max(0, y0), max(0, x0)

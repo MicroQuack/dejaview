@@ -422,7 +422,10 @@ fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
   if (!m) return artSettled();
   ART.manifest = m;
   let left = 2;
-  [m.bg.src, m.bouncer.src].forEach(src => loadImage(src, () => { if (!--left) { ART.scene = true; ART.pending = false; artChanged(); } }));
+  [m.bg.src, m.bouncer.src].forEach(src => loadImage(src, img => {
+    if (src === m.bg.src) ART.clubStill = img;  /* the share card paints this behind the lineup */
+    if (!--left) { ART.scene = true; ART.pending = false; artChanged(); }
+  }));
   if (m.music) $("sound").hidden = false;
   m.guests.forEach(g => {
     loadImage(`art/guests/${g.id}.webp`, img => { ART.sprites[g.id] = img; artChanged(); });
@@ -843,42 +846,96 @@ function openEcho(e) {
 }
 
 /* ---------- share card ---------- */
+/* The share card mirrors the page: the club behind, the lineup in front, the honest line at the bottom. */
+function wrapText(g, text, max) {
+  const out = [];
+  let line = "";
+  for (const word of text.split(" ")) {
+    const test = line ? line + " " + word : word;
+    if (g.measureText(test).width > max && line) { out.push(line); line = word; } else line = test;
+  }
+  if (line) out.push(line);
+  return out;
+}
+function cardGuest(g, r, x, y, w, h) {
+  const tier = tierOf(r), art = guestArt(r.wallet), radius = 10;
+  g.save();
+  g.beginPath(); g.roundRect(x, y, w, h, radius); g.clip();
+  g.fillStyle = "#15122c"; g.fillRect(x, y, w, h);
+  const img = art && ART.sprites[art.id];
+  if (img) {  /* cover-crop the portrait, head at the top */
+    const scale = Math.max(w / img.width, h / img.height), dw = img.width * scale, dh = img.height * scale;
+    g.drawImage(img, x + (w - dw) / 2, y, dw, dh);
+  }
+  const fade = g.createLinearGradient(0, y + h * .35, 0, y + h);
+  fade.addColorStop(0, "rgba(7,8,15,0)"); fade.addColorStop(.6, "rgba(7,8,15,.9)"); fade.addColorStop(1, "rgba(7,8,15,.98)");
+  g.fillStyle = fade; g.fillRect(x, y, w, h);
+  g.restore();
+  g.beginPath(); g.roundRect(x, y, w, h, radius);
+  g.lineWidth = tier === "vip" || tier === "strong" ? 3 : 2; g.strokeStyle = TIER_COLOR[tier];
+  g.setLineDash(tier === "fresh" ? [7, 6] : []); g.stroke(); g.setLineDash([]);
+  g.textAlign = "center";
+  g.fillStyle = TIER_COLOR[tier]; g.font = "600 13px 'Martian Mono'";
+  g.fillText((TIER_TAG[tier] || "").toUpperCase(), x + w / 2, y + h - 34);
+  if (r.scoreable) { g.font = "900 30px 'Big Shoulders Display'"; g.fillText(String(r.reflex), x + w / 2, y + h - 10); }
+  if (tier === "vip") {
+    g.save(); g.translate(x + w / 2 - 25, y + 6); g.scale(.5, .5);
+    const p = new Path2D("M36 4 L42 14 L50 2 L58 14 L64 4 L62 18 L38 18 Z");
+    g.fillStyle = "#f5c542"; g.fill(p); g.restore();
+  }
+  g.textAlign = "left";
+}
 async function shareCard() {
-  const c = document.createElement("canvas"); c.width = 1200; c.height = 630; const g = c.getContext("2d");
-  const grad = g.createRadialGradient(900, 0, 50, 700, 300, 900); grad.addColorStop(0, "#2a1450"); grad.addColorStop(1, "#07080f");
-  g.fillStyle = grad; g.fillRect(0, 0, 1200, 630);
+  const W = 1200, H = 630, c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
   await document.fonts.ready;
+  g.fillStyle = "#07080f"; g.fillRect(0, 0, W, H);
+  const club = ART.manifest && ART.scene ? ART.clubStill : null;
+  if (club) {
+    const scale = Math.max(W / club.width, H / club.height);
+    g.globalAlpha = .4;
+    g.drawImage(club, (W - club.width * scale) / 2, (H - club.height * scale) / 2, club.width * scale, club.height * scale);
+    g.globalAlpha = 1;
+  }
+  const wash = g.createLinearGradient(0, 0, W, 0);
+  wash.addColorStop(0, "rgba(7,8,15,.97)"); wash.addColorStop(.52, "rgba(7,8,15,.88)"); wash.addColorStop(1, "rgba(12,6,26,.72)");
+  g.fillStyle = wash; g.fillRect(0, 0, W, H);
+
   const strong = S.results.filter(r => r.scoreable && r.reflex >= STRONG).length;
-  const best = S.results.filter(r => r.scoreable).sort((a, b) => b.reflex - a.reflex)[0];
-  g.font = "900 64px 'Big Shoulders Display'"; g.fillStyle = "#c46bff"; g.fillText("DÉJÀ VIEW", 63, 103); g.fillStyle = "#f3eaff"; g.fillText("DÉJÀ VIEW", 60, 100);
-  g.fillStyle = "#36e6f5"; g.font = "600 18px 'Martian Mono'"; g.fillText("SAME FACES. DIFFERENT LAUNCH.", 60, 140);
-  g.fillStyle = "#ffd8ff"; g.font = "900 96px 'Big Shoulders Display'"; g.fillText("$" + cleanSym(S.event.symbol).replace(/^\$/, "").toUpperCase(), 60, 255);
-  g.fillStyle = "#eceefa"; g.font = "800 44px 'Big Shoulders Display'";
-  g.fillText(`${strong} OF THE ${S.buyers.length} BIGGEST BUYERS HAVE A`, 60, 335); g.fillText("BETTER LAUNCH RECORD THAN MOST", 60, 385);
-  g.font = "500 24px Onest"; g.fillStyle = "#9aa0bf";
-  if (best) g.fillText(`Strongest Launch Reflex: ${best.reflex} · ${best.rank_label}`, 60, 435);
-  const e = S.echo?.echoes?.[0];
-  if (e) { g.fillStyle = "#c46bff"; g.font = "700 25px 'Martian Mono'"; g.fillText(`ECHO: ${e.wallets.length} were also early on ${cleanSym(e.symbol)}`, 60, 495); }
-  g.fillStyle = "#7d84a6"; g.font = "16px 'Martian Mono'"; g.fillText("Historical context, not a prediction · Data from the Nansen API", 60, 590);
-  const faces = [...S.results].sort((a, b) => (b.scoreable ? b.reflex : -1) - (a.scoreable ? a.reflex : -1)).slice(0, 6);
-  await Promise.all(faces.map((r, i) => new Promise(done => {
-    const x = 770 + (i % 3) * 136, y = 180 + Math.floor(i / 3) * 150, art = guestArt(r.wallet, "head");
-    if (art) {  /* an SVG drawn to a canvas cannot load the painted head, so draw it directly */
-      const tier = tierOf(r), k = 1.2;
-      g.save(); g.beginPath(); g.arc(x + 60, y + 60, 55, 0, 2 * Math.PI); g.fillStyle = "#15172c"; g.fill(); g.clip();
-      g.drawImage(ART.heads[art.id], x, y + 2, 120, 120); g.restore();
-      g.beginPath(); g.arc(x + 60, y + 60, 55, 0, 2 * Math.PI); g.lineWidth = 6; g.strokeStyle = TIER_COLOR[tier];
-      g.setLineDash(tier === "fresh" ? [8, 7] : []); g.stroke(); g.setLineDash([]);
-      if (tier === "vip") {
-        g.save(); g.translate(x, y - 5); g.scale(k, k); const p = new Path2D("M36 4 L42 14 L50 2 L58 14 L64 4 L62 18 L38 18 Z");
-        g.fillStyle = "#f5c542"; g.fill(p); g.lineWidth = 1.5; g.strokeStyle = "#07080f"; g.stroke(p); g.restore();
-      }
-      return done();
+  const echo = S.echo?.echoes?.[0];
+  g.fillStyle = "#f3eaff"; g.font = "900 40px 'Big Shoulders Display'"; g.fillText("DÉJÀ VIEW", 60, 78);
+  g.fillStyle = "#36e6f5"; g.font = "600 13px 'Martian Mono'"; g.fillText("SAME FACES. DIFFERENT LAUNCH.", 60, 104);
+  g.fillStyle = "#ffd8ff"; g.font = "900 104px 'Big Shoulders Display'";
+  g.fillText("$" + cleanSym(S.event.symbol).replace(/^\$/, "").toUpperCase(), 60, 210);
+  g.fillStyle = "#9aa0bf"; g.font = "600 13px 'Martian Mono'";
+  g.fillText(`LAUNCH PARTY · ${S.event.t0 ? day(S.event.t0).toUpperCase() : ""} · FIRST HOUR`, 62, 238);
+  g.fillStyle = "#eceefa"; g.font = "800 40px 'Big Shoulders Display'";
+  const head = strong ? `${strong} of the ${S.buyers.length} biggest buyers have a better launch record than most`
+                      : `None of the ${S.buyers.length} biggest buyers has a better launch record than most`;
+  wrapText(g, head.toUpperCase(), 560).slice(0, 3).forEach((line, i) => g.fillText(line, 60, 296 + i * 44));
+  if (echo) {
+    const label = `${echo.wallets.length} WERE ALSO EARLY ON ${cleanSym(echo.symbol).toUpperCase()}`;
+    g.font = "700 20px 'Martian Mono'";
+    const w = g.measureText(label).width + 118;
+    g.beginPath(); g.roundRect(60, 406, Math.min(w, 600), 52, 26);
+    g.fillStyle = "rgba(40,14,70,.92)"; g.fill(); g.strokeStyle = "#c46bff"; g.lineWidth = 2; g.stroke();
+    g.fillStyle = "#c46bff"; g.font = "700 20px 'Martian Mono'"; g.fillText("ECHO", 86, 439);
+    g.fillStyle = "#efd9ff"; g.fillText(label, 156, 439);
+    if (echo.best_move_1h_pct !== null && echo.best_move_1h_pct !== undefined) {
+      g.fillStyle = "#9aa0bf"; g.font = "15px Onest";
+      g.fillText(`${cleanSym(echo.symbol)} then moved ${moveText(echo.best_move_1h_pct)} within an hour of their buys`, 62, 492);
     }
-    const img = new Image(); img.onload = () => { g.drawImage(img, x, y, 120, 120); done(); }; img.onerror = done;
-    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(avatar(r.wallet, tierOf(r)).replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"'));
-  })));
-  const a = document.createElement("a"); a.download = `dejaview-${cleanSym(S.event.symbol).replace(/[^\w]/g, "") || "scan"}.png`; a.href = c.toDataURL("image/png"); a.click();
+  }
+  const order = [...S.results].sort((a, b) => (b.scoreable ? b.reflex : -1) - (a.scoreable ? a.reflex : -1)).slice(0, 8);
+  const cw = 108, ch = 152, gap = 12, cols = 4, gx = W - 60 - (cols * cw + (cols - 1) * gap);
+  order.forEach((r, i) => cardGuest(g, r, gx + (i % cols) * (cw + gap), 150 + Math.floor(i / cols) * (ch + gap), cw, ch));
+  g.fillStyle = "#7d84a6"; g.font = "15px 'Martian Mono'";
+  g.fillText("Historical context, not a prediction · Data from the Nansen API", 60, 588);
+  const a = document.createElement("a");
+  a.download = `dejaview-${cleanSym(S.event.symbol).replace(/[^\w]/g, "") || "scan"}.png`;
+  a.href = c.toDataURL("image/png");
+  a.click();
 }
 
 /* ---------- scan ---------- */
