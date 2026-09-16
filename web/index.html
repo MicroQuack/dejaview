@@ -99,6 +99,8 @@
   .echo-tag { position: absolute; top: 5px; right: 5px; max-width: calc(100% - 10px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
               padding: 2px 5px; border-radius: 4px; background: rgba(40,14,70,.9); color: #efd9ff; font: 600 9px var(--mono); }
   .guest.vip .echo-tag { max-width: calc(100% - 36px); }
+  .guest .who { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); padding: 2px 5px; border-radius: 4px;
+                background: rgba(8,10,22,.85); color: var(--dim); font: 9px var(--mono); }
   .bouncer { position: absolute; right: 1%; bottom: 0; height: 64%; }
   .bouncer img, .bouncer video { width: 100%; height: 100%; object-fit: contain; display: block; }
   .says { position: absolute; right: 44%; bottom: 99%; white-space: nowrap; padding: 7px 14px; border-radius: 18px; background: rgba(10,6,20,.9);
@@ -318,9 +320,13 @@
     <p><b>Launch Reflex</b> measures how often a buyer's earlier launch buys went on to offer a strong move within an hour of their buy,
       ranked against 37 reference launch buyers. In a test frozen before any results were seen, a buyer's score on older launches predicted
       their score on newer ones. It is historical context, not a profit score, and not a prediction.</p>
-    <p><b>Echoes</b> are earlier launches that two or more of today's buyers were also early on. They show repeated behaviour. They do not show that
-      the wallets are connected.</p>
-    <p><b>Characters</b> are generated from each wallet address, so the same wallet always looks the same, in every launch.</p>
+    <p><b>Echoes</b> are earlier launches that two or more of today's buyers were also early on. A launch only counts when we could resolve
+      its launch moment and the buyer's first buy fell inside the same 6-hour window Launch Reflex uses. Launches we could not verify are left
+      out rather than counted. Echoes show repeated behaviour. They do not show that the wallets are connected.</p>
+    <p><b>When we cannot check a buyer</b>, the page says so. "History unavailable" means Nansen returned no trades for that wallet. "New face"
+      means we read the history and found no earlier launch entry in it.</p>
+    <p><b>Characters</b> come from the wallet address alone, so the same wallet looks the same in every launch. With 24 characters, two buyers at
+      one launch sometimes share a look; their addresses then appear above them.</p>
   </section>
 
   <footer>
@@ -348,9 +354,13 @@ const pct = v => Math.round(v * 100) + "%";
 const mmss = s => { s = Math.max(0, Math.round(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
 const day = iso => new Date(iso).toLocaleDateString("en-GB", {day: "numeric", month: "short", timeZone: "UTC"});
 const plural = (n, one, many) => n === 1 ? one : many;
-const tierOf = r => !r ? "pending" : !r.scoreable ? "fresh" : r.reflex >= VIP ? "vip" : r.reflex >= STRONG ? "strong" : "known";
-const TIER_COLOR = {pending: "#5a6080", fresh: "#5a6080", known: "#c9cde0", strong: "#36e6f5", vip: "#f5c542"};
-const TIER_LABEL = {fresh: "New face", known: "Known", strong: "Strong record", vip: "VIP"};
+/* "unchecked" is not a verdict: it means Nansen gave us no history, or no price for the launches we found. */
+const UNCHECKED = {history_unavailable: "History unavailable", price_data_missing: "No price data", too_little_history: "Too little history"};
+const tierOf = r => !r ? "pending" : r.scoreable ? (r.reflex >= VIP ? "vip" : r.reflex >= STRONG ? "strong" : "known")
+                   : UNCHECKED[r.state] ? "unchecked" : "fresh";
+const TIER_COLOR = {pending: "#5a6080", fresh: "#5a6080", unchecked: "#7d5a9a", known: "#c9cde0", strong: "#36e6f5", vip: "#f5c542"};
+const TIER_LABEL = {fresh: "New face", unchecked: "Not checked", known: "Known", strong: "Strong record", vip: "VIP"};
+const uncheckedText = r => UNCHECKED[r?.state] || "Not checked";
 const moveText = p => p === null || p === undefined ? "no price data" : p >= 900 ? "10×+" : (p > 0 ? "+" : "") + p + "%";
 const mfeText = m => { const r = Math.exp(m); return r >= 9.99 ? "10×+" : (r >= 1 ? "+" : "") + Math.round((r - 1) * 100) + "%"; };
 
@@ -433,20 +443,9 @@ fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
     loadImage(`art/heads/${g.id}.webp`, img => { ART.heads[g.id] = img; artChanged(); });
   });
 }).catch(artSettled);
-/* A wallet keeps the same character in every launch, unless an earlier arrival in this launch already has it:
-   then it takes the next free one, so no two buyers at one party share a face. */
-let faceCache = {key: "", map: {}};
-function faceIndex(seed, n) {
-  const usual = w => Math.floor(rng(w)() * n);
-  if (!S?.byBuyer[seed]) return usual(seed);
-  const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).map(b => b.wallet), key = n + order.join();
-  if (faceCache.key !== key) {
-    const taken = new Set(), map = {};
-    order.forEach(w => { let i = usual(w); while (taken.has(i) && taken.size < n) i = (i + 1) % n; taken.add(i); map[w] = i; });
-    faceCache = {key, map};
-  }
-  return faceCache.map[seed];
-}
+/* The character comes from the wallet address alone, so the same wallet looks the same in every launch.
+   Two buyers at one party can share a character; the page then shows their addresses to tell them apart. */
+function faceIndex(seed, n) { return Math.floor(rng(seed)() * n); }
 /* Returns null until that character's image has loaded. */
 function guestArt(seed, kind) {
   const list = ART.manifest?.guests;
@@ -474,10 +473,12 @@ function coin(symbol, token) {
 
 /* ---------- the party scene ---------- */
 /* Painted club as a backdrop, with the buyers as a lineup of portrait cards. Nothing is drawn onto the painting. */
-const TIER_TAG = {pending: "Checking…", fresh: "New face", known: "Known", strong: "Strong", vip: "VIP"};
+const TIER_TAG = {pending: "Checking…", fresh: "New face", unchecked: "No data", known: "Known", strong: "Strong", vip: "VIP"};
 function artScene(symbol, guests, line) {
   const finale = guests.some(g => g.finale && g.echo);
-  const cards = guests.filter(g => !g.hidden).map(g => {
+  const here = guests.filter(g => !g.hidden), faces = {};
+  here.forEach(g => { const a = guestArt(g.seed); if (a) faces[a.id] = (faces[a.id] || 0) + 1; });
+  const cards = here.map(g => {
     const art = guestArt(g.seed), state = g.hidden ? "waiting" : g.tier;
     /* Once the art is in play, an unloaded guest waits as an empty frame: the drawn face flashing up looked like a fault. */
     const face = art ? `<img src="art/guests/${art.id}.webp" alt="">`
@@ -485,8 +486,9 @@ function artScene(symbol, guests, line) {
     const tag = g.hidden ? "Not here yet" : g.score !== undefined && (g.tier === "vip" || g.tier === "strong" || g.tier === "known")
       ? `<small>${TIER_TAG[g.tier]}</small><b>${g.score}</b>` : TIER_TAG[g.tier];
     const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : finale ? " dim" : ""}`;
+    const twin = art && faces[art.id] > 1 ? `<span class="who">${short(g.seed)}</span>` : "";
     return `<div class="${cls}">${face}${g.tier === "vip" && !g.hidden ? `<svg class="crown" viewBox="34 0 32 20">${CROWN}</svg>` : ""}
-      ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}<span class="tag">${tag}</span></div>`;
+      ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}${twin}<span class="tag">${tag}</span></div>`;
   }).join("");
   return {cards, finale, line};
 }
@@ -580,7 +582,7 @@ function drawScene() {
     const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
     return {seed: b.wallet, tier, hidden: !here, score: r?.scoreable ? r.reflex : undefined, focus: S.focus === b.wallet,
             echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "", finale: S.ready && S.now >= 3600,
-            label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : "NEW FACE") : "CHECKING THE LIST…"};
+            label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : TIER_LABEL[tier].toUpperCase()) : "CHECKING THE LIST…"};
   }), bouncerLine()));
 }
 /* What the bouncer says about the latest arrival. Echo lines describe repeated behaviour, never a connection. */
@@ -629,7 +631,8 @@ function drawTrack() {
   if (focus) {
     const r = S.resolved.has(S.focus) ? S.byWallet[S.focus] : null, tier = tierOf(r), left = Math.min(88, Math.max(8, pos(focus.entry_delay_s) * 100));
     marks += `<div class="callout" style="left:${left}%;border-color:${TIER_COLOR[tier]}">+${mmss(focus.entry_delay_s - S.tape.start_s)} · ${usdShort(focus.usd)} ·
-      <b style="color:${TIER_COLOR[tier]}">${!r ? "checking launch record…" : r.scoreable ? `Reflex ${r.reflex} · ${esc(r.rank_label)}` : "new face"}</b></div>`;
+      <b style="color:${TIER_COLOR[tier]}">${!r ? "checking launch record…" : r.scoreable ? `Reflex ${r.reflex} · ${esc(r.rank_label)}`
+        : tier === "unchecked" ? uncheckedText(r).toLowerCase() : "new face"}</b></div>`;
   }
   const banner = S.bannerEcho && !focus ? `<div class="echo-banner"><b>ECHO DETECTED</b>${S.bannerEcho.wallets.length} of these buyers were also early on ${esc(cleanSym(S.bannerEcho.symbol))}</div>` : "";
   tape.innerHTML = svg; setHTML(overlay, labels + marks); setHTML(bannerEl, banner);
@@ -709,9 +712,11 @@ function renderAnswer() {
   else if (!done) { head = `<span class="n">${strongSeen.length}</span> strong ${plural(strongSeen.length, "record", "records")} so far`; sub = `${S.arrived.size} of ${n} big buyers have arrived.`; }
   else {
     const all = S.results.filter(r => r.scoreable && r.reflex >= STRONG).sort((a, b) => a.entry_delay_s - b.entry_delay_s);
-    head = all.length ? `<span class="n">${all.length} of the ${n}</span> biggest buyers ${plural(all.length, "has", "have")} a better launch record than most.`
-                      : `None of the ${n} biggest buyers has a better launch record than most.`;
+    const scored = S.results.filter(r => r.scoreable).length, unchecked = S.results.filter(r => tierOf(r) === "unchecked").length;
+    head = all.length ? `<span class="n">${all.length} of the ${scored}</span> buyers we could check ${plural(all.length, "has", "have")} a better launch record than most.`
+                      : `None of the ${scored} buyers we could check has a better launch record than most.`;
     if (all.length) sub = `The first strong buyer arrived ${Math.max(0, Math.round(all[0].entry_delay_s / 60))} minutes after launch.`;
+    if (unchecked) sub += ` ${unchecked} of the ${n} buyers could not be checked: Nansen returned no usable history for ${plural(unchecked, "that one", "them")}.`;
     const top10 = S.results.filter(r => r.scoreable && r.reflex >= 90).length;
     if (top10) sub += ` ${top10} ${plural(top10, "ranks", "rank")} in the top 10%.`;
   }
@@ -739,8 +744,12 @@ function renderBuyers() {
     const tier = tierOf(r), here = !S.ready || S.arrived.has(b.wallet);
     if (!here) return `<div class="bcard ghostcard" aria-hidden="true"><div class="top">${avatar(b.wallet)}</div></div>`;
     const sc = !r ? `<span class="num" style="font-size:18px;color:var(--faint)">checking…</span>`
-      : r.scoreable ? `<span class="num">${r.reflex}</span><span class="rank">${esc(r.rank_label)}${tier === "vip" ? " · VIP" : ""}</span>` : `<span class="num">New face</span>`;
-    const meta = r && r.scoreable ? `${usd(b.usd)} bought<br>${r.prior_launch_entries} past launches` : `${usd(b.usd)} bought${r ? "<br>no launch record yet" : ""}`;
+      : r.scoreable ? `<span class="num">${r.reflex}</span><span class="rank">${esc(r.rank_label)}${tier === "vip" ? " · VIP" : ""}</span>`
+      : `<span class="num" style="font-size:20px">${tier === "unchecked" ? esc(uncheckedText(r)) : "New face"}</span>`;
+    const meta = !r ? `${usd(b.usd)} bought`
+      : r.scoreable ? `${usd(b.usd)} bought<br>from ${r.prior_launch_entries} priced ${plural(r.prior_launch_entries, "launch", "launches")}`
+      : tier === "unchecked" ? `${usd(b.usd)} bought<br>we could not check this wallet`
+      : `${usd(b.usd)} bought<br>no earlier launch entry found`;
     return `<button class="bcard ${tier}" data-wallet="${b.wallet}" ${r ? "" : "disabled"} aria-label="Buyer ${short(b.wallet)}">
       <div class="top">${avatar(b.wallet, tier)}<span class="addr">${short(b.wallet)}</span></div>
       <div class="score">${sc}</div><div class="meta">${meta}</div>${r ? `<div class="cta">${r.scoreable ? "View history →" : "View wallet →"}</div>` : ""}</button>`;
@@ -753,7 +762,8 @@ function renderEchoes() {
   const done = S.ready && S.now >= 3600, list = done ? S.echo.echoes : S.firedEchoes;
   $("echo-count").textContent = done ? S.echo.shared_launches : S.firedEchoes.length;
   if (!list.length) {
-    el.innerHTML = `<p class="placeholder">${done ? "No shared launch history. None of these buyers were early on the same earlier launch in the last 30 days." : S.ready ? "Listening for echoes…" : "Checking launch records…"}</p>`;
+    el.innerHTML = `<p class="placeholder">${done ? "No verified shared early entries in the history we could read. That is not proof there are none."
+      : S.ready ? "Listening for echoes…" : "Checking launch records…"}</p>`;
     return;
   }
   const [first, ...rest] = list;

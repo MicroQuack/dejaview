@@ -55,6 +55,10 @@ def describe(pct):
     return "Historically well below other launch buyers."
 
 
+def plural(n, one, many):
+    return one if n == 1 else many
+
+
 def confidence(n):
     return "HIGH" if n >= 16 else "MEDIUM" if n >= 8 else "LOW" if n >= 3 else None
 
@@ -75,9 +79,10 @@ def tape(all_buyers, deploy, t0):
 def echoes(results, top=6):
     """Earlier launches that two or more of this launch's top buyers were also early on.
 
-    A launch counts for a wallet when the wallet's first buy passed the launch pre-filter
-    and was at least 6 h before this launch's T0. Moves come from the priced entries used
-    for Launch Reflex, so older or unpriced launches have no move.
+    A launch counts for a wallet only when that launch's deployment and T0 resolved, the wallet's
+    first buy fell inside the 6 h launch window, and the window closed at least 6 h before this
+    launch's T0. Launches we could not verify are left out, not counted. Moves come from the priced
+    entries used for Launch Reflex, so verified but unpriced launches have no move.
     """
     holders, moves = {}, {}
     for r in results:
@@ -90,8 +95,9 @@ def echoes(results, top=6):
         if len(hs) < 2:
             continue
         mv = moves.get(tok)
+        hs = sorted(hs, key=lambda h: h[1]["at"])
         shared.append({"token": tok, "symbol": hs[0][1]["symbol"], "wallets": [w for w, _ in hs],
-                       "first_buys": sorted(v["at"] for _, v in hs),
+                       "first_buys": [v["at"] for _, v in hs],  # same order as wallets
                        "best_move_1h_pct": round(100 * (math.exp(max(mv)) - 1)) if mv else None})
     shared.sort(key=lambda s: s["first_buys"][-1], reverse=True)  # most recent first, then
     shared.sort(key=lambda s: (-len(s["wallets"]), s["best_move_1h_pct"] is None))  # biggest groups with a move
@@ -228,7 +234,7 @@ class Scanner:
         now = dt.datetime.now(dt.timezone.utc)
         hist = self.history(wallet, cutoff)
         if hist is None:
-            return {**buyer, "scoreable": False, "api_failures": 1,
+            return {**buyer, "scoreable": False, "api_failures": 1, "state": "history_unavailable",
                     "reason": "Nansen did not return this wallet's history."}
         cands = [v for v in ld.first_buys(hist).values()
                  if ld.plausible_launch(v, now) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff]
@@ -237,16 +243,17 @@ class Scanner:
         with ThreadPoolExecutor(4) as pool:
             infos = list(pool.map(lambda v: ld.resolve_t0(self.c, v["prior_token_address"], self.t0_cache), cands))
         failures = sum(1 for info in infos if info is None)
-        entries = []
+        verified, unverified = [], 0
         for v, info in zip(cands, infos):
             if not info or not info.get("deployment_timestamp") or info.get("t0_unresolved_capped"):
+                unverified += 1  # we could not resolve the launch, so we cannot claim this wallet was early on it
                 continue
             deploy, buy = utc(info["deployment_timestamp"]), utc(v["wallet_first_buy"])
             t0 = utc(info["t0_timestamp"]) if info.get("t0_timestamp") else None
             failed = t0 is None or t0 - deploy > ld.LAUNCH_WINDOW
             if deploy <= buy < (deploy if failed else t0) + ld.LAUNCH_WINDOW:
-                entries.append({**v, "failed_launch": failed})
-        entries = entries[:MAX_ENTRIES]
+                verified.append({**v, "failed_launch": failed})
+        entries = verified[:MAX_ENTRIES]
         with ThreadPoolExecutor(4) as pool:
             points = list(pool.map(lambda e: self.market_point(e["prior_token_address"], e["wallet_first_buy"]), entries))
         failures += sum(1 for p in points if p is None)
@@ -259,15 +266,24 @@ class Scanner:
                                "reached_2x": p["pmax"] >= 2 * p["p0"]})
         n = len(scored)
         launches = {v["prior_token_address"]: {"symbol": v["symbol"], "at": v["wallet_first_buy"]}
-                    for v in ld.first_buys(hist).values()
-                    if ld.plausible_launch(v, now) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff}
-        result = {**buyer, "_launches": launches, "history_trades": len(hist), "launch_candidates": len(cands), "api_failures": failures,
+                    for v in verified
+                    if utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff}
+        result = {**buyer, "_launches": launches, "history_trades": len(hist), "launch_candidates": len(cands),
+                  "verified_launches": len(verified), "unverified_candidates": unverified, "api_failures": failures,
                   "entries": sorted(scored, key=lambda s: s["bought_at"], reverse=True)}
         conf = confidence(n)
         if conf is None:
-            return {**result, "scoreable": False,
-                    "reason": ("No prior launch entries with price data in the 30 days before this launch." if n == 0
-                               else f"Only {n} prior launch entries with price data in the 30 days before this launch.")}
+            if n == 0 and not verified:
+                state, reason = ("checked_no_record",
+                                 "No launch in the 30 days before this one had a first buy inside its launch window.")
+            elif n == 0:
+                state, reason = ("price_data_missing",
+                                 f"{len(verified)} earlier {plural(len(verified), 'launch', 'launches')} verified, "
+                                 "but Nansen returned no first-hour price for them, so they cannot be scored.")
+            else:
+                state, reason = ("too_little_history",
+                                 f"Only {n} priced launch {plural(n, 'entry', 'entries')} in the 30 days before this launch.")
+            return {**result, "scoreable": False, "state": state, "reason": reason}
         k, prior = REFERENCE["shrinkage_k"], REFERENCE["prior_mean_mfe60"]
         shrunk = (sum(s["mfe60"] for s in scored) + k * prior) / (n + k)
         pct = percentile(shrunk)
