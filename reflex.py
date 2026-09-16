@@ -284,7 +284,11 @@ class Scanner:
                   "entries": sorted(scored, key=lambda s: s["bought_at"], reverse=True)}
         conf = confidence(n)
         if conf is None:
-            if n == 0 and not verified:
+            if n == 0 and not verified and unverified:
+                state, reason = ("launches_unverified",
+                                 f"{unverified} earlier {plural(unverified, 'launch', 'launches')} could not be resolved, so we "
+                                 "cannot say whether this wallet was early on them.")
+            elif n == 0 and not verified:
                 state, reason = ("checked_no_record",
                                  "No launch in the 30 days before this one had a first buy inside its launch window.")
             elif n == 0:

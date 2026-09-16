@@ -49,9 +49,9 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
    `SITE_URL` in `web/index.html`. The Render blueprint below still works if the Python app is ever wanted.
 
    **Old note, Render.** `render.yaml` is committed and sets `DEJAVIEW_PUBLIC=1`, so the site replays saved launches
-   only and never calls Nansen. The repo is public at **https://github.com/stevehq26-bot/dejaview**. No Render
+   only and never calls Nansen. The repo is public at **https://github.com/MicroQuack/dejaview**. No Render
    credentials exist on this machine, so the owner must click once:
-   **https://render.com/deploy?repo=https://github.com/stevehq26-bot/dejaview**
+   **https://render.com/deploy?repo=https://github.com/MicroQuack/dejaview**
    Afterwards, set `SITE_URL` in `web/index.html` (it prints on every share card) and add the link to the README.
    A fresh clone was tested on 2026-09-16: venv, install, `DEJAVIEW_PUBLIC=1 python app.py`, all four replays serve.
 6. **Done 2026-09-16: README rewritten** around the product, with the no-key path, the live-scan path and cost, the

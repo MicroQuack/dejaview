@@ -362,7 +362,8 @@ const day = iso => new Date(iso).toLocaleDateString("en-GB", {day: "numeric", mo
 const plural = (n, one, many) => n === 1 ? one : many;
 const ordinal = n => n + (["th", "st", "nd", "rd"][n % 100 >> 3 ^ 1 && n % 10] || "th");
 /* "unchecked" is not a verdict: it means Nansen gave us no history, or no price for the launches we found. */
-const UNCHECKED = {history_unavailable: "History unavailable", price_data_missing: "No price data", too_little_history: "Too little history"};
+const UNCHECKED = {history_unavailable: "History unavailable", price_data_missing: "No price data",
+                   too_little_history: "Too little history", launches_unverified: "Launches unverified"};
 /* A launch younger than an hour is only replayed as far as we actually watched it. */
 const observedEnd = () => S?.event && S.event.first_hour_complete === false && S.event.observed_s ? S.event.observed_s : 3600;
 const tierOf = r => !r ? "pending" : r.scoreable ? (r.reflex >= VIP ? "vip" : r.reflex >= STRONG ? "strong" : "known")
@@ -713,7 +714,7 @@ function pause() { if (S) { S.playing = false; S.last = null; render(); } }
 
 /* ---------- panels ---------- */
 function statusText() {
-  if (!S) return "Paste a launch, or pick a replay";
+  if (!S) return STATIC ? "Pick a replay to watch" : "Paste a launch, or pick a replay";
   if (!S.ready) return S.stage;
   if (S.now >= observedEnd()) return S.echo?.echoes?.length ? "Replay complete · echoes found" : "Replay complete";
   if (S.focus && !S.resolved.has(S.focus)) return `Guest ${S.arrived.size} of ${S.buyers.length} · checking launch record`;
@@ -1093,7 +1094,12 @@ function handleEvent(d) {
 }
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
-$("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t, false); };
+$("f").onsubmit = e => {
+  e.preventDefault();
+  const t = $("token").value.trim();
+  if (!t && FEATURED) return scan(FEATURED.token, true);  /* the button plays tonight's launch */
+  if (t) scan(t, !!STATIC);
+};
 let music = null, wantSound = true;
 function toggleSound(on = !wantSound) {
   const btn = $("sound");
@@ -1126,11 +1132,17 @@ $("toggle-method").onclick =() => { const on = $("method").hidden; $("method").h
 
 modeReady = fetch("api/replays").then(r => r.ok ? r.json() : Promise.reject())
   .catch(() => { STATIC = true; return fetch("replays/index.json").then(r => r.json()); });
+let FEATURED = null;
 modeReady.then(({replays, public: pub}) => {
+  FEATURED = replays[0] || null;
   $("examples").innerHTML = replays.length ? `<span>Replay a launch:</span>` + replays.slice(0, 4).map(r =>
     `<button class="chip" data-token="${r.token}">${esc(cleanSym(r.symbol))} · ${day(r.t0)}</button>`).join("") : "";
   $("examples").querySelectorAll(".chip").forEach(b => b.onclick = () => { $("token").value = b.dataset.token; scan(b.dataset.token, true); });
-  if (pub || STATIC) $("token").placeholder = "Public demo: pick a replay below";
+  if ((pub || STATIC) && FEATURED) {  /* this copy replays saved launches: do not invite a scan it cannot run */
+    $("go").textContent = `Watch ${cleanSym(FEATURED.symbol)}`;
+    $("token").placeholder = "Saved launches only here. Run it locally to scan any launch.";
+    $("token").setAttribute("aria-label", "Saved launches only on this site");
+  }
 }).catch(() => {});
 render();
 const q = new URLSearchParams(location.search);

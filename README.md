@@ -18,7 +18,7 @@ Built for the Nansen Meridian Buildathon. Powered by the **Nansen API**.
 ## Watch it in two minutes, no API key
 
 ```bash
-git clone <this repo> && cd Dejaview
+git clone https://github.com/MicroQuack/dejaview.git && cd dejaview
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python app.py                 # then open http://localhost:8420
 ```
@@ -118,6 +118,7 @@ persistence effect measured on 37 actors, not evidence that tonight's VIP will m
 ## Credits and licence
 
 - Code: **MIT**, see [LICENSE](LICENSE). Use it, change it, ship it; just keep the copyright line.
+- Built by [MicroQuack](https://github.com/MicroQuack).
 - Art generated with Codex and Grok Imagine, cut out and compressed by `tools/build_art.py`.
 - Music: **"Neon Synthwave Vibe" by Lumen Sound**, from [Pixabay](https://pixabay.com/music/synthwave-neon-synthwave-vibe-554114/),
   used under the Pixabay Content Licence. Certificate: [`docs/licences/`](docs/licences/).

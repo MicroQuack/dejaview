@@ -55,11 +55,11 @@ def verified_launches(hist, cutoff, fetched_at):
     return found, unverified
 
 
-def state_for(w, hist, verified):
+def state_for(w, hist, verified, unverified):
     if hist is None:
         return "history_unavailable"
     if not verified:
-        return "checked_no_record"
+        return "launches_unverified" if unverified else "checked_no_record"
     return "price_data_missing" if not w.get("entries") else "too_little_history"
 
 
@@ -81,7 +81,7 @@ def redo(path, write):
         found, unverified = verified_launches(hist, cutoff, fetched_at)
         w["verified_launches"], w["unverified_candidates"] = len(found), unverified
         if not w.get("scoreable"):
-            w["state"] = state_for(w, hist, found)
+            w["state"] = state_for(w, hist, found, unverified)
         results.append({**w, "_launches": found})
     fresh = echoes(results)
     old = next((e for e in events if e["kind"] == "echo"), None)

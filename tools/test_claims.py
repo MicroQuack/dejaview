@@ -21,7 +21,11 @@ from reflex import echoes, utc
 
 ROOT = Path(__file__).resolve().parent.parent
 REPLAYS = ROOT / "data" / "replays"
-T0 = json.loads(Path(ld.T0_FILE).read_text()) if Path(ld.T0_FILE).exists() else {}
+# The launch moments behind the saved echoes travel with the repo, so anyone can run these checks.
+FIXTURE = ROOT / "data" / "verify" / "launch_moments.json"
+T0 = json.loads(FIXTURE.read_text()) if FIXTURE.exists() else {}
+if Path(ld.T0_FILE).exists():
+    T0 = {**json.loads(Path(ld.T0_FILE).read_text()), **T0}
 FAILS = []
 
 
@@ -97,9 +101,22 @@ def test_unavailable_history_is_not_a_new_face():
                 continue
             state = w.get("state")
             check(f"{name}: {w['wallet'][:6]} says which kind of gap it is", state in
-                  {"history_unavailable", "checked_no_record", "price_data_missing", "too_little_history"}, str(state))
+                  {"history_unavailable", "checked_no_record", "price_data_missing", "too_little_history",
+                   "launches_unverified"}, str(state))
             if w.get("api_failures") and not w.get("history_trades"):
                 check(f"{name}: {w['wallet'][:6]} failed history is not a new face", state == "history_unavailable", str(state))
+
+
+def test_failed_lookups_are_not_a_verdict():
+    """A wallet whose earlier launches could not be resolved is not a new face."""
+    for path in sorted(REPLAYS.glob("*.json")):
+        data = json.loads(path.read_text())
+        name = next(e for e in data["events"] if e["kind"] == "event").get("symbol", path.stem)
+        for w in [e for e in data["events"] if e["kind"] == "wallet"]:
+            if w.get("scoreable") or w.get("state") != "checked_no_record":
+                continue
+            check(f"{name}: {w['wallet'][:6]} found nothing, rather than failing to look",
+                  not w.get("unverified_candidates"), f"{w.get('unverified_candidates')} unresolved")
 
 
 def test_scoring_does_not_depend_on_todays_date():
@@ -129,6 +146,7 @@ def main():
     test_echo_rows_stay_paired()
     test_saved_replays_only_claim_verified_echoes()
     test_unavailable_history_is_not_a_new_face()
+    test_failed_lookups_are_not_a_verdict()
     test_scoring_does_not_depend_on_todays_date()
     test_page_keeps_faces_stable()
     print()
