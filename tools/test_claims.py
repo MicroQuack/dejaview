@@ -102,6 +102,21 @@ def test_unavailable_history_is_not_a_new_face():
                 check(f"{name}: {w['wallet'][:6]} failed history is not a new face", state == "history_unavailable", str(state))
 
 
+def test_scoring_does_not_depend_on_todays_date():
+    """A cached scan must give the same answer next week, so ages are read as of the fetch."""
+    code = (ROOT / "reflex.py").read_text()
+    check("scoring filters candidates as of the fetch time", "ld.plausible_launch(v, fetched_at)" in code)
+    check("history returns when it was fetched", "return trades, fetched" in code)
+    check("cached history applies both 30-day bounds", "cutoff - 30 * ld.DAY <= utc(x[\"block_timestamp\"]) < cutoff" in code)
+    day = dt.timedelta(days=1)
+    row = {"age_days_today": 3, "wallet_first_buy": (dt.datetime(2026, 9, 10, tzinfo=dt.timezone.utc)).isoformat()}
+    fetched = dt.datetime(2026, 9, 13, tzinfo=dt.timezone.utc)
+    same = ld.plausible_launch(row, fetched) == ld.plausible_launch(row, fetched)
+    moved = ld.plausible_launch(row, fetched) != ld.plausible_launch(row, fetched + 7 * day)
+    check("the same fetch time gives the same verdict", same)
+    check("a later clock would have changed it, which is why we pin the fetch time", moved)
+
+
 def test_page_keeps_faces_stable():
     """The character must come from the wallet alone, not from who else is in the lineup."""
     page = (ROOT / "web" / "index.html").read_text()
@@ -114,6 +129,7 @@ def main():
     test_echo_rows_stay_paired()
     test_saved_replays_only_claim_verified_echoes()
     test_unavailable_history_is_not_a_new_face()
+    test_scoring_does_not_depend_on_todays_date()
     test_page_keeps_faces_stable()
     print()
     if FAILS:

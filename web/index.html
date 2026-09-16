@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Déjà View</title>
+<title>Déjà View — same faces, different launch</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0b1c'/%3E%3Ccircle cx='32' cy='30' r='13' fill='none' stroke='%23c46bff' stroke-width='4'/%3E%3Ccircle cx='32' cy='30' r='21' fill='none' stroke='%2336e6f5' stroke-width='3' opacity='.7'/%3E%3C/svg%3E">
+<meta name="description" content="Replay the first hour of a pump.fun launch as a club night, and see which buyers have been early on the same earlier launches. Data from the Nansen API.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Martian+Mono:wght@400;600&family=Onest:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
@@ -62,6 +64,7 @@
   .launch .when { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font: 600 11px var(--mono); letter-spacing: .2em;
                   text-transform: uppercase; color: var(--dim); }
   .launch .when b { color: var(--now); font-weight: 600; }
+  .launch .when b.warn { color: var(--gold); }
   .scene { position: relative; margin-right: -24px; min-height: 520px; overflow: hidden; background: linear-gradient(#1a0f33, #0a0a16 77%, #07070f 77%); }
   .scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   .scene .club { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 35%; }
@@ -318,8 +321,10 @@
     <p><b>The launch moment</b> is the first time a coin's trading reaches $5,000. <b>The buyers</b> are the 8 biggest buyers of $500 or more
       in the hour after it. For each buyer, Déjà View looks at their trades in the 30 days before the launch moment, and nothing after it.</p>
     <p><b>Launch Reflex</b> measures how often a buyer's earlier launch buys went on to offer a strong move within an hour of their buy,
-      ranked against 37 reference launch buyers. In a test frozen before any results were seen, a buyer's score on older launches predicted
-      their score on newer ones. It is historical context, not a profit score, and not a prediction.</p>
+      ranked against 37 reference launch buyers. <b>The number is a percentile, not a win rate:</b> 92 means this buyer's record sits above
+      about 92% of that reference group. It is measured from the launches we could price, so a 92 from 5 launches rests on less evidence than
+      a 92 from 16. In a test frozen before any results were seen, a buyer's score on older launches predicted their score on newer ones.
+      It is historical context, not a profit score, and not a prediction.</p>
     <p><b>Echoes</b> are earlier launches that two or more of today's buyers were also early on. A launch only counts when we could resolve
       its launch moment and the buyer's first buy fell inside the same 6-hour window Launch Reflex uses. Launches we could not verify are left
       out rather than counted. Echoes show repeated behaviour. They do not show that the wallets are connected.</p>
@@ -356,6 +361,8 @@ const day = iso => new Date(iso).toLocaleDateString("en-GB", {day: "numeric", mo
 const plural = (n, one, many) => n === 1 ? one : many;
 /* "unchecked" is not a verdict: it means Nansen gave us no history, or no price for the launches we found. */
 const UNCHECKED = {history_unavailable: "History unavailable", price_data_missing: "No price data", too_little_history: "Too little history"};
+/* A launch younger than an hour is only replayed as far as we actually watched it. */
+const observedEnd = () => S?.event && S.event.first_hour_complete === false && S.event.observed_s ? S.event.observed_s : 3600;
 const tierOf = r => !r ? "pending" : r.scoreable ? (r.reflex >= VIP ? "vip" : r.reflex >= STRONG ? "strong" : "known")
                    : UNCHECKED[r.state] ? "unchecked" : "fresh";
 const TIER_COLOR = {pending: "#5a6080", fresh: "#5a6080", unchecked: "#7d5a9a", known: "#c9cde0", strong: "#36e6f5", vip: "#f5c542"};
@@ -443,9 +450,13 @@ fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
     loadImage(`art/heads/${g.id}.webp`, img => { ART.heads[g.id] = img; artChanged(); });
   });
 }).catch(artSettled);
-/* The character comes from the wallet address alone, so the same wallet looks the same in every launch.
-   Two buyers at one party can share a character; the page then shows their addresses to tell them apart. */
+/* The character and its tint both come from the wallet address alone, so a wallet looks the same in every
+   launch. 24 characters x 6 tints keeps buyers at one party apart; if two still match, the page shows addresses. */
+const TINTS = ["none", "hue-rotate(28deg)", "hue-rotate(-32deg)", "hue-rotate(58deg) saturate(1.15)",
+               "hue-rotate(-64deg)", "hue-rotate(96deg) saturate(.9)"];
 function faceIndex(seed, n) { return Math.floor(rng(seed)() * n); }
+function tintIndex(seed) { const r = rng("tint:" + seed); r(); return Math.floor(r() * TINTS.length); }
+const tintCss = seed => TINTS[tintIndex(seed)] === "none" ? "" : `filter:${TINTS[tintIndex(seed)]}`;
 /* Returns null until that character's image has loaded. */
 function guestArt(seed, kind) {
   const list = ART.manifest?.guests;
@@ -457,7 +468,7 @@ function guestArt(seed, kind) {
 let clipId = 0;
 function avatar(seed, tier = "pending", cls = "av") {
   const id = "clip" + (clipId++), ring = TIER_COLOR[tier], art = guestArt(seed, "head");
-  const face = art ? `<image href="art/heads/${art.id}.webp" x="0" y="2" width="100" height="100"/>`
+  const face = art ? `<image href="art/heads/${art.id}.webp" x="0" y="2" width="100" height="100" style="${tintCss(seed)}"/>`
                    : ART.pending || ART.manifest ? "" : `<g transform="translate(0 10)">${guestParts(seed, {body: true})}</g>`;
   return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="${id}"><circle cx="50" cy="50" r="46"/></clipPath></defs>
     <circle cx="50" cy="50" r="46" fill="#15172c"/><g clip-path="url(#${id})">${face}</g>
@@ -477,16 +488,16 @@ const TIER_TAG = {pending: "Checking…", fresh: "New face", unchecked: "No data
 function artScene(symbol, guests, line) {
   const finale = guests.some(g => g.finale && g.echo);
   const here = guests.filter(g => !g.hidden), faces = {};
-  here.forEach(g => { const a = guestArt(g.seed); if (a) faces[a.id] = (faces[a.id] || 0) + 1; });
+  here.forEach(g => { const a = guestArt(g.seed); if (a) { const k = a.id + tintIndex(g.seed); faces[k] = (faces[k] || 0) + 1; } });
   const cards = here.map(g => {
     const art = guestArt(g.seed), state = g.hidden ? "waiting" : g.tier;
     /* Once the art is in play, an unloaded guest waits as an empty frame: the drawn face flashing up looked like a fault. */
-    const face = art ? `<img src="art/guests/${art.id}.webp" alt="">`
+    const face = art ? `<img src="art/guests/${art.id}.webp" alt="" style="${tintCss(g.seed)}">`
       : ART.manifest ? "" : `<svg viewBox="0 0 100 100">${guestParts(g.seed, {body: true})}</svg>`;
     const tag = g.hidden ? "Not here yet" : g.score !== undefined && (g.tier === "vip" || g.tier === "strong" || g.tier === "known")
       ? `<small>${TIER_TAG[g.tier]}</small><b>${g.score}</b>` : TIER_TAG[g.tier];
     const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : finale ? " dim" : ""}`;
-    const twin = art && faces[art.id] > 1 ? `<span class="who">${short(g.seed)}</span>` : "";
+    const twin = art && faces[art.id + tintIndex(g.seed)] > 1 ? `<span class="who">${short(g.seed)}</span>` : "";
     return `<div class="${cls}">${face}${g.tier === "vip" && !g.hidden ? `<svg class="crown" viewBox="34 0 32 20">${CROWN}</svg>` : ""}
       ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}${twin}<span class="tag">${tag}</span></div>`;
   }).join("");
@@ -579,9 +590,9 @@ function drawScene() {
   const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s);
   paintScene(scene(S.event?.symbol, order.map(b => {
     const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, tier = tierOf(r), here = S.arrived.has(b.wallet);
-    const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
+    const spotlight = S.focus === b.wallet || (S.ready && S.now >= observedEnd() && tier === "vip");  /* label one guest at a time */
     return {seed: b.wallet, tier, hidden: !here, score: r?.scoreable ? r.reflex : undefined, focus: S.focus === b.wallet,
-            echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "", finale: S.ready && S.now >= 3600,
+            echo: here && S.bannerEcho?.wallets.includes(b.wallet) ? cleanSym(S.bannerEcho.symbol) : "", finale: S.ready && S.now >= observedEnd(),
             label: !spotlight ? "" : r ? (r.scoreable ? `${TIER_LABEL[tier].toUpperCase()} · REFLEX ${r.reflex}` : TIER_LABEL[tier].toUpperCase()) : "CHECKING THE LIST…"};
   }), bouncerLine()));
 }
@@ -591,11 +602,11 @@ function bouncerLine() {
   const f = S.focus;
   if (f) return !S.resolved.has(f) ? "Name?" : {fresh: "Never seen you before.", known: "You again.", strong: "I've seen you before.", vip: "VIP. Straight in."}[tierOf(S.byWallet[f])];
   if (S.bannerEcho) return `You ${S.bannerEcho.wallets.filter(w => S.byBuyer[w]).length} were early on ${cleanSym(S.bannerEcho.symbol)} too.`;
-  return S.now >= 3600 ? "That's the first hour." : "";
+  return S.now >= observedEnd() ? (S.event?.first_hour_complete === false ? "That's as far as this launch has got." : "That's the first hour.") : "";
 }
 
 /* ---------- replay track ---------- */
-const pos = sec => (sec - S.tape.start_s) / (3600 - S.tape.start_s);
+const pos = sec => (sec - S.tape.start_s) / (observedEnd() - S.tape.start_s);
 function drawTrack() {
   const W = 1000, H = 128, base = 92, el = $("track");
   if (!el.children.length) el.innerHTML = `<div></div><div style="position:absolute;inset:0;pointer-events:none"></div><div></div>`;
@@ -648,14 +659,14 @@ function admit(s, b) {
 }
 /* Jump straight to a replay second, with everyone who arrived by then already checked. Used by the ?at= test hook. */
 function jumpTo(sec) {
-  S.now = Math.min(3600, sec);
+  S.now = Math.min(observedEnd(), sec);
   S.buyers.filter(b => b.entry_delay_s <= S.now).forEach(b => { S.arrived.add(b.wallet); if (S.byWallet[b.wallet]) S.resolved.add(b.wallet); });
   step(0);
 }
 function step(dt) {
-  const s = S, span = 3600 - s.tape.start_s, t = performance.now();
+  const s = S, end = observedEnd(), span = end - s.tape.start_s, t = performance.now();
   if (t < s.holdUntil) dt = 0;  /* the clock waits while the newest guest is checked at the door */
-  s.now = Math.min(3600, s.now + dt * span / REPLAY_SECONDS * s.speed);
+  s.now = Math.min(end, s.now + dt * span / REPLAY_SECONDS * s.speed);
   if (t >= s.holdUntil) {
     const next = [...s.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s).find(b => !s.arrived.has(b.wallet));
     if (next && next.entry_delay_s <= s.now) { admit(s, next); s.holdUntil = t + (reduced ? 0 : HOLD_MS / s.speed); }
@@ -665,7 +676,7 @@ function step(dt) {
     const here = e.wallets.filter(w => s.byBuyer[w]);
     if (here.length >= 2 && here.every(w => s.resolved.has(w)) && !s.firedEchoes.includes(e)) { s.firedEchoes.push(e); if (!s.bannerEcho) s.bannerEcho = e; }
   });
-  if (s.now >= 3600) {
+  if (s.now >= end) {
     s.buyers.forEach(b => { s.arrived.add(b.wallet); if (s.byWallet[b.wallet]) s.resolved.add(b.wallet); });
     (s.echo?.echoes || []).slice(0, 3).forEach(e => { if (!s.firedEchoes.includes(e)) s.firedEchoes.push(e); });
     s.bannerEcho = s.bannerEcho || s.echo?.echoes?.[0] || null;
@@ -680,8 +691,8 @@ function loop(t) {
 }
 function play() {
   if (!S || !S.ready) return;
-  if (S.now >= 3600) resetPlayback();
-  if (reduced) { S.now = 3599.9; step(1); render(); return; }
+  if (S.now >= observedEnd()) resetPlayback();
+  if (reduced) { S.now = observedEnd() - .1; step(1); render(); return; }
   S.playing = true; S.last = null; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); render();
 }
 function pause() { if (S) { S.playing = false; S.last = null; render(); } }
@@ -690,7 +701,7 @@ function pause() { if (S) { S.playing = false; S.last = null; render(); } }
 function statusText() {
   if (!S) return "Paste a launch, or pick a replay";
   if (!S.ready) return S.stage;
-  if (S.now >= 3600) return S.echo?.echoes?.length ? "Replay complete · echoes found" : "Replay complete";
+  if (S.now >= observedEnd()) return S.echo?.echoes?.length ? "Replay complete · echoes found" : "Replay complete";
   if (S.focus && !S.resolved.has(S.focus)) return `Guest ${S.arrived.size} of ${S.buyers.length} · checking launch record`;
   if (S.focus) { const t = tierOf(S.byWallet[S.focus]); return `Guest ${S.arrived.size} of ${S.buyers.length} · ${t === "vip" ? "VIP" : t === "strong" ? "strong record" : t === "known" ? "known buyer" : "new face"}`; }
   if (S.bannerEcho) return "Echo detected";
@@ -705,7 +716,7 @@ const ICONS = {
 function renderAnswer() {
   const el = $("answer-panel");
   if (!S || !S.buyers.length) return;
-  const n = S.buyers.length, done = S.ready && S.now >= 3600;
+  const n = S.buyers.length, done = S.ready && S.now >= observedEnd();
   const seen = S.results.filter(r => S.resolved.has(r.wallet)), strongSeen = seen.filter(r => r.scoreable && r.reflex >= STRONG);
   let head, sub = "";
   if (!S.ready) head = `Checking <span class="n">${S.results.length}</span> of ${n} buyers…`;
@@ -725,7 +736,7 @@ function renderAnswer() {
   if (done && d && d.fingerprint && d.fingerprint_rank) {
     const r = d.fingerprint_rank, f = d.fingerprint, lv = (v, w) => w[Math.min(4, Math.floor(v * 5))];
     signals = `<div class="signals">
-      <div class="sig">${ICONS.q}<div><div class="k">Buyer quality</div><div class="v">${lv(r.actor_quality, ["Very low", "Low", "Typical", "High", "Very high"])}</div><div class="d">Average Launch Reflex ${f.actor_quality_pct}</div></div></div>
+      <div class="sig">${ICONS.q}<div><div class="k">Buyer quality</div><div class="v">${lv(r.actor_quality, ["Very low", "Low", "Typical", "High", "Very high"])}</div><div class="d">Combined buyer record: ${f.actor_quality_pct}th reference percentile</div></div></div>
       <div class="sig">${ICONS.s}<div><div class="k">Buying speed</div><div class="v">${lv(r.entry_speed, ["Much slower than usual", "Slower than usual", "Typical", "Faster than usual", "Much faster than usual"])}</div><div class="d">${f.entry_speed >= 60 ? "No strong buyer in the first hour" : `Strong buyers in by ${Math.round(f.entry_speed)} min`}</div></div></div>
       <div class="sig">${ICONS.c}<div><div class="k">Buyer spread</div><div class="v">${lv(r.concentration, ["Widely spread", "Spread out", "Typical", "Concentrated", "Very concentrated"])}</div><div class="d">Top 3 buyers = ${pct(f.concentration)} of first-hour buying</div></div></div>
       <div class="sig">${ICONS.p}<div><div class="k">Follow-through</div><div class="v">${lv(r.persistence, ["Very weak", "Weak", "Typical", "Strong", "Very strong"])}</div><div class="d">${pct(f.persistence)} of big buyers' buying came later</div></div></div>
@@ -737,7 +748,7 @@ function renderBuyers() {
   const el = $("buyers");
   if (!S || !S.buyers.length) return;
   $("buyer-count").textContent = S.buyers.length;
-  const done = S.ready && S.now >= 3600, score = r => r?.scoreable ? r.reflex : -1;
+  const done = S.ready && S.now >= observedEnd(), score = r => r?.scoreable ? r.reflex : -1;
   const list = S.buyers.map(b => ({b, r: S.resolved.has(b.wallet) || !S.ready ? S.byWallet[b.wallet] : null}))
     .sort((p, q) => done ? score(q.r) - score(p.r) : p.b.entry_delay_s - q.b.entry_delay_s);
   setHTML(el, list.map(({b, r}) => {
@@ -759,7 +770,7 @@ function renderBuyers() {
 function renderEchoes() {
   const el = $("echoes");
   if (!S || !S.echo) return;
-  const done = S.ready && S.now >= 3600, list = done ? S.echo.echoes : S.firedEchoes;
+  const done = S.ready && S.now >= observedEnd(), list = done ? S.echo.echoes : S.firedEchoes;
   $("echo-count").textContent = done ? S.echo.shared_launches : S.firedEchoes.length;
   if (!list.length) {
     el.innerHTML = `<p class="placeholder">${done ? "No verified shared early entries in the history we could read. That is not proof there are none."
@@ -771,7 +782,7 @@ function renderEchoes() {
   el.innerHTML = `<button class="echo-feature" data-echo="0">${coin(first.symbol, first.token)}
       <div><div class="sym">${esc(cleanSym(first.symbol))}</div>
       <div class="line">${first.wallets.length} of these buyers were also early on ${esc(cleanSym(first.symbol))}.</div>
-      <div class="move">${mv(first.best_move_1h_pct)}<small>best move within 1 h of their buys</small></div></div></button>
+      <div class="move">${mv(first.best_move_1h_pct)}<small>best move within 1 h of a buy, among the buyers we could price. Capped at 10×. Not what anyone made.</small></div></div></button>
     ${rest.map((e, i) => `<button class="echo-row" data-echo="${i + 1}">${coin(e.symbol, e.token)}<div><div class="esym">${esc(cleanSym(e.symbol))}</div>
       <div class="esub">${e.wallets.length} of the same buyers · ${day(e.first_buys[e.first_buys.length - 1])}</div></div><div class="emove">${mv(e.best_move_1h_pct)}</div></button>`).join("")}
     <p class="echo-note">An echo means these buyers were early on the same earlier launch. It shows repeated behaviour, not that the wallets are connected.${
@@ -793,14 +804,19 @@ function renderLaunch() {
   el.hidden = !ev;
   if (!ev) return;
   const sym = esc(cleanSym(ev.symbol).replace(/^\$/, "").toUpperCase());
+  const part = ev.first_hour_complete === false;
+  const mins = Math.max(1, Math.round((ev.observed_s || 0) / 60));
+  const notes = [part ? `<b class="warn">Provisional · first ${mins} min observed</b>` : `<b>First hour</b>`];
+  if (ev.validated_launchpad === false) notes.push(`<b class="warn">Not a pump.fun launch · Launch Reflex is not validated here</b>`);
+  if (S.capped) notes.push(`<b class="warn">Partial trade coverage</b>`);
   setHTML(el, `<div class="ticker">$${sym}</div>
-    <div class="when"><span>Launch party</span><span>${ev.t0 ? day(ev.t0) : ""}</span><b>First hour</b></div>`);
+    <div class="when"><span>Launch party</span><span>${ev.t0 ? day(ev.t0) : ""}</span>${notes.join("")}</div>`);
 }
 function render() {
   $("status").textContent = statusText();
   renderLaunch();
   if (S && S.tape) {
-    const span = 3600 - S.tape.start_s, p = S.ready ? S.now - S.tape.start_s : 0;
+    const span = observedEnd() - S.tape.start_s, p = S.ready ? S.now - S.tape.start_s : 0;
     $("bar").style.width = Math.min(100, p / span * 100) + "%";
     $("clock").textContent = `${mmss(p)} / ${mmss(span)}`;
   }
@@ -808,7 +824,7 @@ function render() {
   $("play").innerHTML = S && S.playing ? `<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="1" width="3.5" height="12" fill="#eceefa"/><rect x="8.5" y="1" width="3.5" height="12" fill="#eceefa"/></svg>`
     : `<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1l10 6-10 6z" fill="#eceefa"/></svg>`;
   $("play").setAttribute("aria-label", S && S.playing ? "Pause replay" : "Play replay");
-  $("share").disabled = !(S && S.ready && S.now >= 3600 && S.buyers.length);
+  $("share").disabled = !(S && S.ready && S.now >= observedEnd() && S.buyers.length);
   $("share").style.visibility = $("share").disabled ? "hidden" : "visible";
   clipId = 0;
   drawScene(); drawTrack(); renderAnswer(); renderBuyers(); renderEchoes();
@@ -833,13 +849,15 @@ function openBuyer(wallet) {
     return;
   }
   const rows = (r.entries || []).map(e => `<tr><td>${esc(cleanSym(e.symbol))}</td><td>${day(e.bought_at)}</td>
-    <td class="r ${e.mfe60 > 0 ? "up" : "down"}">${mfeText(e.mfe60)}</td><td class="r nodata">${e.failed_launch ? "never reached $5k" : ""}</td></tr>`).join("");
+    <td class="r ${e.mfe60 > 0 ? "up" : "down"}">${mfeText(e.mfe60)}</td><td class="r nodata">${e.failed_launch ? "did not reach $5k within 6 h" : ""}</td></tr>`).join("");
   const echoesHere = (S.echo?.echoes || []).filter(e => e.wallets.includes(wallet));
   openDrawer(`<div class="eyebrow">Where we've seen this buyer before</div><h3>${short(wallet)}</h3>
     <div class="who">${avatar(wallet, tier)}<div><div style="font:900 44px/1 var(--display);color:${TIER_COLOR[tier]}">${r.reflex}</div>
-      <div style="font:12px var(--mono);color:var(--dim)">Launch Reflex · ${esc(r.rank_label)} · ${r.confidence.toLowerCase()} confidence</div>
+      <div style="font:12px var(--mono);color:var(--dim)">Launch Reflex · ${esc(r.rank_label)} of 37 reference launch buyers</div>
+      <div style="font:12px var(--mono);color:var(--dim);margin-top:2px">from ${r.prior_launch_entries} priced ${plural(r.prior_launch_entries, "launch", "launches")} in the 30 days before this one</div>
       <div style="font:12px var(--mono);color:var(--dim);margin-top:4px">${arrived}</div></div></div>
-    <p style="margin-top:16px"><b style="color:var(--now)">${pct(r.runner_rate)}</b> of their ${r.prior_launch_entries} earlier launches offered a 2× move within an hour of their buy.</p>
+    <p style="margin-top:16px"><b style="color:var(--now)">${pct(r.runner_rate)}</b> of those ${r.prior_launch_entries} earlier launches offered a 2× move within an hour of their buy.
+      That is the move the coin offered, not what this buyer took.</p>
     ${echoesHere.length ? `<p class="eyebrow" style="margin-top:18px">Also early, with other buyers here, on</p><p>${echoesHere.map(e => esc(cleanSym(e.symbol))).join(" · ")}</p>` : ""}
     <table><tr><th>Earlier launch</th><th>Bought</th><th class="r">Best in 1 h</th><th></th></tr>${rows}</table>
     <p class="note">Launch Reflex measures whether this buyer repeatedly got into launches that later offered strong first-hour moves. It does not measure realised profit.</p>
@@ -874,9 +892,11 @@ function cardGuest(g, r, x, y, w, h) {
   g.beginPath(); g.roundRect(x, y, w, h, radius); g.clip();
   g.fillStyle = "#15122c"; g.fillRect(x, y, w, h);
   const img = art && ART.sprites[art.id];
-  if (img) {  /* cover-crop the portrait, head at the top */
+  if (img) {  /* cover-crop the portrait, head at the top, with this wallet's own tint */
     const scale = Math.max(w / img.width, h / img.height), dw = img.width * scale, dh = img.height * scale;
+    g.filter = TINTS[tintIndex(r.wallet)] === "none" ? "none" : TINTS[tintIndex(r.wallet)];
     g.drawImage(img, x + (w - dw) / 2, y, dw, dh);
+    g.filter = "none";
   }
   const fade = g.createLinearGradient(0, y + h * .35, 0, y + h);
   fade.addColorStop(0, "rgba(7,8,15,0)"); fade.addColorStop(.6, "rgba(7,8,15,.9)"); fade.addColorStop(1, "rgba(7,8,15,.98)");
@@ -914,6 +934,9 @@ async function shareCard() {
   g.fillStyle = wash; g.fillRect(0, 0, W, H);
 
   const strong = S.results.filter(r => r.scoreable && r.reflex >= STRONG).length;
+  const scored = S.results.filter(r => r.scoreable).length;
+  const unchecked = S.results.filter(r => tierOf(r) === "unchecked").length;
+  const spend = S.buyers.reduce((t, b) => t + b.usd, 0);
   const echo = S.echo?.echoes?.[0];
   g.fillStyle = "#f3eaff"; g.font = "900 40px 'Big Shoulders Display'"; g.fillText("DÉJÀ VIEW", 60, 78);
   g.fillStyle = "#36e6f5"; g.font = "600 13px 'Martian Mono'"; g.fillText("SAME FACES. DIFFERENT LAUNCH.", 60, 104);
@@ -921,38 +944,56 @@ async function shareCard() {
   g.fillText("$" + cleanSym(S.event.symbol).replace(/^\$/, "").toUpperCase(), 60, 210);
   g.fillStyle = "#9aa0bf"; g.font = "600 13px 'Martian Mono'";
   g.fillText(`LAUNCH PARTY · ${S.event.t0 ? day(S.event.t0).toUpperCase() : ""} · FIRST HOUR`, 62, 238);
-  g.fillStyle = "#eceefa"; g.font = "800 40px 'Big Shoulders Display'";
-  const head = strong ? `${strong} of the ${S.buyers.length} biggest buyers have a better launch record than most`
-                      : `None of the ${S.buyers.length} biggest buyers has a better launch record than most`;
-  wrapText(g, head.toUpperCase(), 560).slice(0, 3).forEach((line, i) => g.fillText(line, 60, 296 + i * 44));
+  const head = strong ? `${strong} of the ${scored} buyers we could check have a better launch record than most`
+                      : `None of the ${scored} buyers we could check has a better launch record than most`;
+  g.fillStyle = "#eceefa";
+  let headLines = [];
+  for (const size of [40, 36, 32]) {  /* shrink until the headline fits two lines */
+    g.font = `800 ${size}px 'Big Shoulders Display'`;
+    headLines = wrapText(g, head.toUpperCase(), 580);
+    if (headLines.length <= 2) break;
+  }
+  const lead = Math.min(46, 500 / headLines.length);
+  headLines.slice(0, 3).forEach((line, i) => g.fillText(line, 60, 292 + i * lead));
+  let y = 292 + (Math.min(3, headLines.length) - 1) * lead + 36;  /* the rest follows the headline */
+
+  g.fillStyle = "#9aa0bf"; g.font = "15px Onest";
+  g.fillText(`${S.buyers.length} biggest first-hour buyers   ·   ${usdShort(spend)} bought between them`, 62, y);
+  g.fillText(`${S.echo?.shared_launches || 0} verified shared earlier launches`
+    + (unchecked ? `   ·   ${unchecked} ${plural(unchecked, "buyer", "buyers")} we could not check` : ""), 62, y + 22);
+  y += 56;
+
   if (S.tape?.minute_usd?.length) {
-    const m = S.tape.minute_usd, peak = Math.max(1, ...m), x0 = 62, y0 = 424, w = 520, h = 46;
-    g.fillStyle = "#5a6080"; g.font = "600 11px 'Martian Mono'"; g.fillText("FIRST HOUR OF BUYING", x0, y0 - 14);
+    const m = S.tape.minute_usd, peak = Math.max(1, ...m), x0 = 62, w = 520, h = 34;
+    g.fillStyle = "#5a6080"; g.font = "600 11px 'Martian Mono'";
+    g.fillText("DOLLARS BOUGHT PER MINUTE OF THE FIRST HOUR", x0, y);
+    y += 12;
     g.fillStyle = "rgba(54,230,245,.22)"; g.strokeStyle = "#36e6f5"; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(x0, y0 + h);
-    m.forEach((v, i) => { const px = x0 + i / m.length * w, py = y0 + h - (v / peak) * h; g.lineTo(px, py); g.lineTo(px + w / m.length, py); });
-    g.lineTo(x0 + w, y0 + h); g.closePath(); g.fill();
-    g.beginPath(); g.moveTo(x0, y0 + h + 1); g.lineTo(x0 + w, y0 + h + 1); g.stroke();
+    g.beginPath(); g.moveTo(x0, y + h);
+    m.forEach((v, i) => { const px = x0 + i / m.length * w, py = y + h - (v / peak) * h; g.lineTo(px, py); g.lineTo(px + w / m.length, py); });
+    g.lineTo(x0 + w, y + h); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x0, y + h + 1); g.lineTo(x0 + w, y + h + 1); g.stroke();
+    y += h + 26;
   }
   if (echo) {
     const label = `${echo.wallets.length} WERE ALSO EARLY ON ${cleanSym(echo.symbol).toUpperCase()}`;
     g.font = "700 20px 'Martian Mono'";
     const w = g.measureText(label).width + 118;
-    g.beginPath(); g.roundRect(60, 506, Math.min(w, 600), 52, 26);
+    g.beginPath(); g.roundRect(60, y, Math.min(w, 600), 52, 26);
     g.fillStyle = "rgba(40,14,70,.92)"; g.fill(); g.strokeStyle = "#c46bff"; g.lineWidth = 2; g.stroke();
-    g.fillStyle = "#c46bff"; g.font = "700 20px 'Martian Mono'"; g.fillText("ECHO", 86, 539);
-    g.fillStyle = "#efd9ff"; g.fillText(label, 156, 539);
+    g.fillStyle = "#c46bff"; g.fillText("ECHO", 86, y + 33);
+    g.fillStyle = "#efd9ff"; g.fillText(label, 156, y + 33);
+    y += 74;
     if (echo.best_move_1h_pct !== null && echo.best_move_1h_pct !== undefined) {
       g.fillStyle = "#9aa0bf"; g.font = "15px Onest";
-      g.fillText(`${cleanSym(echo.symbol)} then moved ${moveText(echo.best_move_1h_pct)} within an hour of their buys`, 62, 576);
+      g.fillText(`${cleanSym(echo.symbol)} then offered ${moveText(echo.best_move_1h_pct)} within an hour of a buy. Not what anyone made.`, 62, y);
     }
   }
   const order = [...S.results].sort((a, b) => (b.scoreable ? b.reflex : -1) - (a.scoreable ? a.reflex : -1)).slice(0, 8);
   const cw = 108, ch = 152, gap = 12, cols = 4, gx = W - 60 - (cols * cw + (cols - 1) * gap);
   order.forEach((r, i) => cardGuest(g, r, gx + (i % cols) * (cw + gap), 150 + Math.floor(i / cols) * (ch + gap), cw, ch));
   g.fillStyle = "#7d84a6"; g.font = "14px 'Martian Mono'";
-  const foot = "Historical context, not a prediction · Data from the Nansen API";
-  g.fillText(foot, 60, 612);
+  g.fillText("Historical context, not a prediction · Data from the Nansen API", 60, 612);
   if (SITE_URL) { g.fillStyle = "#36e6f5"; g.textAlign = "right"; g.fillText(SITE_URL, W - 60, 612); g.textAlign = "left"; }
   const a = document.createElement("a");
   a.download = `dejaview-${cleanSym(S.event.symbol).replace(/[^\w]/g, "") || "scan"}.png`;
@@ -979,7 +1020,7 @@ function scan(token, replay) {
     const d = JSON.parse(m.data);
     if (d.kind === "event") { S.event = d; S.stage = "Finding the biggest first-hour buyers…"; }
     else if (d.kind === "buyers") {
-      S.buyers = d.buyers; S.tape = d.tape; d.buyers.forEach(b => { S.byBuyer[b.wallet] = b; S.arrived.add(b.wallet); });
+      S.buyers = d.buyers; S.tape = d.tape; S.capped = !!d.capped_windows; S.qualifying = d.qualifying_buyers; d.buyers.forEach(b => { S.byBuyer[b.wallet] = b; S.arrived.add(b.wallet); });
       S.stage = `${d.buyers.length} big buyers found · checking launch records`;
     }
     else if (d.kind === "wallet") { S.results.push(d); S.byWallet[d.wallet] = d; S.resolved.add(d.wallet); S.stage = `Checking launch records · ${S.results.length} of ${S.buyers.length}`; }

@@ -162,12 +162,16 @@ def first_buys(history):
     return out
 
 
-def plausible_launch(buy, now):
-    """Free pre-filter: today's whole-day age puts deployment within about a day of the buy."""
+def plausible_launch(buy, as_of):
+    """Free pre-filter: the token's whole-day age puts deployment within about a day of the buy.
+
+    `as_of` must be when the trade row was fetched, not today. The age travels with the cached row,
+    so using the current clock would quietly move the window and change old results.
+    """
     age = buy.get("age_days_today")
     if age is None:
         return False
-    latest = now - int(age) * DAY
+    latest = as_of - int(age) * DAY
     ts = utc(buy["wallet_first_buy"])
     return latest - 2 * DAY <= ts <= latest + LAUNCH_WINDOW + DAY
 

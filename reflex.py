@@ -148,7 +148,7 @@ class Scanner:
         """Every buyer after the filters, largest first, with buy USD per first-hour window."""
         m = dt.timedelta(minutes=1)
         edges = [deploy, t0 + 5 * m, t0 + 15 * m, t0 + 30 * m, t0 + 60 * m]
-        buys = []
+        buys, self.capped_windows = [], 0
         for i, (a, b) in enumerate(zip(edges, edges[1:])):
             if a >= now:
                 break
@@ -165,7 +165,10 @@ class Scanner:
                     break
             if resp is None:
                 raise RuntimeError("Nansen did not return first-hour trades. Try again shortly.")
-            buys += [(i, x) for x in rows(resp)]
+            page = rows(resp)
+            if len(page) >= 1000:
+                self.capped_windows += 1  # more trades exist than one page returns, so this window is partial
+            buys += [(i, x) for x in page]
         seen, wallets = set(), {}
         for i, x in buys:  # window order, so a buy on a shared edge counts in the earlier window
             k = (x["transaction_hash"], x["trader_address"], x["token_amount"])
@@ -196,12 +199,20 @@ class Scanner:
     # ------------------------------------------------------------------ wallet
 
     def history(self, wallet, cutoff):
-        """Wallet trades in the 30 days before cutoff. Cached; filtered strictly before cutoff."""
+        """Wallet trades in the 30 days before cutoff, with when they were fetched.
+
+        Returns (trades, fetched_at). Token ages in the rows were measured at fetch time, so scoring
+        must use that moment, not today's date, or a cached scan changes as the calendar moves.
+        """
         path = HISTORY_DIR / f"{wallet}.json"
         if path.exists():
             cached = json.loads(path.read_text())
             if utc(cached["from"]) <= cutoff - 30 * ld.DAY and utc(cached["to"]) >= cutoff:
-                return [x for x in cached["trades"] if utc(x["block_timestamp"]) < cutoff]
+                fetched = utc(cached["fetched_at"]) if cached.get("fetched_at") else \
+                    dt.datetime.fromtimestamp(path.stat().st_mtime, dt.timezone.utc)
+                window = [x for x in cached["trades"]
+                          if cutoff - 30 * ld.DAY <= utc(x["block_timestamp"]) < cutoff]  # both bounds, not just the top
+                return window, fetched
         trades = []
         for lo, hi in ((cutoff - 7 * ld.DAY, cutoff), (cutoff - 14 * ld.DAY, cutoff - 7 * ld.DAY),
                        (cutoff - 30 * ld.DAY, cutoff - 14 * ld.DAY)):
@@ -212,11 +223,12 @@ class Scanner:
                     break
                 r = None
             if r is None:
-                return None
+                return None, None
             trades += [x for x in r if utc(x["block_timestamp"]) < cutoff]
+        fetched = dt.datetime.now(dt.timezone.utc)
         path.write_text(json.dumps({"from": (cutoff - 30 * ld.DAY).isoformat(), "to": cutoff.isoformat(),
-                                    "trades": trades}))
-        return trades
+                                    "fetched_at": fetched.isoformat(), "trades": trades}))
+        return trades, fetched
 
     def market_point(self, token, buy):
         key = f"{token}|{buy}"
@@ -231,13 +243,12 @@ class Scanner:
 
     def score_wallet(self, buyer, cutoff):
         wallet = buyer["wallet"]
-        now = dt.datetime.now(dt.timezone.utc)
-        hist = self.history(wallet, cutoff)
+        hist, fetched_at = self.history(wallet, cutoff)
         if hist is None:
             return {**buyer, "scoreable": False, "api_failures": 1, "state": "history_unavailable",
                     "reason": "Nansen did not return this wallet's history."}
         cands = [v for v in ld.first_buys(hist).values()
-                 if ld.plausible_launch(v, now) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff]
+                 if ld.plausible_launch(v, fetched_at) and utc(v["wallet_first_buy"]) + ld.LAUNCH_WINDOW < cutoff]
         cands.sort(key=lambda v: v["wallet_first_buy"], reverse=True)
         cands = cands[:CANDIDATE_POOL]
         with ThreadPoolExecutor(4) as pool:
@@ -306,11 +317,14 @@ class Scanner:
         deploy, t0 = utc(info["deployment_timestamp"]), utc(info["t0_timestamp"])
         event = {"token": token, "symbol": info.get("symbol"), "deployment": deploy.isoformat(),
                  "t0": t0.isoformat(), "first_hour_complete": now >= t0 + dt.timedelta(hours=1),
+                 "observed_s": round(min(3600, (now - t0).total_seconds())),
+                 "scanned_at": now.isoformat(),
                  "validated_launchpad": token.endswith("pump")}
         self.emit("event", **event)
         all_buyers = self.first_hour_buys(token, deploy, t0, now)
         buyers = all_buyers[:MAX_BUYERS]
-        self.emit("buyers", buyers=buyers, tape=tape(all_buyers, deploy, t0))
+        self.emit("buyers", buyers=buyers, tape=tape(all_buyers, deploy, t0),
+                  capped_windows=getattr(self, "capped_windows", 0), qualifying_buyers=len(all_buyers))
         self.emit("stage", key="history", text="Checking prior launch behaviour")
         results = []
         with ThreadPoolExecutor(4) as pool:
