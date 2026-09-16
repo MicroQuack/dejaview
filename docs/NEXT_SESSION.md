@@ -36,11 +36,15 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
    `manifest.json`). The page uses the painted club, bouncer, guests, and head avatars, and falls back to the
    code-drawn scene per image. All 24 guests are used, and buyers at one launch always get different faces.
    Raw PNGs are not committed. The user rejected likeness worries about the bouncer and the plant creature: use all art.
-2. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
-3. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
+2. **Done 2026-09-16: the club moves.** `tools/build_art.py` also turns `web/art/raw/club-loop.mp4` and
+   `bouncer-loop.mp4` into seamless loops (forward then backward, because a cross-fade ghosts the painted signs).
+   The bouncer is a transparent WebM, so Safari and reduced-motion get the stills instead. Source clips are not committed.
+3. **Phone layout is still broken:** the page is wider than the screen and the lineup overflows the scene. Fix before submitting.
+4. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
+5. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
    (the `gh` login works, but no remote exists yet), and give the user the Render dashboard link.
-4. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
-5. **Record the silent demo** (30–45 seconds) and submit.
+6. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
+7. **Record the silent demo** (30–45 seconds) and submit.
 
 ## Working agreements with this user
 
