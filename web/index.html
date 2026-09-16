@@ -57,8 +57,7 @@
   .chip:focus-visible { outline: 2px solid var(--now); }
   .error { margin-top: 16px; padding: 10px 14px; border-left: 3px solid var(--gold); background: rgba(245,197,66,.08); max-width: 560px; font-size: 14px; }
   .error:empty { display: none; }
-  .launch { margin-top: 30px; max-width: 560px; padding: 18px 22px 16px; border-radius: 12px; border: 1px solid rgba(196,107,255,.4);
-            background: linear-gradient(180deg, rgba(48,16,84,.5), rgba(12,8,26,.65)); box-shadow: inset 0 0 40px rgba(196,107,255,.12), 0 0 30px rgba(196,107,255,.1); }
+  .launch { margin-top: 32px; max-width: 560px; }
   .launch .ticker { font: 900 clamp(46px, 5.4vw, 74px)/.86 var(--display); text-transform: uppercase; color: #ffd8ff; letter-spacing: -.01em;
                     text-shadow: 0 0 24px rgba(196,107,255,.75), 0 0 2px #fff; overflow-wrap: anywhere; }
   .launch .when { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font: 600 11px var(--mono); letter-spacing: .2em;
@@ -178,7 +177,7 @@
   .bcard.vip { border-color: rgba(245,197,66,.55); }
   .bcard .top { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .bcard .addr { font: 10.5px var(--mono); color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bcard .av { width: 46px; height: 46px; flex: none; }
+  .bcard .av { width: 54px; height: 54px; flex: none; }
   .bcard .score { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
   .bcard .num { font: 900 34px/1 var(--display); }
   .bcard .rank { font: 600 10px var(--mono); color: var(--now); }
@@ -361,6 +360,7 @@ const pct = v => Math.round(v * 100) + "%";
 const mmss = s => { s = Math.max(0, Math.round(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
 const day = iso => new Date(iso).toLocaleDateString("en-GB", {day: "numeric", month: "short", timeZone: "UTC"});
 const plural = (n, one, many) => n === 1 ? one : many;
+const ordinal = n => n + (["th", "st", "nd", "rd"][n % 100 >> 3 ^ 1 && n % 10] || "th");
 /* "unchecked" is not a verdict: it means Nansen gave us no history, or no price for the launches we found. */
 const UNCHECKED = {history_unavailable: "History unavailable", price_data_missing: "No price data", too_little_history: "Too little history"};
 /* A launch younger than an hour is only replayed as far as we actually watched it. */
@@ -693,7 +693,7 @@ function step(dt) {
   if (s.now >= end) {
     s.buyers.forEach(b => { s.arrived.add(b.wallet); if (s.byWallet[b.wallet]) s.resolved.add(b.wallet); });
     (s.echo?.echoes || []).slice(0, 3).forEach(e => { if (!s.firedEchoes.includes(e)) s.firedEchoes.push(e); });
-    s.bannerEcho = s.bannerEcho || s.echo?.echoes?.[0] || null;
+    s.bannerEcho = s.echo?.echoes?.[0] || s.bannerEcho || null;  /* the ending names the headline echo, not the first one to fire */
     s.focus = null; s.playing = false;
   }
 }
@@ -741,7 +741,7 @@ function renderAnswer() {
     head = all.length ? `<span class="n">${all.length} of the ${scored}</span> buyers we could check ${plural(all.length, "has", "have")} a better launch record than most.`
                       : `None of the ${scored} buyers we could check has a better launch record than most.`;
     if (all.length) sub = `The first strong buyer arrived ${Math.max(0, Math.round(all[0].entry_delay_s / 60))} minutes after launch.`;
-    if (unchecked) sub += ` ${unchecked} of the ${n} buyers could not be checked: Nansen returned no usable history for ${plural(unchecked, "that one", "them")}.`;
+    if (unchecked) sub += ` ${unchecked} of the ${n} could not be checked: no usable history from Nansen.`;
     const top10 = S.results.filter(r => r.scoreable && r.reflex >= 90).length;
     if (top10) sub += ` ${top10} ${plural(top10, "ranks", "rank")} in the top 10%.`;
   }
@@ -750,7 +750,7 @@ function renderAnswer() {
   if (done && d && d.fingerprint && d.fingerprint_rank) {
     const r = d.fingerprint_rank, f = d.fingerprint, lv = (v, w) => w[Math.min(4, Math.floor(v * 5))];
     signals = `<div class="signals">
-      <div class="sig">${ICONS.q}<div><div class="k">Buyer quality</div><div class="v">${lv(r.actor_quality, ["Very low", "Low", "Typical", "High", "Very high"])}</div><div class="d">Combined buyer record: ${f.actor_quality_pct}th reference percentile</div></div></div>
+      <div class="sig">${ICONS.q}<div><div class="k">Buyer quality</div><div class="v">${lv(r.actor_quality, ["Very low", "Low", "Typical", "High", "Very high"])}</div><div class="d">Combined buyer record: ${ordinal(f.actor_quality_pct)} reference percentile</div></div></div>
       <div class="sig">${ICONS.s}<div><div class="k">Buying speed</div><div class="v">${lv(r.entry_speed, ["Much slower than usual", "Slower than usual", "Typical", "Faster than usual", "Much faster than usual"])}</div><div class="d">${f.entry_speed >= 60 ? "No strong buyer in the first hour" : `Strong buyers in by ${Math.round(f.entry_speed)} min`}</div></div></div>
       <div class="sig">${ICONS.c}<div><div class="k">Buyer spread</div><div class="v">${lv(r.concentration, ["Widely spread", "Spread out", "Typical", "Concentrated", "Very concentrated"])}</div><div class="d">Top 3 buyers = ${pct(f.concentration)} of first-hour buying</div></div></div>
       <div class="sig">${ICONS.p}<div><div class="k">Follow-through</div><div class="v">${lv(r.persistence, ["Very weak", "Weak", "Typical", "Strong", "Very strong"])}</div><div class="d">${pct(f.persistence)} of big buyers' buying came later</div></div></div>
@@ -770,13 +770,13 @@ function renderBuyers() {
     if (!here) return `<div class="bcard ghostcard" aria-hidden="true"><div class="top">${avatar(b.wallet)}</div></div>`;
     const sc = !r ? `<span class="num" style="font-size:18px;color:var(--faint)">checking…</span>`
       : r.scoreable ? `<span class="num">${r.reflex}</span><span class="rank">${esc(r.rank_label)}${tier === "vip" ? " · VIP" : ""}</span>`
-      : `<span class="num" style="font-size:20px">${tier === "unchecked" ? esc(uncheckedText(r)) : "New face"}</span>`;
-    const meta = !r ? `${usd(b.usd)} bought`
-      : r.scoreable ? `${usd(b.usd)} bought<br>from ${r.prior_launch_entries} priced ${plural(r.prior_launch_entries, "launch", "launches")}`
-      : tier === "unchecked" ? `${usd(b.usd)} bought<br>we could not check this wallet`
-      : `${usd(b.usd)} bought<br>no earlier launch entry found`;
+      : `<span class="num" style="font-size:17px;line-height:1.15">${tier === "unchecked" ? esc(uncheckedText(r)) : "New face"}</span>`;
+    const meta = !r ? `${usdShort(b.usd)} bought`
+      : r.scoreable ? `${usdShort(b.usd)} bought<br>${r.prior_launch_entries} priced ${plural(r.prior_launch_entries, "launch", "launches")}`
+      : tier === "unchecked" ? `${usdShort(b.usd)} bought<br>we could not check`
+      : `${usdShort(b.usd)} bought<br>no launch entry found`;
     return `<button class="bcard ${tier}" data-wallet="${b.wallet}" ${r ? "" : "disabled"} aria-label="Buyer ${short(b.wallet)}">
-      <div class="top">${avatar(b.wallet, tier)}<span class="addr">${short(b.wallet)}</span></div>
+      <div class="top">${avatar(b.wallet, tier)}</div>
       <div class="score">${sc}</div><div class="meta">${meta}</div>${r ? `<div class="cta">${r.scoreable ? "View history →" : "View wallet →"}</div>` : ""}</button>`;
   }).join(""));
   el.querySelectorAll("button.bcard").forEach(btn => btn.onclick = () => openBuyer(btn.dataset.wallet));
@@ -796,7 +796,7 @@ function renderEchoes() {
   el.innerHTML = `<button class="echo-feature" data-echo="0">${coin(first.symbol, first.token)}
       <div><div class="sym">${esc(cleanSym(first.symbol))}</div>
       <div class="line">${first.wallets.length} of these buyers were also early on ${esc(cleanSym(first.symbol))}.</div>
-      <div class="move">${mv(first.best_move_1h_pct)}<small>best move within 1 h of a buy, among the buyers we could price. Capped at 10×. Not what anyone made.</small></div></div></button>
+      <div class="move">${mv(first.best_move_1h_pct)}<small>best move within 1 h of a buy, among the buyers we could price. Not anyone's profit.</small></div></div></button>
     ${rest.map((e, i) => `<button class="echo-row" data-echo="${i + 1}">${coin(e.symbol, e.token)}<div><div class="esym">${esc(cleanSym(e.symbol))}</div>
       <div class="esub">${e.wallets.length} of the same buyers · ${day(e.first_buys[e.first_buys.length - 1])}</div></div><div class="emove">${mv(e.best_move_1h_pct)}</div></button>`).join("")}
     <p class="echo-note">An echo means these buyers were early on the same earlier launch. It shows repeated behaviour, not that the wallets are connected.${
@@ -1037,6 +1037,7 @@ async function shareCard() {
 /* ---------- scan ---------- */
 function scan(token, replay) {
   $("error").textContent = "";
+  startSoundWithScan();
   if (/^[a-z0-9]{32,44}$/.test(token)) { $("error").textContent = "This address is all lowercase. Solana addresses are case-sensitive, so copy it again from the original source."; return; }
   if (es) es.close();
   cancelAnimationFrame(raf); closeDrawer();
@@ -1076,14 +1077,14 @@ function scan(token, replay) {
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
 $("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t, false); };
-let music = null;
-function toggleSound() {
+let music = null, wantSound = true;
+function toggleSound(on = !wantSound) {
   const btn = $("sound");
+  wantSound = on;
   if (!music) {
     music = new Audio(ART.manifest.music.src);
     music.loop = true; music.volume = 0;
   }
-  const on = btn.getAttribute("aria-pressed") !== "true";
   btn.setAttribute("aria-pressed", on);
   btn.setAttribute("aria-label", on ? "Mute club music" : "Play club music");
   btn.textContent = on ? "♪ Sound on" : "♪ Sound";
@@ -1095,7 +1096,9 @@ function toggleSound() {
     if (Math.abs(music.volume - target) < .02) { music.volume = target; clearInterval(music._fade); if (!on) music.pause(); }
   }, 40);
 }
-$("sound").onclick = toggleSound;
+$("sound").onclick = () => toggleSound();
+/* Browsers refuse to play sound before the visitor acts, so the club starts when they start a launch. */
+function startSoundWithScan() { if (wantSound && !music && !$("sound").hidden) toggleSound(true); }
 $("play").onclick = () => S && S.playing ? pause() : play();
 $("share").onclick = () => shareCard();
 document.querySelectorAll(".speed").forEach(b => b.onclick = () => {
