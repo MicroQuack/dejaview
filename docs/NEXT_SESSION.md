@@ -44,9 +44,14 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
    then did 10x), BRAIN, PVE, and ELON (7 of 8 buyers shared earlier coins, but those coins barely moved).
    **Picking demo coins:** the screener's 24-hour volume says nothing about the first hour. Check the first hour
    directly with `Scanner.first_hour_buys` (about 4 calls) and look for 6+ buyers over $500 with a spread of sizes.
-5. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
-   (the `gh` login works, but no remote exists yet), and give the user the Render dashboard link.
-6. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
+5. **Deploy on Render.** `render.yaml` is committed and sets `DEJAVIEW_PUBLIC=1`, so the site replays saved launches
+   only and never calls Nansen. The repo is public at **https://github.com/stevehq26-bot/dejaview**. No Render
+   credentials exist on this machine, so the owner must click once:
+   **https://render.com/deploy?repo=https://github.com/stevehq26-bot/dejaview**
+   Afterwards, set `SITE_URL` in `web/index.html` (it prints on every share card) and add the link to the README.
+   A fresh clone was tested on 2026-09-16: venv, install, `DEJAVIEW_PUBLIC=1 python app.py`, all four replays serve.
+6. **Done 2026-09-16: README rewritten** around the product, with the no-key path, the live-scan path and cost, the
+   endpoint-to-feature table, the usage receipt, and how to verify the claims.
 7. **Record the silent demo** (30–45 seconds) and submit.
 
 ## Corrections made on 2026-09-16 (judge-style review)
