@@ -1035,9 +1035,11 @@ async function shareCard() {
 }
 
 /* ---------- scan ---------- */
-function scan(token, replay) {
+/* Locally the Python app answers; on a static host the saved launches are files. */
+let STATIC = false, modeReady = null;
+async function scan(token, replay) {
   $("error").textContent = "";
-  startSoundWithScan();
+  startSoundWithScan();  /* before any await, so it still counts as the visitor's own click */
   if (/^[a-z0-9]{32,44}$/.test(token)) { $("error").textContent = "This address is all lowercase. Solana addresses are case-sensitive, so copy it again from the original source."; return; }
   if (es) es.close();
   cancelAnimationFrame(raf); closeDrawer();
@@ -1049,9 +1051,26 @@ function scan(token, replay) {
   $("buyers").innerHTML = `<p class="placeholder">Finding the biggest first-hour buyers…</p>`;
   $("echoes").innerHTML = `<p class="placeholder">Listening for echoes…</p>`;
   render();
-  es = new EventSource(`/api/scan?token=${encodeURIComponent(token)}${replay ? "&replay=1" : ""}`);
-  es.onmessage = m => {
-    const d = JSON.parse(m.data);
+  await modeReady;  /* know which kind of host we are on before asking it for anything */
+  if (!S) return;
+  if (STATIC) return replayFromFile(token);
+  es = new EventSource(`api/scan?token=${encodeURIComponent(token)}${replay ? "&replay=1" : ""}`);
+  es.onmessage = m => handleEvent(JSON.parse(m.data));
+  es.onerror = () => { if (es && es.readyState !== 2) { $("error").textContent = "The connection to the scan dropped. Scan again."; finish(); } };
+}
+/* A static host has no scan API: the saved launch is just a file. */
+async function replayFromFile(token) {
+  try {
+    const r = await fetch(`replays/${encodeURIComponent(token)}.json`);
+    if (!r.ok) throw new Error("no saved replay");
+    const data = await r.json();
+    for (const e of data.events) handleEvent({...e, replayed: true});
+  } catch {
+    handleEvent({kind: "error", message: "This demo replays saved launches only. Pick one below, or run Déjà View "
+      + "locally with your own Nansen key to scan any launch."});
+  }
+}
+function handleEvent(d) {
     if (d.kind === "event") { S.event = d; S.stage = "Finding the biggest first-hour buyers…"; }
     else if (d.kind === "buyers") {
       S.buyers = d.buyers; S.tape = d.tape; S.capped = !!d.capped_windows; S.qualifying = d.qualifying_buyers; d.buyers.forEach(b => { S.byBuyer[b.wallet] = b; S.arrived.add(b.wallet); });
@@ -1071,8 +1090,6 @@ function scan(token, replay) {
     }
     else if (d.kind === "error") { $("error").textContent = d.message; finish(); S = null; }
     render();
-  };
-  es.onerror = () => { if (es && es.readyState !== 2) { $("error").textContent = "The connection to the scan dropped. Scan again."; finish(); } };
 }
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
@@ -1107,11 +1124,13 @@ document.querySelectorAll(".speed").forEach(b => b.onclick = () => {
 $("toggle-setups").onclick = () => { const on = $("setups").hidden; $("setups").hidden = !on; $("toggle-setups").setAttribute("aria-expanded", on); };
 $("toggle-method").onclick =() => { const on = $("method").hidden; $("method").hidden = !on; $("toggle-method").setAttribute("aria-expanded", on); };
 
-fetch("/api/replays").then(r => r.json()).then(({replays, public: pub}) => {
+modeReady = fetch("api/replays").then(r => r.ok ? r.json() : Promise.reject())
+  .catch(() => { STATIC = true; return fetch("replays/index.json").then(r => r.json()); });
+modeReady.then(({replays, public: pub}) => {
   $("examples").innerHTML = replays.length ? `<span>Replay a launch:</span>` + replays.slice(0, 4).map(r =>
     `<button class="chip" data-token="${r.token}">${esc(cleanSym(r.symbol))} · ${day(r.t0)}</button>`).join("") : "";
   $("examples").querySelectorAll(".chip").forEach(b => b.onclick = () => { $("token").value = b.dataset.token; scan(b.dataset.token, true); });
-  if (pub) $("token").placeholder = "Public demo: pick a replay below";
+  if (pub || STATIC) $("token").placeholder = "Public demo: pick a replay below";
 }).catch(() => {});
 render();
 const q = new URLSearchParams(location.search);

@@ -34,6 +34,18 @@ To serve replays only, so visitors can never spend your credits:
 DEJAVIEW_PUBLIC=1 .venv/bin/python app.py
 ```
 
+## Publish it
+
+The public site needs no server at all. This writes `dist/`: the page, the art and the saved
+launches as plain files, ready for any static host.
+
+```bash
+.venv/bin/python tools/build_static.py
+```
+
+The same `web/index.html` runs both ways: against the Python app locally, and against those files
+when there is no scan API. `render.yaml` is also here if you would rather run the Python app itself.
+
 ## Scan a live launch, with your own key
 
 ```bash

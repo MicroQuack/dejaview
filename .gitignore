@@ -16,3 +16,6 @@ Thumbs.db
 web/art/raw/*.png
 web/art/raw/*.mp4
 web/art/raw/*.mp3
+
+# Built by tools/build_static.py
+dist/
