@@ -54,9 +54,9 @@
   .error:empty { display: none; }
   .scene { position: relative; margin-right: -24px; min-height: 520px; overflow: hidden; background: linear-gradient(#1a0f33, #0a0a16 77%, #07070f 77%); }
   .scene > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .scene .club { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; }
-  .scene .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,8,15,.35) 0%, transparent 25%, transparent 45%, rgba(7,8,15,.9) 88%); }
-  .party { position: absolute; left: 18px; top: 16px; padding: 7px 14px; border-radius: 6px; background: rgba(10,8,22,.72); border: 1px solid rgba(196,107,255,.45);
+  .scene .club { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 35%; }
+  .scene .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,8,15,.4) 0%, rgba(7,8,15,.1) 22%, rgba(7,8,15,.15) 40%, rgba(7,8,15,.82) 72%, rgba(7,8,15,.97) 86%); }
+  .party { position: absolute; left: 18px; bottom: calc(18px + 33%); padding: 7px 14px; border-radius: 6px; background: rgba(10,8,22,.72); border: 1px solid rgba(196,107,255,.45);
            backdrop-filter: blur(6px); font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
   .party span { font: 900 22px/1 var(--display); letter-spacing: .02em; color: #ffd8ff; margin-right: 6px; text-shadow: 0 0 12px rgba(196,107,255,.8); vertical-align: -2px; }
   .lineup { position: absolute; left: 18px; right: 17%; bottom: 18px; display: flex; flex-direction: row-reverse; gap: 8px; align-items: flex-end; }
@@ -93,11 +93,15 @@
               padding: 2px 5px; border-radius: 4px; background: rgba(40,14,70,.9); color: #efd9ff; font: 600 9px var(--mono); }
   .guest.vip .echo-tag { max-width: calc(100% - 36px); }
   .bouncer { position: absolute; right: 1%; bottom: 0; height: 64%; }
-  .bouncer img { width: 100%; height: 100%; display: block; }
-  .says { position: absolute; right: 62%; top: 9%; white-space: nowrap; padding: 7px 13px; border-radius: 18px; background: rgba(10,6,20,.88);
+  .bouncer img, .bouncer video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .says { position: absolute; right: 44%; bottom: 99%; white-space: nowrap; padding: 7px 14px; border-radius: 18px; background: rgba(10,6,20,.9);
           border: 1px solid var(--then); color: #efd9ff; font: 15px var(--hand); transform: rotate(-3deg); box-shadow: 0 0 18px rgba(196,107,255,.35);
           animation: pop .3s both; }
-
+  /* the tail points down at the bouncer's mouth */
+  .says::before, .says::after { content: ""; position: absolute; right: 42px; top: 100%; border: 9px solid transparent; border-bottom: 0;
+                                transform: rotate(20deg); transform-origin: top center; }
+  .says::before { border-top-color: var(--then); }
+  .says::after { top: calc(100% - 1px); border-top-color: #100617; }
   /* ---------- replay strip ---------- */
   .strip { margin-top: -6px; background: linear-gradient(180deg, rgba(10,14,30,.96), rgba(8,10,22,.96)); border: 1px solid rgba(54,230,245,.28);
            border-radius: 10px; padding: 14px 18px 10px; box-shadow: 0 0 40px rgba(54,230,245,.08); position: relative; z-index: 3; }
@@ -461,14 +465,26 @@ function artScene(symbol, guests, line) {
     return `<div class="${cls}">${face}${g.tier === "vip" && !g.hidden ? `<svg class="crown" viewBox="34 0 32 20">${CROWN}</svg>` : ""}
       ${g.echo ? `<span class="echo-tag">↺ ${esc(g.echo)}</span>` : ""}<span class="tag">${tag}</span></div>`;
   }).join("");
-  const {bouncer} = ART.manifest;
-  return `<img class="club" src="${ART.manifest.bg.src}" alt=""><div class="shade"></div>
-    <div class="bouncer" style="aspect-ratio:${bouncer.w} / ${bouncer.h}"><img src="${bouncer.src}" alt="">${line ? `<span class="says">${esc(line)}</span>` : ""}</div>
-    ${sign ? `<div class="party"><span>$${sign}</span> launch party</div>` : ""}
-    <div class="lineup${finale ? " finale" : ""}">${cards}</div>`;
+  return {cards, finale, sign, line};
+}
+/* Safari cannot show a WebM with transparency, so it keeps the still bouncer. */
+const ALPHA_VIDEO = !/^((?!chrome|android|crios|fxios|firefox).)*safari/i.test(navigator.userAgent);
+/* The club and the bouncer are built once and left alone: rebuilding them would restart both clips. */
+function buildBackdrop(el) {
+  const {bg, bg_video, bouncer, bouncer_video} = ART.manifest;
+  const live = bouncer_video && bouncer_video.w && ALPHA_VIDEO && !reduced;
+  const clip = (src, poster) => `<video src="${src}" ${poster ? `poster="${poster}"` : ""} autoplay muted loop playsinline disablepictureinpicture></video>`;
+  el.innerHTML = `${bg_video && !reduced ? clip(bg_video.src, bg.src).replace("<video", `<video class="club"`) : `<img class="club" src="${bg.src}" alt="">`}
+    <div class="shade"></div>
+    <div class="bouncer" style="aspect-ratio:${live ? bouncer_video.w + " / " + bouncer_video.h : bouncer.w + " / " + bouncer.h}">
+      ${live ? clip(bouncer_video.src) : `<img src="${bouncer.src}" alt="">`}<span class="says" hidden></span></div>
+    <div class="party" hidden></div><div class="lineup"></div>`;
+  /* A clip the browser cannot play falls back to the still picture. */
+  const bv = el.querySelector(".bouncer video");
+  if (bv) bv.onerror = () => bv.replaceWith(Object.assign(new Image(), {src: bouncer.src, alt: ""}));
 }
 function scene(symbol, guests, line) {
-  if (ART.scene) return artScene(symbol, guests, line);
+  if (ART.scene) return artScene(symbol, guests, line);  /* returns the parts, not markup */
   const W = 900, H = 520, d = {x: 400, y: 150, w: 170, h: 250};
   const sign = esc(cleanSym(symbol || "YOURCOIN").replace(/^\$/, "").toUpperCase().slice(0, 11));
   const cx = d.x + d.w / 2;
@@ -519,14 +535,24 @@ function scene(symbol, guests, line) {
 }
 /* Rebuilding unchanged markup every frame makes images flicker and drops keyboard focus. */
 function setHTML(el, html) { if (el._html !== html) { el._html = html; el.innerHTML = html; } }
+function paintScene(parts) {
+  const el = $("scene");
+  if (typeof parts === "string") { setHTML(el, parts); el._backdrop = false; return; }  /* code-drawn fallback */
+  if (!el._backdrop) { buildBackdrop(el); el._backdrop = true; }
+  const says = el.querySelector(".says"), party = el.querySelector(".party"), lineup = el.querySelector(".lineup");
+  says.hidden = !parts.line; if (parts.line) setHTML(says, esc(parts.line));
+  party.hidden = !parts.sign; if (parts.sign) setHTML(party, `<span>$${parts.sign}</span> launch party`);
+  lineup.classList.toggle("finale", parts.finale);
+  setHTML(lineup, parts.cards);
+}
 function drawScene() {
   $("scene").classList.toggle("art", ART.scene);
   if (!S || !S.buyers.length) {
-    setHTML($("scene"), scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666", "g7777777", "h88888888"].slice(0, ART.scene ? 8 : 6).map(seed => ({seed, tier: "pending", hidden: ART.scene})), bouncerLine()));
+    paintScene(scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666", "g7777777", "h88888888"].slice(0, ART.scene ? 8 : 6).map(seed => ({seed, tier: "pending", hidden: ART.scene})), bouncerLine()));
     return;
   }
   const order = [...S.buyers].sort((a, b) => a.entry_delay_s - b.entry_delay_s);
-  setHTML($("scene"), scene(S.event?.symbol, order.map(b => {
+  paintScene(scene(S.event?.symbol, order.map(b => {
     const r = S.resolved.has(b.wallet) ? S.byWallet[b.wallet] : null, tier = tierOf(r), here = S.arrived.has(b.wallet);
     const spotlight = S.focus === b.wallet || (S.ready && S.now >= 3600 && tier === "vip");  /* label one guest at a time */
     return {seed: b.wallet, tier, hidden: !here, score: r?.scoreable ? r.reflex : undefined, focus: S.focus === b.wallet,

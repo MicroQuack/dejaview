@@ -25,7 +25,8 @@ PUBLIC = os.environ.get("DEJAVIEW_PUBLIC") == "1"
 PORT = int(os.environ.get("PORT") or os.environ.get("DEJAVIEW_PORT", "8420"))
 TOKEN_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")  # Solana base58 address
 STATIC = {"/bg.jpg": "image/jpeg", "/hero.jpg": "image/jpeg"}
-ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|manifest\.json)$")
+ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|club-loop\.mp4|bouncer-loop\.webm|manifest\.json)$")
+ART_TYPES = {".webp": "image/webp", ".json": "application/json", ".mp4": "video/mp4", ".webm": "video/webm"}
 SAVED = ROOT / "spike_out" / "scans"
 REPLAY_DIRS = [ROOT / "data" / "replays"] + ([] if PUBLIC else [SAVED])
 
@@ -45,7 +46,7 @@ def art_type(path):
     """Content type for a built art file (see tools/build_art.py), or None."""
     if not ART_RE.match(path):
         return None
-    return "application/json" if path.endswith(".json") else "image/webp"
+    return ART_TYPES[path[path.rindex("."):]]
 
 
 def saved_scan(token):

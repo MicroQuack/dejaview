@@ -265,14 +265,22 @@
    }
   }
  ],
+ "bg_video": {
+  "src": "art/club-loop.mp4"
+ },
  "bg": {
   "src": "art/club-bg.webp",
-  "w": 1672,
-  "h": 941
+  "w": 1168,
+  "h": 768
+ },
+ "bouncer_video": {
+  "src": "art/bouncer-loop.webm",
+  "w": 560,
+  "h": 472
  },
  "bouncer": {
   "src": "art/bouncer.webp",
   "w": 520,
-  "h": 646
+  "h": 636
  }
 }
