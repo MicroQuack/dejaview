@@ -101,8 +101,10 @@ The research behind Launch Reflex is written up honestly, including the first hy
 failed, in [`docs/`](docs/). The frozen retest is `docs/D3_RETEST_PLAN.md`; its result is a modest
 persistence effect measured on 37 actors, not evidence that tonight's VIP will make money.
 
-## Credits
+## Credits and licence
 
+- Code: **MIT**, see [LICENSE](LICENSE). Use it, change it, ship it; just keep the copyright line.
 - Art generated with Codex and Grok Imagine, cut out and compressed by `tools/build_art.py`.
-- Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen").
+- Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen"), used under the Pixabay Content
+  Licence. The certificate is in [`docs/licences/`](docs/licences/).
 - Data from the **Nansen API**.
