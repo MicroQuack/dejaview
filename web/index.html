@@ -348,7 +348,7 @@
 const $ = id => document.getElementById(id);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const STRONG = 60, VIP = 95, REPLAY_SECONDS = 20, HOLD_MS = 1500;
-const SITE_URL = "";  /* set this to the public address after deploying; it prints on the share card */
+const SITE_URL = "dejaview-delta.vercel.app";  /* prints on every share card */
 let es = null, S = null, raf = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));

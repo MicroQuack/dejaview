@@ -44,7 +44,11 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
    then did 10x), BRAIN, PVE, and ELON (7 of 8 buyers shared earlier coins, but those coins barely moved).
    **Picking demo coins:** the screener's 24-hour volume says nothing about the first hour. Check the first hour
    directly with `Scanner.first_hour_buys` (about 4 calls) and look for 6+ buyers over $500 with a spread of sizes.
-5. **Deploy on Render.** `render.yaml` is committed and sets `DEJAVIEW_PUBLIC=1`, so the site replays saved launches
+5. **Done 2026-09-16: live at https://dejaview-delta.vercel.app** (Vercel, free, static). `tools/build_static.py`
+   writes `dist/` and `cd dist && vercel deploy --prod` publishes it. The link is on every share card via
+   `SITE_URL` in `web/index.html`. The Render blueprint below still works if the Python app is ever wanted.
+
+   **Old note, Render.** `render.yaml` is committed and sets `DEJAVIEW_PUBLIC=1`, so the site replays saved launches
    only and never calls Nansen. The repo is public at **https://github.com/stevehq26-bot/dejaview**. No Render
    credentials exist on this machine, so the owner must click once:
    **https://render.com/deploy?repo=https://github.com/stevehq26-bot/dejaview**

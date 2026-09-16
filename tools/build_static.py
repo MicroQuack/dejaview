@@ -10,6 +10,7 @@ web/index.html runs locally against Python and publicly as a static site.
 import json
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,9 +19,16 @@ REPLAYS = ROOT / "data" / "replays"
 
 
 def main():
+    keep = DIST / ".vercel"  # the host link lives here; a rebuild must not throw it away
+    stash = None
+    if keep.exists():
+        stash = Path(tempfile.mkdtemp()) / ".vercel"
+        shutil.move(str(keep), str(stash))
     if DIST.exists():
         shutil.rmtree(DIST)
     (DIST / "replays").mkdir(parents=True)
+    if stash:
+        shutil.move(str(stash), str(keep))
 
     shutil.copy2(ROOT / "web" / "index.html", DIST / "index.html")
     shutil.copytree(ROOT / "web" / "art", DIST / "art",

@@ -9,6 +9,8 @@ labels them: **VIP**, **strong record**, **known**, **new face**, or plainly **w
 this one**. When two or more of tonight's buyers were also early on the same earlier launch, that is
 an **echo**.
 
+**Watch it now: https://dejaview-delta.vercel.app** — four real launches, no sign-up, no API key.
+
 Built for the Nansen Meridian Buildathon. Powered by the **Nansen API**.
 
 > **Use a computer.** The phone layout is not finished.
