@@ -1,4 +1,49 @@
-# Next session: art assets, polish, demo, submission
+# Next session: record the demo and submit
+
+**Updated 2026-09-17.** The build is frozen. Codex scored the entry 90/100 before the video, and all four of its
+finishing fixes are confirmed. This session's job is the recording and the submission. Everything below the
+"Earlier notes" line is background.
+
+## 1. Before recording
+
+- **Credits.** 711 were left on 2026-09-16, and a live scan costs 300 to 500. The user was advised to buy $12 more,
+  about 24,000 credits, so failed takes are affordable. Check the balance first. If they did not buy, allow exactly one live take.
+- **Pick the live coin.** Choose a pump.fun launch more than an hour past its launch moment. The page ignores
+  `first_hour_complete`, so a younger launch would be narrated as a full hour. Check candidates with
+  `Scanner.first_hour_buys` (about 4 calls): look for 6+ buyers over $500 with a spread of sizes.
+- **Check the phone layout note** under "Next steps", item 3. It may already be fixed.
+
+## 2. The recording (Codex's guidance)
+
+- 30 to 45 seconds, understandable with the sound off.
+- Show the entrance, the buyer reveals, the EMBER echo on PAID, and its evidence drawer.
+- **Label saved playback and live data differently on screen,** for example "Saved replay" and
+  "Live scan: fresh Nansen data". Include a short live-scan section. Nansen expects live data in the recording,
+  so a replay-only video may not qualify.
+- One framing line for the pump.fun scope: "Built for pump.fun launches, and tested there across 37 buyers and 8 launches."
+- Credit the music in the X post: "Neon Synthwave Vibe" by Lumen Sound (Pixabay).
+- Help the user with a shot list and on-screen captions. The user records the screen themselves.
+
+## 3. Submission
+
+Official deadline 2026-09-27 23:59 UTC; aim for 2026-09-26. Submit the email, the X post tagging `@nansen_ai`,
+and the repo https://github.com/MicroQuack/dejaview. Put the video link in the README "Demo" section.
+
+## 4. Optional, only after the video exists
+
+- **Wider reference scale, no credits.** Launch Reflex percentiles come from 37 reference buyers, so they move in
+  steps of about 3. `spike_out/corpus/scored.json` holds 308 corpus buyers: 212 scoreable, 162 with 16+ prior
+  launch entries, each with `reflex_raw`. Those records carry no wallet address, so find the addresses in the corpus
+  collection data and remove any D3 buyers before merging. This changes every score on the site: rebuild
+  `data/reflex_reference.json`, run `tools/recompute_replays.py` and `tools/test_claims.py`, and update every "37"
+  in the README and on the page. Skip it if time is short. The user asked for it only if it is worth doing.
+- **A second launchpad.** The user says many memecoins now launch on a "stonks" launchpad. Ask for its name or an
+  example coin. Cheap part: get its tokens scanning. Proof part: a smaller D3-style test with rules frozen first and
+  reviewed by Codex, roughly 2,000 to 3,000 credits. Ship it only if the test passes; otherwise keep the pump.fun scope.
+
+---
+
+## Earlier notes (2026-09-15 and 2026-09-16)
 
 **Written:** 2026-09-15, end of a long session. Submit by 2026-09-26.
 
