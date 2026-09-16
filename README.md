@@ -105,6 +105,6 @@ persistence effect measured on 37 actors, not evidence that tonight's VIP will m
 
 - Code: **MIT**, see [LICENSE](LICENSE). Use it, change it, ship it; just keep the copyright line.
 - Art generated with Codex and Grok Imagine, cut out and compressed by `tools/build_art.py`.
-- Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen"), used under the Pixabay Content
-  Licence. The certificate is in [`docs/licences/`](docs/licences/).
+- Music: **"Neon Synthwave Vibe" by Lumen Sound**, from [Pixabay](https://pixabay.com/music/synthwave-neon-synthwave-vibe-554114/),
+  used under the Pixabay Content Licence. Certificate: [`docs/licences/`](docs/licences/).
 - Data from the **Nansen API**.

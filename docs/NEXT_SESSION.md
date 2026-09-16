@@ -83,9 +83,9 @@ the hour ended up, red when it ended down. It describes the hour; it is not a fo
 
 ## Music credit (must appear in the README and the X post)
 
-Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen", neon synthwave). Free for commercial use, no
-attribution required, but credit it anyway. The track is registered with YouTube Content ID, so download the
-licence certificate from Pixabay before posting the recording anywhere that might claim it.
+**"Neon Synthwave Vibe" by Lumen Sound**, from Pixabay (file 554114). Free for commercial use, no attribution
+required, but credit it anyway. The track is registered with YouTube Content ID; the licence certificate is saved
+at `docs/licences/neon-synthwave-vibe-pixabay.txt`, which is what answers a claim on the recording.
 
 ## Working agreements with this user
 
