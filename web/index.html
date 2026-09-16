@@ -336,6 +336,7 @@
 const $ = id => document.getElementById(id);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const STRONG = 60, VIP = 95, REPLAY_SECONDS = 20, HOLD_MS = 1500;
+const SITE_URL = "";  /* set this to the public address after deploying; it prints on the share card */
 let es = null, S = null, raf = null;
 
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
@@ -876,8 +877,8 @@ function cardGuest(g, r, x, y, w, h) {
   g.setLineDash(tier === "fresh" ? [7, 6] : []); g.stroke(); g.setLineDash([]);
   g.textAlign = "center";
   g.fillStyle = TIER_COLOR[tier]; g.font = "600 13px 'Martian Mono'";
-  g.fillText((TIER_TAG[tier] || "").toUpperCase(), x + w / 2, y + h - 34);
-  if (r.scoreable) { g.font = "900 30px 'Big Shoulders Display'"; g.fillText(String(r.reflex), x + w / 2, y + h - 10); }
+  g.fillText((TIER_TAG[tier] || "").toUpperCase(), x + w / 2, y + h - 46);
+  if (r.scoreable) { g.font = "900 32px 'Big Shoulders Display'"; g.fillText(String(r.reflex), x + w / 2, y + h - 14); }
   if (tier === "vip") {
     g.save(); g.translate(x + w / 2 - 25, y + 6); g.scale(.5, .5);
     const p = new Path2D("M36 4 L42 14 L50 2 L58 14 L64 4 L62 18 L38 18 Z");
@@ -914,24 +915,35 @@ async function shareCard() {
   const head = strong ? `${strong} of the ${S.buyers.length} biggest buyers have a better launch record than most`
                       : `None of the ${S.buyers.length} biggest buyers has a better launch record than most`;
   wrapText(g, head.toUpperCase(), 560).slice(0, 3).forEach((line, i) => g.fillText(line, 60, 296 + i * 44));
+  if (S.tape?.minute_usd?.length) {
+    const m = S.tape.minute_usd, peak = Math.max(1, ...m), x0 = 62, y0 = 424, w = 520, h = 46;
+    g.fillStyle = "#5a6080"; g.font = "600 11px 'Martian Mono'"; g.fillText("FIRST HOUR OF BUYING", x0, y0 - 14);
+    g.fillStyle = "rgba(54,230,245,.22)"; g.strokeStyle = "#36e6f5"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x0, y0 + h);
+    m.forEach((v, i) => { const px = x0 + i / m.length * w, py = y0 + h - (v / peak) * h; g.lineTo(px, py); g.lineTo(px + w / m.length, py); });
+    g.lineTo(x0 + w, y0 + h); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(x0, y0 + h + 1); g.lineTo(x0 + w, y0 + h + 1); g.stroke();
+  }
   if (echo) {
     const label = `${echo.wallets.length} WERE ALSO EARLY ON ${cleanSym(echo.symbol).toUpperCase()}`;
     g.font = "700 20px 'Martian Mono'";
     const w = g.measureText(label).width + 118;
-    g.beginPath(); g.roundRect(60, 406, Math.min(w, 600), 52, 26);
+    g.beginPath(); g.roundRect(60, 506, Math.min(w, 600), 52, 26);
     g.fillStyle = "rgba(40,14,70,.92)"; g.fill(); g.strokeStyle = "#c46bff"; g.lineWidth = 2; g.stroke();
-    g.fillStyle = "#c46bff"; g.font = "700 20px 'Martian Mono'"; g.fillText("ECHO", 86, 439);
-    g.fillStyle = "#efd9ff"; g.fillText(label, 156, 439);
+    g.fillStyle = "#c46bff"; g.font = "700 20px 'Martian Mono'"; g.fillText("ECHO", 86, 539);
+    g.fillStyle = "#efd9ff"; g.fillText(label, 156, 539);
     if (echo.best_move_1h_pct !== null && echo.best_move_1h_pct !== undefined) {
       g.fillStyle = "#9aa0bf"; g.font = "15px Onest";
-      g.fillText(`${cleanSym(echo.symbol)} then moved ${moveText(echo.best_move_1h_pct)} within an hour of their buys`, 62, 492);
+      g.fillText(`${cleanSym(echo.symbol)} then moved ${moveText(echo.best_move_1h_pct)} within an hour of their buys`, 62, 576);
     }
   }
   const order = [...S.results].sort((a, b) => (b.scoreable ? b.reflex : -1) - (a.scoreable ? a.reflex : -1)).slice(0, 8);
   const cw = 108, ch = 152, gap = 12, cols = 4, gx = W - 60 - (cols * cw + (cols - 1) * gap);
   order.forEach((r, i) => cardGuest(g, r, gx + (i % cols) * (cw + gap), 150 + Math.floor(i / cols) * (ch + gap), cw, ch));
-  g.fillStyle = "#7d84a6"; g.font = "15px 'Martian Mono'";
-  g.fillText("Historical context, not a prediction · Data from the Nansen API", 60, 588);
+  g.fillStyle = "#7d84a6"; g.font = "14px 'Martian Mono'";
+  const foot = "Historical context, not a prediction · Data from the Nansen API";
+  g.fillText(foot, 60, 612);
+  if (SITE_URL) { g.fillStyle = "#36e6f5"; g.textAlign = "right"; g.fillText(SITE_URL, W - 60, 612); g.textAlign = "left"; }
   const a = document.createElement("a");
   a.download = `dejaview-${cleanSym(S.event.symbol).replace(/[^\w]/g, "") || "scan"}.png`;
   a.href = c.toDataURL("image/png");
