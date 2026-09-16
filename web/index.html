@@ -411,21 +411,24 @@ function guestParts(seed, {body = false, crown = false} = {}) {
   return g;
 }
 /* ---------- painted art (tools/build_art.py). Anything that fails to load falls back to the drawing above ---------- */
-const ART = {manifest: null, scene: false, sprites: {}, heads: {}};
+const ART = {manifest: null, scene: false, sprites: {}, heads: {}, pending: true};
+/* Until the art answers, draw nothing: the old drawn faces flashing up on every reload looked broken. */
+const artSettled = () => { if (ART.pending) { ART.pending = false; artChanged(); } };
+setTimeout(artSettled, 4000);
 function loadImage(src, onload) { const img = new Image(); img.onload = () => onload(img); img.src = src; }
 let artRender = 0;
 const artChanged = () => { if (!artRender) artRender = requestAnimationFrame(() => { artRender = 0; if (!S || !S.playing) render(); }); };
 fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
-  if (!m) return;
+  if (!m) return artSettled();
   ART.manifest = m;
   let left = 2;
-  [m.bg.src, m.bouncer.src].forEach(src => loadImage(src, () => { if (!--left) { ART.scene = true; artChanged(); } }));
+  [m.bg.src, m.bouncer.src].forEach(src => loadImage(src, () => { if (!--left) { ART.scene = true; ART.pending = false; artChanged(); } }));
   if (m.music) $("sound").hidden = false;
   m.guests.forEach(g => {
     loadImage(`art/guests/${g.id}.webp`, img => { ART.sprites[g.id] = img; artChanged(); });
     loadImage(`art/heads/${g.id}.webp`, img => { ART.heads[g.id] = img; artChanged(); });
   });
-}).catch(() => {});
+}).catch(artSettled);
 /* A wallet keeps the same character in every launch, unless an earlier arrival in this launch already has it:
    then it takes the next free one, so no two buyers at one party share a face. */
 let faceCache = {key: "", map: {}};
@@ -452,7 +455,7 @@ let clipId = 0;
 function avatar(seed, tier = "pending", cls = "av") {
   const id = "clip" + (clipId++), ring = TIER_COLOR[tier], art = guestArt(seed, "head");
   const face = art ? `<image href="art/heads/${art.id}.webp" x="0" y="2" width="100" height="100"/>`
-                   : `<g transform="translate(0 10)">${guestParts(seed, {body: true})}</g>`;
+                   : ART.pending || ART.manifest ? "" : `<g transform="translate(0 10)">${guestParts(seed, {body: true})}</g>`;
   return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="${id}"><circle cx="50" cy="50" r="46"/></clipPath></defs>
     <circle cx="50" cy="50" r="46" fill="#15172c"/><g clip-path="url(#${id})">${face}</g>
     <circle cx="50" cy="50" r="46" fill="none" stroke="${ring}" stroke-width="${tier === "pending" ? 2 : 5}" ${tier === "fresh" ? 'stroke-dasharray="7 6"' : ""}/>
@@ -472,7 +475,9 @@ function artScene(symbol, guests, line) {
   const finale = guests.some(g => g.finale && g.echo);
   const cards = guests.filter(g => !g.hidden).map(g => {
     const art = guestArt(g.seed), state = g.hidden ? "waiting" : g.tier;
-    const face = art ? `<img src="art/guests/${art.id}.webp" alt="">` : `<svg viewBox="0 0 100 100">${guestParts(g.seed, {body: true})}</svg>`;
+    /* Once the art is in play, an unloaded guest waits as an empty frame: the drawn face flashing up looked like a fault. */
+    const face = art ? `<img src="art/guests/${art.id}.webp" alt="">`
+      : ART.manifest ? "" : `<svg viewBox="0 0 100 100">${guestParts(g.seed, {body: true})}</svg>`;
     const tag = g.hidden ? "Not here yet" : g.score !== undefined && (g.tier === "vip" || g.tier === "strong" || g.tier === "known")
       ? `<small>${TIER_TAG[g.tier]}</small><b>${g.score}</b>` : TIER_TAG[g.tier];
     const cls = `guest ${state}${g.focus ? " focus" : ""}${g.focus && g.tier === "pending" ? " arrive" : ""}${g.echo ? " echo" : finale ? " dim" : ""}`;
@@ -560,6 +565,7 @@ function paintScene(parts) {
 }
 function drawScene() {
   $("scene").classList.toggle("art", ART.scene);
+  if (ART.pending && !ART.scene) return;  /* wait rather than flash the drawn scene */
   if (!S || !S.buyers.length) {
     paintScene(scene(S?.event?.symbol, ["a1", "b22", "c333", "d4444", "e55555", "f666666", "g7777777", "h88888888"].slice(0, ART.scene ? 8 : 6).map(seed => ({seed, tier: "pending", hidden: ART.scene})), bouncerLine()));
     return;
