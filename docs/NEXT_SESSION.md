@@ -4,6 +4,15 @@
 finishing fixes are confirmed. This session's job is the recording and the submission. Everything below the
 "Earlier notes" line is background.
 
+## 0. Done on 2026-09-17 (late)
+
+- **Shot list and captions:** `docs/DEMO_SHOT_LIST.md`. The live coin is **HYPED**, chosen and checked there.
+- **Credits:** 647. The user had not topped up. Five screener picks were scripted-looking launches (29 credits wasted);
+  filter the screener by `nof_traders` to find real launches.
+- **Source pill on the page:** "Saved replay" or "Live scan · fresh Nansen data", above the ticker.
+- **The local server was stale** (started before the echo fixes). It was restarted. Restart it after any Python change.
+- **Phone layout is still broken.** It does not affect the desktop recording. Fix before submitting.
+
 ## 1. Before recording
 
 - **Credits.** 711 were left on 2026-09-16, and a live scan costs 300 to 500. The user was advised to buy $12 more,
