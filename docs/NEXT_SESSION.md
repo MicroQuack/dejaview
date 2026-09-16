@@ -28,7 +28,7 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 | Test hook | `?token=...&replay=1&at=1500` jumps the replay to a second, for headless screenshots |
 | Lookalike matching | Demoted behind "Similar past setups →" |
 | API usage proof | `tools/api_usage.py`. About 20,000 successful calls. |
-| Credits | 1,755 left, from the last call logged on 2026-09-15. One full scan costs roughly 250. |
+| Credits | 1,366 left after the PAID scan on 2026-09-16. A full scan costs about 315. |
 
 ## Next steps, in order
 
@@ -40,7 +40,8 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
    `bouncer-loop.mp4` into seamless loops (forward then backward, because a cross-fade ghosts the painted signs).
    The bouncer is a transparent WebM, so Safari and reduced-motion get the stills instead. Source clips are not committed.
 3. **Phone layout is still broken:** the page is wider than the screen and the lineup overflows the scene. Fix before submitting.
-4. **Pick 3 demo launches** with a strong echo. Scan them live, then copy their saved scans into `data/replays/`.
+4. **Done 2026-09-16: 3 demo launches saved** in `data/replays/`: BRAIN, PVE, and PAID. Each has an echo where 3 buyers
+   were early on the same earlier coin.
 5. **Deploy on Render** in public replay mode. Codex's `render-deploy` skill pattern: add a `render.yaml`, push to GitHub
    (the `gh` login works, but no remote exists yet), and give the user the Render dashboard link.
 6. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
