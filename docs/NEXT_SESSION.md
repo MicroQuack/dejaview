@@ -49,6 +49,26 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 6. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
 7. **Record the silent demo** (30–45 seconds) and submit.
 
+## Corrections made on 2026-09-16 (judge-style review)
+
+A judge-style review found the headline echo claim was wrong. Fixed:
+
+1. **Echoes now use the same launch-window rule as scoring.** They used a loose age prefilter, so a buy 25 h after a
+   launch counted as "early". PAID's FLAME claim was 3 buyers; only 2 qualified. Its verified top echo is now
+   **EMBER, 3 buyers, all inside 1.3 h, which then moved 10x**. Unresolvable launches are left out, not counted.
+2. **Missing data no longer reads as "New face."** States: history unavailable, no price data, too little history,
+   or checked and nothing found. The headline counts only buyers we could check.
+3. **Characters are stable again.** The face comes from the wallet alone; duplicates in one lineup show addresses.
+4. `tools/recompute_replays.py` fixed the saved replays from cached data, no API calls. `tools/test_claims.py`
+   runs offline and would have caught the original error.
+
+**Still open from that review:** scoring's candidate prefilter still uses today's date (`plausible_launch(v, now)`),
+so a rescan on a later day can drop candidates; cached history reads do not apply the lower 30-day bound; the page
+ignores `first_hour_complete`, so a launch less than an hour old would still be narrated as a full hour; metric
+labels ("92" is a reference percentile, "high confidence" means 16+ entries, echo moves are the best among priced
+participants) need plainer wording. The official deadline is **2026-09-27 23:59 UTC**, and Nansen expects live data
+visible in the recording, so a replay-only video may not satisfy them: check with the organisers.
+
 ## Music credit (must appear in the README and the X post)
 
 Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen", neon synthwave). Free for commercial use, no
