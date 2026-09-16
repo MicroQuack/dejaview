@@ -112,7 +112,10 @@
   /* ---------- replay strip ---------- */
   .strip { margin-top: -6px; background: linear-gradient(180deg, rgba(10,14,30,.96), rgba(8,10,22,.96)); border: 1px solid rgba(54,230,245,.28);
            border-radius: 10px; padding: 14px 18px 10px; box-shadow: 0 0 40px rgba(54,230,245,.08); position: relative; z-index: 3; }
-  .controls { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 16px; align-items: center; }
+  .controls { display: grid; grid-template-columns: auto 1fr auto auto auto auto; gap: 16px; align-items: center; }
+  .sound { border: 1px solid var(--rule); background: transparent; color: var(--dim); border-radius: 5px; padding: 6px 12px;
+           font: 12px var(--mono); cursor: pointer; white-space: nowrap; }
+  .sound[aria-pressed="true"] { border-color: var(--then); color: var(--then); background: rgba(196,107,255,.12); }
   .play { width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--rule); background: var(--panel-2); cursor: pointer; display: grid; place-items: center; }
   .play:disabled { opacity: .4; cursor: default; }
   .status { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--now); min-width: 0; }
@@ -280,6 +283,7 @@
         <button class="speed" data-speed="2" aria-pressed="false">2×</button>
         <button class="speed" data-speed="4" aria-pressed="false">4×</button>
       </div>
+      <button class="sound" id="sound" aria-pressed="false" aria-label="Play club music" hidden>♪ Sound</button>
       <button class="share" id="share" disabled>Share this scan ↗</button>
     </div>
     <div class="track" id="track"></div>
@@ -416,6 +420,7 @@ fetch("art/manifest.json").then(r => r.ok ? r.json() : null).then(m => {
   ART.manifest = m;
   let left = 2;
   [m.bg.src, m.bouncer.src].forEach(src => loadImage(src, () => { if (!--left) { ART.scene = true; artChanged(); } }));
+  if (m.music) $("sound").hidden = false;
   m.guests.forEach(g => {
     loadImage(`art/guests/${g.id}.webp`, img => { ART.sprites[g.id] = img; artChanged(); });
     loadImage(`art/heads/${g.id}.webp`, img => { ART.heads[g.id] = img; artChanged(); });
@@ -912,6 +917,26 @@ function scan(token, replay) {
 function finish() { if (es) es.close(); es = null; $("go").disabled = false; }
 
 $("f").onsubmit = e => { e.preventDefault(); const t = $("token").value.trim(); if (t) scan(t, false); };
+let music = null;
+function toggleSound() {
+  const btn = $("sound");
+  if (!music) {
+    music = new Audio(ART.manifest.music.src);
+    music.loop = true; music.volume = 0;
+  }
+  const on = btn.getAttribute("aria-pressed") !== "true";
+  btn.setAttribute("aria-pressed", on);
+  btn.setAttribute("aria-label", on ? "Mute club music" : "Play club music");
+  btn.textContent = on ? "♪ Sound on" : "♪ Sound";
+  if (on) music.play().catch(() => {});
+  const target = on ? .32 : 0, step = (target - music.volume) / 20;  /* fade, so it never jumps in */
+  clearInterval(music._fade);
+  music._fade = setInterval(() => {
+    music.volume = Math.min(1, Math.max(0, music.volume + step));
+    if (Math.abs(music.volume - target) < .02) { music.volume = target; clearInterval(music._fade); if (!on) music.pause(); }
+  }, 40);
+}
+$("sound").onclick = toggleSound;
 $("play").onclick = () => S && S.playing ? pause() : play();
 $("share").onclick = () => shareCard();
 document.querySelectorAll(".speed").forEach(b => b.onclick = () => {

@@ -25,8 +25,8 @@ PUBLIC = os.environ.get("DEJAVIEW_PUBLIC") == "1"
 PORT = int(os.environ.get("PORT") or os.environ.get("DEJAVIEW_PORT", "8420"))
 TOKEN_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")  # Solana base58 address
 STATIC = {"/bg.jpg": "image/jpeg", "/hero.jpg": "image/jpeg"}
-ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|club-loop\.mp4|bouncer-loop\.webm|manifest\.json)$")
-ART_TYPES = {".webp": "image/webp", ".json": "application/json", ".mp4": "video/mp4", ".webm": "video/webm"}
+ART_RE = re.compile(r"^/art/(?:(?:guests|heads)/g\d{2}\.webp|club-bg\.webp|bouncer\.webp|club-loop\.mp4|bouncer-loop\.webm|club-music\.mp3|manifest\.json)$")
+ART_TYPES = {".webp": "image/webp", ".json": "application/json", ".mp4": "video/mp4", ".webm": "video/webm", ".mp3": "audio/mpeg"}
 # The demo launch a first-time visitor should meet first. The rest follow, newest first.
 FEATURED = ["98kfF7rmsg1QDUEoCqNE7g7M1FdrTt92TEp2CLzypump"]
 SAVED = ROOT / "spike_out" / "scans"

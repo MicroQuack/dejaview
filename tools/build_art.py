@@ -114,6 +114,11 @@ def main():
     manifest["bg"] = {"src": "art/club-bg.webp", "w": bg.width, "h": bg.height}
     (OUT / "club-still.png").unlink(missing_ok=True)
 
+    music = RAW / "club-music.mp3"
+    if music.exists():
+        ffmpeg(["-i", str(music), "-vn", "-ac", "2", "-b:a", "112k", str(OUT / "club-music.mp3")])
+        manifest["music"] = {"src": "art/club-music.mp3"}
+
     bclip, poster = RAW / "bouncer-loop.mp4", OUT / "bouncer-still.png"
     if bclip.exists():
         bouncer_loop(bclip, OUT / "bouncer-loop.webm", poster)

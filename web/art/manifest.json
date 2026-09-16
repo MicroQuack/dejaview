@@ -273,6 +273,9 @@
   "w": 1168,
   "h": 768
  },
+ "music": {
+  "src": "art/club-music.mp3"
+ },
  "bouncer_video": {
   "src": "art/bouncer-loop.webm",
   "w": 560,

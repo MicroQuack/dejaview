@@ -49,6 +49,12 @@ resolves to a tier from Launch Reflex: VIP (95+, gold), strong record (60+, cyan
 6. **Rewrite the README** around the party, echoes, and the evidence. Keep the honest claims.
 7. **Record the silent demo** (30–45 seconds) and submit.
 
+## Music credit (must appear in the README and the X post)
+
+Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen", neon synthwave). Free for commercial use, no
+attribution required, but credit it anyway. The track is registered with YouTube Content ID, so download the
+licence certificate from Pixabay before posting the recording anywhere that might claim it.
+
 ## Working agreements with this user
 
 - Replies use the four-line format in the user's global `CLAUDE.md`. Plain words.
