@@ -1,173 +1,108 @@
 # Déjà View
 
-*We've seen this trade before.*
+**Same faces. Different launch.**
 
-Déjà View shows who is buying a new Solana token launch, and how those buyers' earlier launch
-buys played out. It scores each meaningful first-hour buyer with **Launch Reflex**: how often the
-wallet's past launch buys went on to offer a strong first-hour opportunity, ranked against other
-launch buyers.
+Paste a pump.fun token and Déjà View replays its first hour as a club night. The eight biggest
+first-hour buyers arrive at the door in the order they bought, each as a character drawn from their
+wallet address. As each one arrives, the page checks what that wallet did on earlier launches and
+labels them: **VIP**, **strong record**, **known**, **new face**, or plainly **we could not check
+this one**. When two or more of tonight's buyers were also early on the same earlier launch, that is
+an **echo**.
 
-Built for the Nansen Meridian Buildathon. **Powered by Nansen API.**
+Built for the Nansen Meridian Buildathon. Powered by the **Nansen API**.
 
-## The 30-second version
+> **Use a computer.** The phone layout is not finished.
 
-1. Paste a Solana token address.
-2. Déjà View finds the token's launch moment: the first time its DEX volume reaches $5,000.
-3. It picks the largest buyers from the first hour after that moment.
-4. For each buyer, it looks back 30 days, strictly before the launch moment, and finds the other
-   launches that wallet bought within 6 hours.
-5. For each of those earlier launches, it measures the best price reached within an hour of the
-   wallet's entry.
-6. It ranks the wallet against a reference set of launch buyers and explains the score.
+## Watch it in two minutes, no API key
 
-## Demo
+```bash
+git clone <this repo> && cd Dejaview
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python app.py                 # then open http://localhost:8420
+```
 
-Recording: to be added before submission.
+Click **PAID** in the "Replay a launch" row. Four saved launches replay from `data/replays/`
+with no key and no API calls: **PAID**, **ELON**, **BRAIN**, **PVE**.
 
-## Why Launch Reflex is not Smart Money
+**PAID is the one to watch.** Four of the five buyers we could check have a better launch record
+than most, one of them ranks in the top 3%, and three of them were also early on **EMBER**, which
+then offered a 10× move within an hour of their buys.
 
-Smart Money labels say a wallet has done well in general. Launch Reflex asks a narrower
-question: when this wallet buys a brand-new token in its first hours, does that token tend to go on
-to offer a real opportunity? A wallet can be a strong long-term holder and a poor launch picker,
-or the other way around.
+To serve replays only, so visitors can never spend your credits:
 
-## Does it work? The evidence
+```bash
+DEJAVIEW_PUBLIC=1 .venv/bin/python app.py
+```
 
-Before any product code, a spike tested whether Launch Reflex measures something real. The full log,
-including the tests that failed, is in [spike_results.md](spike_results.md).
+## Scan a live launch, with your own key
 
-- **The first design failed.** Scoring wallets on 24-hour token returns could not tell wallets apart.
-  The spread in scores matched random chance.
-- **The measure changed for a stated reason.** Launch buyers usually hold for minutes, so the outcome
-  moved to the first hour.
-- **A wider retest passed rules frozen before any data was fetched**
-  ([docs/D3_RETEST_PLAN.md](docs/D3_RETEST_PLAN.md)). It covered 37 buyers across 8 randomly sampled
-  launches, including launches that died. A wallet's score on its older launches predicted its score on
-  newer launches (rank correlation 0.42; stronger than 99.6% of random shuffles). The result held after
-  removing each launch in turn, after dropping each wallet's best trade, after adjusting for market week,
-  and after adjusting for entry speed.
-- **The effect is moderate.** A high Launch Reflex improves the odds. It does not guarantee anything.
+```bash
+cp .env.example .env                    # add NANSEN_API_KEY=...
+.venv/bin/python app.py
+```
 
-## How Launch Reflex is calculated
+Paste any pump.fun token address. A scan costs roughly **300 to 500 Nansen credits**, depending on
+how much history its buyers have, and takes a few minutes. Every finished scan saves itself to
+`spike_out/scans/`, and `?replay=1` replays it without spending anything again.
 
-| Step | Rule |
+## What the words mean
+
+- **Launch moment (T0).** The first time a coin's cumulative trading reaches $5,000.
+- **The buyers.** The eight largest buyers of $500 or more in the hour after T0, excluding labelled
+  exchange and bot addresses and wallets with more than 25 buys in that hour.
+- **Launch Reflex.** For each buyer, we look at their launch entries in the 30 days before T0: buys
+  that landed inside another launch's own six-hour window. We measure how often those launches went
+  on to offer a strong move within an hour of the buy, then rank that against 37 reference launch
+  buyers. **The score is a percentile, not a win rate, and not profit.** A 92 from five launches
+  rests on less evidence than a 92 from sixteen, so the page always shows the count.
+- **Echo.** An earlier launch that two or more of tonight's buyers were also early on, using that
+  same six-hour rule. Launches whose own launch moment we cannot resolve are left out rather than
+  counted. **An echo shows repeated behaviour. It does not show that the wallets are connected.**
+- **We could not check.** Missing data is never dressed up as a finding. The page separates
+  "history unavailable", "no price data", "too little history" and "checked, nothing found".
+
+## Which Nansen endpoints do what
+
+| Endpoint | What it gives Déjà View |
 |---|---|
-| Launch moment (T0) | First time cumulative DEX volume after deployment reaches $5,000, counting each swap once |
-| Meaningful buyers | Buys of at least $500 from deployment to T0 + 1 hour, ranked by total size; pools, routers, and exchanges excluded; top 8 |
-| Prior launch entry | The wallet's first buy of another token within 6 hours of that token's T0, or of its deployment if it never reached $5,000 (a failed launch) |
-| Entry price | Median market price in the 2 minutes around the wallet's buy |
-| First-hour opportunity | Log of the 5th-highest trade price in the hour after entry, divided by the entry price, capped at ±ln 10 |
-| Score | Mean first-hour opportunity over up to 16 recent prior launch entries, shrunk toward the reference average |
-| Launch Reflex | Percentile of that score among the 37 reference buyers from the retest |
-| Confidence | High: 16 entries. Medium: 8 to 15. Low: 3 to 7. Fewer than 3: not scoreable |
+| `/api/v1/tgm/token-information` | Deployment time and symbol for a launch, and for every earlier launch we verify |
+| `/api/v1/tgm/dex-trades` | The launch moment, the first hour's buyers, and the prices behind every move we quote |
+| `/api/v1/profiler/dex-trades` | Each buyer's trades in the 30 days before the launch, which is where the record comes from |
+| `/api/v1/tgm/token-ohlcv` | The price line across the first hour |
+| `/api/v1/token-screener` | Finding launches worth scanning |
 
-**Point-in-time trade cutoff:** Déjà View never uses wallet trades that occur after the launch being
-evaluated. Historical enrichment supplied by Nansen may subsequently be restated or corrected.
+Usage receipt: **22,416 successful requests and 22,660 credits charged** between 14 and 16 September
+2026, from the local call ledger. Reproduce it with `.venv/bin/python tools/api_usage.py`.
 
-Launch Reflex is relative. A score of 92 means the wallet ranks above 92% of reference launch buyers.
-It is not a 92% win rate.
+## Checking our claims
 
-## We've seen this before: similar past launches
+```bash
+.venv/bin/python tools/test_claims.py       # offline, no API calls
+```
 
-One hour after the launch moment, Déjà View describes the launch's buying with four measures, and it lists the
-most similar launches from a library of 31 sampled past pump.fun launches. It shows what happened to each one
-next, winners and losers, and never a probability.
+These checks guard the sentences the page says out loud: an echo must be a verified early entry, a
+wallet we could not read must never appear as a new face, wallets and buy times must stay paired,
+and a cached scan must give the same answer next week as it did today.
 
-| Measure | What it describes |
-|---|---|
-| Actor quality | The Launch Reflex of the top buyers with a known launch record, weighted by the square root of buy size |
-| Entry speed | How many minutes after the launch moment the strong buyers arrived |
-| Concentration | The share of first-hour buying from the 3 largest buyers |
-| Persistence | The share of the top buyers' buying that came after their first buy window |
+Two more tools, both offline apart from one call each in `backfill_prices.py`:
 
-- **Rules frozen before any outcome data:** [docs/CORPUS_PLAN.md](docs/CORPUS_PLAN.md), reviewed by Codex.
-- **Outcomes start at the decision point,** one hour after the launch moment, because that is when a person could act.
-- **If all three nearest launches went the same way,** the screen adds the nearest launch that went the other way.
-- **If even the nearest launch is far away,** the screen says "We haven't seen this one before."
+```bash
+.venv/bin/python tools/recompute_replays.py   # rebuild saved replays after a rule change
+.venv/bin/python tools/build_art.py           # rebuild web/art/ from the source art
+```
 
-**Backtest.** Each past launch was matched against launches from other weeks. Its next-day outcome and its
-matches' outcomes had rank correlation 0.57, stronger than 99.9% of random shuffles. **Most of that came from
-concentration,** which mostly reflects how many buyers a launch had: launches with a few large buyers fell less
-over the next day than crowded launches. Actor quality alone did not predict event outcomes. Only 4 of the 31 launches
-were up a day later, so treat the matches as context.
+## What we do not claim
 
-## Nansen endpoints
+Not smart money. Not proven. Not profitable. Not coordinated. Not insider. No predictions, no
+probabilities. A move we quote is what a coin offered within an hour of a buy, capped at 10×, and it
+is never what anyone actually made.
 
-| Endpoint | Used for | Credits a call |
-|---|---|---|
-| `/api/v1/tgm/token-information` | Deployment time | 1 |
-| `/api/v1/tgm/dex-trades` | Launch moment, first-hour buyers, market prices | 1 |
-| `/api/v1/profiler/dex-trades` | Wallet history before the launch moment | 1 |
-| `/api/v1/token-screener` | Finding recent launches during the spike | 1 |
-| `/api/v1beta1/token-screener/historical` | Sampling past launches without survivorship, for the retest and the library of past launches | 5 |
+The research behind Launch Reflex is written up honestly, including the first hypothesis that
+failed, in [`docs/`](docs/). The frozen retest is `docs/D3_RETEST_PLAN.md`; its result is a modest
+persistence effect measured on 37 actors, not evidence that tonight's VIP will make money.
 
-## Performance and caching
+## Credits
 
-- A cold scan takes about 1 minute and about 300 API calls. A repeat scan takes about 2 seconds.
-- Caches store enrichment, never scores: launch moments per token, market prices per entry, and wallet
-  history per wallet. Scores are recalculated at each launch's own cutoff.
-- Every request is logged to `spike_out/calls.jsonl`, the record of API usage for the competition.
-
-## Limitations
-
-- **Pump.fun launches only.** The launch-moment and price methods were validated there.
-- **Opportunity, not profit.** Nansen trade data does not show whether the wallet sold near the peak.
-- **Moderate effect.** Treat Launch Reflex as evidence, not a signal to copy.
-- **Shallow history for very active wallets.** Each history window returns up to 1,000 trades, which covers
-  only a few days for high-frequency wallets.
-- **Small library of past launches.** 31 launches from 2026-06-10 to 2026-08-15. September conditions can differ.
-- **Small reference set.** Percentiles come from 37 reference buyers, so they move in steps of about 3.
-- **Retries can change a score.** If a price request fails, that entry is left out. A later scan fills it
-  in, which can move the score.
-
-## Set up in under 10 minutes
-
-You need Python 3.10 or later and a Nansen API key from [app.nansen.ai/api](https://app.nansen.ai/api).
-
-1. Clone the repository and change into it.
-2. Create a virtual environment and install the dependency:
-
-   ```bash
-   python3 -m venv .venv
-   .venv/bin/pip install -r requirements.txt
-   ```
-
-3. Copy `.env.example` to `.env`, then add your key after `NANSEN_API_KEY=`.
-4. Start the app:
-
-   ```bash
-   .venv/bin/python app.py
-   ```
-
-5. Open <http://localhost:8420> and paste a Solana token address, or click a replay example.
-
-To use another port, set `DEJAVIEW_PORT`. To scan from the terminal, run
-`.venv/bin/python reflex.py <token address>`.
-
-A cold scan uses about 300 credits.
-
-## Architecture
-
-| File | Role |
-|---|---|
-| `app.py` | Local web server; streams scan progress to the page |
-| `web/index.html` | The scan page |
-| `reflex.py` | Scan orchestration and Launch Reflex scoring |
-| `launch_data.py` | Launch moment, wallet first buys, market prices, caches |
-| `nansen_client.py` | Nansen API client with retries and the call ledger |
-| `matching.py` | The four launch measures and the search for similar past launches |
-| `corpus.py` | Samples past launches, measures them, fetches outcomes, and runs the backtest |
-| `data/reflex_reference.json` | Reference scores from the retest; derived numbers only |
-| `data/corpus.json` | The library of past launches: measures and outcomes only, no wallet addresses |
-| `spike_runner.py`, `d3.py` | Spike and retest code |
-| `tools/build_reference.py` | Rebuilds the reference from local retest data |
-
-## Attribution and data
-
-Powered by Nansen API. The repository contains derived metrics only. Raw Nansen responses, wallet
-histories, and API keys stay local in `spike_out/` and `.env`, which git ignores.
-
-## Future work
-
-- A larger library of past launches. With 31 launches, the backtest result is real but fragile.
-- A larger reference set of launch buyers.
+- Art generated with Codex and Grok Imagine, cut out and compressed by `tools/build_art.py`.
+- Music by **Lumen Sound** from **Pixabay** ("Echoes of Lumen").
+- Data from the **Nansen API**.

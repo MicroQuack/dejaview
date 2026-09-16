@@ -1,0 +1,13 @@
+# Public replay mode: visitors watch saved launches, and the app never calls Nansen.
+services:
+  - type: web
+    name: dejaview
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: DEJAVIEW_PUBLIC
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.12.6"
