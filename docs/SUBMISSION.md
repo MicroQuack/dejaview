@@ -23,7 +23,7 @@ Repost from @MicroQuack.
 ```text
 Déjà View: same faces, different launch.
 
-Paste a pump.fun token and it replays the first hour as a club night. The biggest buyers queue at the door, and it checks who was early on earlier launches.
+Paste a pump.fun token and it replays the first hour as a club night. The biggest buyers queue at the door, and it checks who was early on past launches.
 
 Built on the @nansen_ai API for the Meridian Buildathon.
 
