@@ -12,7 +12,7 @@ finishing fixes are confirmed. This session's job is the recording and the submi
 - **Source pill on the page:** "Saved replay" or "Live scan · fresh Nansen data", above the ticker.
 - **The local server was stale** (started before the echo fixes). It was restarted. Restart it after any Python change.
 - **Demo video finished 2026-09-17.** The user approved the full-length cut (1:38, normal speed; do not speed it up).
-  The final file is `Deja View demo - captions.mp4` on the user's Desktop: the PAID replay, then the HYPED live scan,
+  The final file is `Deja View demo - final.mp4` on the user's Desktop: the PAID replay, then the HYPED live scan,
   with music from the first scan and 11 captions in a strip under the page. Next: post on X tagging @nansen_ai,
   credit the music, put the video link in the README "Demo" section, and send the submission email.
 - **Phone layout is still broken.** It does not affect the desktop recording. Fix before submitting.
