@@ -13,13 +13,12 @@ an **echo**.
 
 Built for the Nansen Meridian Buildathon. Powered by the **Nansen API**.
 
-> **Use a computer.** The phone layout is not finished.
-
 ## Demo
 
-**[Watch the demo video on X](https://x.com/iAteUrSOL/status/2100539163883847883)**, posted by @iAteUrSOL. It runs 1:38
-with captions, so it works with the sound off. It replays **PAID** from saved data, then runs a live scan of **HYPED** against the
-Nansen API. That scan finds that 6 of HYPED's buyers were also early on PAID.
+**[Watch the demo video on X](https://x.com/iAteUrSOL/status/2100539163883847883)**, posted by @iAteUrSOL. It runs
+1:38 with captions, so it works with the sound off. It replays **PAID** from saved data, then runs a
+live scan of **HYPED** against the Nansen API. That scan finds that 6 of HYPED's buyers were also
+early on PAID.
 
 ## Watch it in two minutes, no API key
 

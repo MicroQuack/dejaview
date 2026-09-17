@@ -30,9 +30,6 @@
   button { font: inherit; color: inherit; }
   :focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
   .wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px 80px; }
-  .desktop-note { display: none; margin: 16px 0 0; padding: 10px 14px; border-left: 3px solid var(--gold);
-                  background: rgba(245,197,66,.08); font-size: 14px; }
-  @media (max-width: 900px) { .desktop-note { display: block; } }
 
   /* ---------- hero ---------- */
   .hero { display: grid; grid-template-columns: minmax(340px, 5fr) 7fr; gap: 12px; align-items: stretch; min-height: 520px; }
@@ -251,17 +248,47 @@
     .panels { grid-template-columns: 1fr 1fr; }
     .panels > :last-child { grid-column: 1 / -1; }
   }
+  /* Narrow screens: the club art sits on top and the queue stands below it, so the cards never cover the bouncer. */
   @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
-    .scene { margin: 0 -24px; min-height: 380px; }
-    .scene.art { min-height: 380px; }
-    .lineup { flex-wrap: wrap; right: 18px; }
-    .lineup .guest { flex-basis: calc((100% - 3 * 8px) / 4); }
+    :root { --art-h: 380px; }
+    .hero { grid-template-columns: 1fr; min-height: 0; }
     .hero-copy { padding-bottom: 0; }
+    .scene, .scene.art { margin: 18px -24px 0; min-height: 0; padding-top: var(--art-h); }
+    .scene > svg { height: var(--art-h); bottom: auto; }
+    .scene .club, .scene .shade { height: var(--art-h); bottom: auto; }
+    .bouncer { bottom: auto; top: calc(var(--art-h) * .36); height: calc(var(--art-h) * .64); }
+    .lineup { position: relative; left: auto; right: auto; bottom: auto; margin: -44px 24px 18px; z-index: 1; }
     .panels { grid-template-columns: 1fr; }
     .controls { grid-template-columns: auto 1fr; }
     .buyers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .setup-row { grid-template-columns: 1fr 1fr; }
+    .track > div:nth-child(2) > span:not([class]):nth-child(2) { display: none; }  /* +5m crowds the launch label */
     footer { grid-template-columns: 1fr; }
+  }
+  /* Phones: a 4 by 2 queue, 16px gutters, and a timeline with fewer labels. */
+  @media (max-width: 640px) {
+    :root { --art-h: 300px; }
+    .wrap { padding: 0 16px 64px; }
+    .hero-copy { padding-top: 36px; }
+    .strap { font-size: 11px; letter-spacing: .28em; }
+    .lede { font-size: 17px; }
+    input { font-size: 16px; }  /* below 16px, iPhones zoom in when the field is tapped */
+    .go { flex: 1 1 100%; }
+    .scene, .scene.art { margin: 16px -16px 0; }
+    .lineup { flex-wrap: wrap; margin: -36px 16px 16px; }
+    .lineup .guest { flex-basis: calc((100% - 3 * 8px) / 4); }
+    .says { font-size: 13px; padding: 5px 10px; }
+    .strip { padding: 12px 12px 8px; }
+    .controls { gap: 12px; }
+    .mark { width: 30px; height: 30px; margin-left: -15px; }
+    .track > div:nth-child(2) > span:not([class]) { font-size: 10px !important; }
+    .track > div:nth-child(2) > span:not([class]):is(:nth-child(3), :nth-child(4)) { display: none; }  /* +10m and +15m */
+    .legend { font-size: 9.5px; }
+    .echo-banner { white-space: normal; text-align: center; width: max-content; max-width: 94%; font-size: 11px; padding: 5px 10px; }
+    .callout { left: 50% !important; max-width: calc(100% - 8px); white-space: normal; text-align: center; }
+    .panel { padding: 18px; }
+    .drawer { padding: 48px 20px 20px; }  /* room for Close above the heading */
+    .drawer h3 { font-size: 26px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -301,8 +328,6 @@
     </div>
     <div class="track" id="track"></div>
   </section>
-
-  <p class="desktop-note">Déjà View is built for a computer screen. The phone layout is not ready yet.</p>
 
   <section class="panels" id="panels" hidden>
     <div class="panel" id="answer-panel">
