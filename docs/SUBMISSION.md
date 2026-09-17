@@ -21,7 +21,7 @@ Repost from @MicroQuack.
 **Post:**
 
 ```text
-Déjà View: same faces, different launch.
+Déjà View. Same faces, different places.
 
 Paste a pump.fun token and it replays the first hour as a club night. The biggest buyers queue at the door, and it checks who was early on past launches.
 

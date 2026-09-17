@@ -9,7 +9,7 @@ labels them: **VIP**, **strong record**, **known**, **new face**, or plainly **w
 this one**. When two or more of tonight's buyers were also early on the same earlier launch, that is
 an **echo**.
 
-**Watch it now: https://dejaview-delta.vercel.app** — four real launches, no sign-up, no API key.
+**Watch it now: https://dejaview-delta.vercel.app** — five real launches, no sign-up, no API key.
 
 Built for the Nansen Meridian Buildathon. Powered by the **Nansen API**.
 
@@ -23,8 +23,8 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python app.py                 # then open http://localhost:8420
 ```
 
-Click **PAID** in the "Replay a launch" row. Four saved launches replay from `data/replays/`
-with no key and no API calls: **PAID**, **ELON**, **BRAIN**, **PVE**.
+Click **PAID** in the "Replay a launch" row. Five saved launches replay from `data/replays/`
+with no key and no API calls: **PAID**, **HYPED**, **ELON**, **BRAIN**, **PVE**.
 
 **PAID is the one to watch.** Four of the five buyers we could check have a better launch record
 than most, one of them ranks in the top 3%, and three of them were also early on **EMBER**, which

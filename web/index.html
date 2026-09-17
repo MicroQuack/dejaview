@@ -1145,7 +1145,7 @@ modeReady = fetch("api/replays").then(r => r.ok ? r.json() : Promise.reject())
 let FEATURED = null;
 modeReady.then(({replays, public: pub}) => {
   FEATURED = replays[0] || null;
-  $("examples").innerHTML = replays.length ? `<span>Replay a launch:</span>` + replays.slice(0, 4).map(r =>
+  $("examples").innerHTML = replays.length ? `<span>Replay a launch:</span>` + replays.slice(0, 5).map(r =>
     `<button class="chip" data-token="${r.token}">${esc(cleanSym(r.symbol))} · ${day(r.t0)}</button>`).join("") : "";
   $("examples").querySelectorAll(".chip").forEach(b => b.onclick = () => { $("token").value = b.dataset.token; scan(b.dataset.token, true); });
   if ((pub || STATIC) && FEATURED) {  /* this copy replays saved launches: do not invite a scan it cannot run */
