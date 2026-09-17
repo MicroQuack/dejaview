@@ -11,6 +11,10 @@ finishing fixes are confirmed. This session's job is the recording and the submi
   filter the screener by `nof_traders` to find real launches.
 - **Source pill on the page:** "Saved replay" or "Live scan · fresh Nansen data", above the ticker.
 - **The local server was stale** (started before the echo fixes). It was restarted. Restart it after any Python change.
+- **Recorded 2026-09-17 morning.** Trimmed, silent clips are on the user's Desktop: the PAID replay (45 s) and the
+  HYPED live scan (54 s, a 100 VIP buyer). Together they run about 1:40, well over the 30 to 45 s target.
+  Next step: join them into one short video, speeding up the waits. This ffmpeg build has no text filter,
+  so render captions as images.
 - **Phone layout is still broken.** It does not affect the desktop recording. Fix before submitting.
 
 ## 1. Before recording
